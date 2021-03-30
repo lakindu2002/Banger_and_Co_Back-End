@@ -1,6 +1,7 @@
 package com.lakindu.bangerandcobackend.util;
 
 public class MultipleErrorSupporter {
+    //class used in join with BangerAndCoExceptionHandler to provide composite exceptions
     private String error;
     private String message;
 

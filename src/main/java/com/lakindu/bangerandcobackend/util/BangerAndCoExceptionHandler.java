@@ -3,6 +3,7 @@ package com.lakindu.bangerandcobackend.util;
 import java.util.List;
 
 public class BangerAndCoExceptionHandler {
+    //class implemented to handle exception responses to client
     private final String message;
     private final String exceptionMessage;
     private final int errorCode;

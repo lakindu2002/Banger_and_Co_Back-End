@@ -1,6 +1,7 @@
 package com.lakindu.bangerandcobackend.util;
 
 public class BangerAndCoResponse {
+    //class added to handle API Success Responses to client
     private final String message;
     private final int code;
 
