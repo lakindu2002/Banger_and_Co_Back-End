@@ -2,6 +2,7 @@ package com.lakindu.bangerandcobackend.dto;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 public class InquiryDTO {
     @NotNull(message = "First Name Cannot Be Null")
@@ -14,10 +15,12 @@ public class InquiryDTO {
 
     @NotNull(message = "Subject Cannot Be Null")
     @NotBlank(message = "Subject Cannot Be Empty")
+    @Size(min = 1, max = 1000)
     private String inquirySubject;
 
     @NotNull(message = "Message Cannot Be Null")
     @NotBlank(message = "Message Cannot Be Empty")
+    @Size(min = 1, max = 1000)
     private String message;
 
     @NotNull(message = "Email Address Cannot Be Null")
