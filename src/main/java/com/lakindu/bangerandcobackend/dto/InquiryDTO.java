@@ -13,14 +13,14 @@ public class InquiryDTO {
     @NotBlank(message = "Last Name Cannot Be Empty")
     private String lastName;
 
-    @NotNull(message = "Subject Cannot Be Null")
-    @NotBlank(message = "Subject Cannot Be Empty")
-    @Size(min = 1, max = 1000)
+    @NotNull(message = "Inquiry Subject Cannot Be Null")
+    @NotBlank(message = "Inquiry Subject Cannot Be Empty")
+    @Size(min = 1, max = 1000, message = "Please Keep Your Subject Between 1 and 1000 Characters")
     private String inquirySubject;
 
     @NotNull(message = "Message Cannot Be Null")
     @NotBlank(message = "Message Cannot Be Empty")
-    @Size(min = 1, max = 1000)
+    @Size(min = 1, max = 1000, message = "Please Keep Your Message Between 1 and 1000 Characters")
     private String message;
 
     @NotNull(message = "Email Address Cannot Be Null")
@@ -29,7 +29,7 @@ public class InquiryDTO {
 
     @NotNull(message = "Contact Number Cannot Be Null")
     @NotBlank(message = "Contact Number Cannot Be Empty")
-    @Size(min = 1, max = 20)
+    @Size(min = 1, max = 20, message = "Please Keep Your Contact Number Between 1 and 20 Characters")
     private String contactNumber;
 
     public InquiryDTO(String firstName, String lastName, String inquirySubject, String message, String emailAddress, String contactNumber) {

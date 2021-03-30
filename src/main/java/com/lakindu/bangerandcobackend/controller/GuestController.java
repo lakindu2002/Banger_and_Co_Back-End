@@ -80,7 +80,7 @@ public class GuestController {
 
         //create an exception handler object
         BangerAndCoExceptionHandler exceptionHandler = new BangerAndCoExceptionHandler(
-                "Please Provide Valid Inputs for The Request Body",
+                "Please Provide Valid Inputs For the Fields",
                 ex.getLocalizedMessage(),
                 HttpStatus.BAD_REQUEST.value(),
                 errorList
