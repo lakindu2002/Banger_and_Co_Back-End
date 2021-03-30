@@ -29,6 +29,7 @@ public class InquiryDTO {
 
     @NotNull(message = "Contact Number Cannot Be Null")
     @NotBlank(message = "Contact Number Cannot Be Empty")
+    @Size(min = 1, max = 20)
     private String contactNumber;
 
     public InquiryDTO(String firstName, String lastName, String inquirySubject, String message, String emailAddress, String contactNumber) {
