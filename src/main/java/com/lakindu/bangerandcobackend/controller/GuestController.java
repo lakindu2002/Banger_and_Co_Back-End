@@ -18,6 +18,7 @@ import java.util.ArrayList;
 
 @RestController
 @RequestMapping(path = "/api/guest") //base path of the api
+//endpoint must remain unauthenticated
 public class GuestController {
 
     private final InquiryService inquiryService;
@@ -55,8 +56,20 @@ public class GuestController {
         //JSON Body converted automatically by Jackson Project.
     }
 
+    @PostMapping(path = "/createAccount")
+    public void createAccount() {
 
+    }
 
+    @PostMapping(path = "/authenticate")
+    public void authenticate() {
+
+    }
+
+    @GetMapping(path = "/getAllRentableVehicle")
+    public void getAllRentableVehicles() {
+
+    }
 
 
     @ExceptionHandler
