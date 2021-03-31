@@ -1,6 +1,9 @@
 package com.lakindu.bangerandcobackend.entity;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.sql.Timestamp;
 import java.util.Date;
 
@@ -8,27 +11,41 @@ import java.util.Date;
 @Table(name = "inquiry")
 public class Inquiry {
     //definition of entity class for Inquiry with Table Linking for ORM
+    //added bean validations to this class as well via Java EE Bean validation
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     //enable auto incrementing by using Databases identity generator
     @Column(name = "inquiry_id")
     private int inquiryId;
 
+    @NotNull(message = "First Name Cannot Be Null")
+    @NotBlank(message = "First Name Cannot Be Empty")
     @Column(nullable = false, name = "first_name")
     private String firstName;
 
+    @NotNull(message = "Last Name Cannot Be Null")
+    @NotBlank(message = "Last Name Cannot Be Empty")
     @Column(nullable = false, name = "last_name")
     private String lastName;
 
+    @NotNull(message = "Inquiry Subject Cannot Be Null")
+    @NotBlank(message = "Inquiry Subject Cannot Be Empty")
     @Column(nullable = false, name = "inquiry_subject", length = 1000)
     private String inquirySubject;
 
+    @NotNull(message = "Message Cannot Be Null")
+    @NotBlank(message = "Message Cannot Be Empty")
     @Column(nullable = false, name = "message", length = 1000)
     private String message;
 
+    @NotNull(message = "Email Address Cannot Be Null")
+    @NotBlank(message = "Email Address Cannot Be Empty")
     @Column(nullable = false, name = "email_address")
     private String emailAddress;
 
+    @NotNull(message = "Contact Number Cannot Be Null")
+    @NotBlank(message = "Contact Number Cannot Be Empty")
+    @Size(min = 1, max = 20, message = "Please Keep Your Contact Number Between 1 and 20 Characters")
     @Column(nullable = false, name = "contact_number", length = 20)
     private String contactNumber;
 
@@ -41,19 +58,6 @@ public class Inquiry {
     @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.DETACH, CascadeType.REFRESH})
     @JoinColumn(name = "handled_by")
     private User resolvedBy;
-
-    public Inquiry(int inquiryId, String firstName, String lastName, String inquirySubject, String message, String emailAddress, String contactNumber, boolean isReplied, Timestamp createdAt, User resolvedBy) {
-        this.inquiryId = inquiryId;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.inquirySubject = inquirySubject;
-        this.message = message;
-        this.emailAddress = emailAddress;
-        this.contactNumber = contactNumber;
-        this.isReplied = isReplied;
-        this.createdAt = createdAt;
-        this.resolvedBy = resolvedBy;
-    }
 
     public Inquiry() {
     }

@@ -1,6 +1,5 @@
 package com.lakindu.bangerandcobackend.controller;
 
-import com.lakindu.bangerandcobackend.dto.InquiryDTO;
 import com.lakindu.bangerandcobackend.entity.Inquiry;
 import com.lakindu.bangerandcobackend.service.InquiryService;
 import com.lakindu.bangerandcobackend.util.BangerAndCoExceptionHandler;
@@ -30,18 +29,18 @@ public class GuestController {
     }
 
     @PostMapping(path = "/createInquiry")
-    public ResponseEntity<BangerAndCoResponse> createInquiry(@Valid @RequestBody InquiryDTO requestInquiryDTO) {
+    public ResponseEntity<BangerAndCoResponse> createInquiry(@Valid @RequestBody Inquiry requestInquiry) {
         //inquiry object is valid
         Inquiry theSubmittingInquiry = new Inquiry();
         //construct the entity object to be persisted onto the database via JPA
         theSubmittingInquiry.calculateLodgedTime();
         theSubmittingInquiry.setReplied(false);
-        theSubmittingInquiry.setFirstName(requestInquiryDTO.getFirstName());
-        theSubmittingInquiry.setLastName(requestInquiryDTO.getLastName());
-        theSubmittingInquiry.setInquirySubject(requestInquiryDTO.getInquirySubject());
-        theSubmittingInquiry.setMessage(requestInquiryDTO.getMessage());
-        theSubmittingInquiry.setContactNumber(requestInquiryDTO.getContactNumber());
-        theSubmittingInquiry.setEmailAddress(requestInquiryDTO.getEmailAddress());
+        theSubmittingInquiry.setFirstName(requestInquiry.getFirstName());
+        theSubmittingInquiry.setLastName(requestInquiry.getLastName());
+        theSubmittingInquiry.setInquirySubject(requestInquiry.getInquirySubject());
+        theSubmittingInquiry.setMessage(requestInquiry.getMessage());
+        theSubmittingInquiry.setContactNumber(requestInquiry.getContactNumber());
+        theSubmittingInquiry.setEmailAddress(requestInquiry.getEmailAddress());
 
         //save the inquiry to the database
         Inquiry savedInquiry = inquiryService.saveInquiry(theSubmittingInquiry);
@@ -55,6 +54,9 @@ public class GuestController {
         return new ResponseEntity<>(response, HttpStatus.OK); //return the response body as JSON
         //JSON Body converted automatically by Jackson Project.
     }
+
+
+
 
 
     @ExceptionHandler
