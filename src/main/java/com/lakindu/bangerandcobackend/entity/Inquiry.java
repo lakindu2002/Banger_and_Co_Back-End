@@ -30,11 +30,13 @@ public class Inquiry {
 
     @NotNull(message = "Inquiry Subject Cannot Be Null")
     @NotBlank(message = "Inquiry Subject Cannot Be Empty")
+    @Size(min = 1, max=1000,message = "Please Keep The Subject Between 1 to 1000 Characters")
     @Column(nullable = false, name = "inquiry_subject", length = 1000)
     private String inquirySubject;
 
     @NotNull(message = "Message Cannot Be Null")
     @NotBlank(message = "Message Cannot Be Empty")
+    @Size(min = 1, max=1000,message = "Please Keep The Message Between 1 to 1000 Characters")
     @Column(nullable = false, name = "message", length = 1000)
     private String message;
 
