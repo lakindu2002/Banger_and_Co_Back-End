@@ -52,6 +52,7 @@ public class User {
     }
 
     public void setEmailAddress(String emailAddress) {
+        System.out.println("executed");
         this.emailAddress = emailAddress;
     }
 

@@ -1,12 +1,17 @@
 package com.lakindu.bangerandcobackend.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lakindu.bangerandcobackend.entity.Inquiry;
+import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.service.InquiryService;
 import com.lakindu.bangerandcobackend.util.BangerAndCoResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 
@@ -50,9 +55,31 @@ public class GuestController {
         //JSON Body converted automatically by Jackson Project.
     }
 
-    @PostMapping(path = "/createAccount")
-    public void createAccount() {
+    @PostMapping(
+            path = "/createAccount",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<BangerAndCoResponse> createAccount(
+            @RequestParam(name = "userProfile") String requestUser,
+            @RequestParam(name = "profilePic", required = false) MultipartFile requestProfilePic
+    ) throws Exception {
+        //requestUser is a Stringify of the JSON sent from the API
+        //method used for the Sign Up endpoint
 
+        //convert the Stringify JSON Object to an instance of User via Jackson Project
+        ObjectMapper objectMapper = new ObjectMapper();
+        User theUser = objectMapper.readValue(requestUser, User.class); //call setters
+
+        System.out.println(requestUser);
+        System.out.println(requestProfilePic);
+
+        BangerAndCoResponse response = new BangerAndCoResponse(
+                String.format("account with email - %s created successfully", theUser.getEmailAddress()),
+                HttpStatus.OK.value()
+        );
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
     @PostMapping(path = "/authenticate")
