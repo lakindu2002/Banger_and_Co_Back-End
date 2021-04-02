@@ -8,7 +8,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import javax.validation.ValidationException;
 import java.util.ArrayList;
 
 @RestControllerAdvice
@@ -57,7 +56,7 @@ public class GlobalExceptionHandler {
 
         //create an exception handler object
         BangerAndCoExceptionHandler exceptionHandler = new BangerAndCoExceptionHandler(
-                "An Account With This Email Address Exists",
+                "An Account With This Email Address Already Exists",
                 ex.getLocalizedMessage(),
                 HttpStatus.CONFLICT.value(),
                 new ArrayList<>()

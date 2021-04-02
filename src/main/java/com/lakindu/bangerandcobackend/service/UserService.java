@@ -7,6 +7,9 @@ import com.lakindu.bangerandcobackend.repository.UserRepository;
 import com.lakindu.bangerandcobackend.util.FileHandler.CompressImage;
 import com.lakindu.bangerandcobackend.util.FileHandler.ImageHandler;
 import com.lakindu.bangerandcobackend.util.UserAlreadyExistsException;
+import com.lakindu.bangerandcobackend.util.mailsender.MailSender;
+import com.lakindu.bangerandcobackend.util.mailsender.MailSenderHelper;
+import com.lakindu.bangerandcobackend.util.mailsender.MailTemplateType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
@@ -21,12 +24,14 @@ public class UserService {
     private final UserRepository theUserRepository;
     private final RoleRepository theRoleRepository;
     private final Validator validator;
+    private final MailSender theSender;
 
     @Autowired
-    public UserService(UserRepository theUserRepository, RoleRepository theRoleRepository, Validator validator) {
+    public UserService(UserRepository theUserRepository, RoleRepository theRoleRepository, Validator validator, MailSender theSender) {
         this.theUserRepository = theUserRepository;
         this.theRoleRepository = theRoleRepository;
         this.validator = validator;
+        this.theSender = theSender;
     }
 
     public User createUser(User theNewUser, MultipartFile profilePicture) throws Exception {
@@ -62,7 +67,9 @@ public class UserService {
                     //if the role has been retrieved successfully
                     theNewUser.setUserRole(theRole);
                     theNewUser.setBlackListed(false);
+
                     final User registeredUser = theUserRepository.save(theNewUser);
+                    theSender.sendMail(new MailSenderHelper(registeredUser, "Welcome To Banger and Co!", MailTemplateType.SIGNUP));
                     return registeredUser;
                 } else {
                     throw new UnsupportedOperationException("invalid role assignment");
