@@ -1,10 +1,10 @@
 package com.lakindu.bangerandcobackend.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lakindu.bangerandcobackend.entity.Inquiry;
 import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.service.InquiryService;
+import com.lakindu.bangerandcobackend.service.UserService;
 import com.lakindu.bangerandcobackend.util.BangerAndCoResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,29 +21,20 @@ import javax.validation.Valid;
 public class GuestController {
 
     private final InquiryService inquiryService;
+    private final UserService userService;
 
-    @Autowired
-    //inject the inquiry service bean created due to IOC by Spring.
-    public GuestController(InquiryService inquiryService) {
+    //inject the inquiry service and userService bean created due to IOC by Spring.
+    public GuestController(@Autowired InquiryService inquiryService, @Autowired UserService userService) {
         this.inquiryService = inquiryService;
+        this.userService = userService;
     }
 
     @PostMapping(path = "/createInquiry")
     public ResponseEntity<BangerAndCoResponse> createInquiry(@Valid @RequestBody Inquiry requestInquiry) {
         //inquiry object is valid
-        Inquiry theSubmittingInquiry = new Inquiry();
-        //construct the entity object to be persisted onto the database via JPA
-        theSubmittingInquiry.calculateLodgedTime();
-        theSubmittingInquiry.setReplied(false);
-        theSubmittingInquiry.setFirstName(requestInquiry.getFirstName());
-        theSubmittingInquiry.setLastName(requestInquiry.getLastName());
-        theSubmittingInquiry.setInquirySubject(requestInquiry.getInquirySubject());
-        theSubmittingInquiry.setMessage(requestInquiry.getMessage());
-        theSubmittingInquiry.setContactNumber(requestInquiry.getContactNumber());
-        theSubmittingInquiry.setEmailAddress(requestInquiry.getEmailAddress());
 
         //save the inquiry to the database
-        Inquiry savedInquiry = inquiryService.saveInquiry(theSubmittingInquiry);
+        Inquiry savedInquiry = inquiryService.saveInquiry(requestInquiry);
 
         //return the success message if inquiry is saved successfully
         //if exception occurs will be directed to @ExceptionHandler handling Exception
@@ -71,8 +62,7 @@ public class GuestController {
         ObjectMapper objectMapper = new ObjectMapper();
         User theUser = objectMapper.readValue(requestUser, User.class); //call setters
 
-        System.out.println(requestUser);
-        System.out.println(requestProfilePic);
+        userService.createUser(theUser,requestProfilePic);
 
         BangerAndCoResponse response = new BangerAndCoResponse(
                 String.format("account with email - %s created successfully", theUser.getEmailAddress()),

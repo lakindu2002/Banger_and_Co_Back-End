@@ -18,9 +18,20 @@ public class InquiryService {
         this.inquiryRepository = inquiryRepository;
     }
 
-    public Inquiry saveInquiry(Inquiry inquiryToBeSaved){
+    public Inquiry saveInquiry(Inquiry requestInquiry) {
+        Inquiry theSubmittingInquiry = new Inquiry();
+        //construct the entity object to be persisted onto the database via JPA
+        theSubmittingInquiry.calculateLodgedTime();
+        theSubmittingInquiry.setReplied(false);
+        theSubmittingInquiry.setFirstName(requestInquiry.getFirstName());
+        theSubmittingInquiry.setLastName(requestInquiry.getLastName());
+        theSubmittingInquiry.setInquirySubject(requestInquiry.getInquirySubject());
+        theSubmittingInquiry.setMessage(requestInquiry.getMessage());
+        theSubmittingInquiry.setContactNumber(requestInquiry.getContactNumber());
+        theSubmittingInquiry.setEmailAddress(requestInquiry.getEmailAddress());
+
         //method to save the inquiry in the database
         //let the JAVA EE - Java Persistence API handle the underlying SQL
-        return inquiryRepository.save(inquiryToBeSaved);
+        return inquiryRepository.save(theSubmittingInquiry);
     }
 }

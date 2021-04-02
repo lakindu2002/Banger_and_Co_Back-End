@@ -8,6 +8,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import javax.validation.ValidationException;
 import java.util.ArrayList;
 
 @RestControllerAdvice
@@ -20,8 +21,9 @@ public class GlobalExceptionHandler {
     @ExceptionHandler
     public ResponseEntity<BangerAndCoExceptionHandler> handlerDefaultException(Exception ex) {
         //exception handler to handle all default exceptions thrown at runtime by JVM
+        System.out.println(ex);
         BangerAndCoExceptionHandler exceptionHandler = new BangerAndCoExceptionHandler(
-                "An error occurred on our end",
+                "An error occurred",
                 ex.getLocalizedMessage(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 null);

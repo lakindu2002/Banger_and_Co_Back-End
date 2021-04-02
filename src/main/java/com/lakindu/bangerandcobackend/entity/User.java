@@ -3,7 +3,10 @@ package com.lakindu.bangerandcobackend.entity;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.sql.Date;
+import java.util.Arrays;
 
 @Entity
 @Table(name = "user_info")
@@ -22,7 +25,7 @@ public class User {
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
-    @NotBlank(message = "Please Provide a Valid Date of Birth")
+    @NotNull(message = "Please Provide a Valid Date of Birth")
     @Column(name = "date_of_birth", nullable = false)
     private Date dateOfBirth;
 
@@ -31,6 +34,7 @@ public class User {
     private String userPassword;
 
     @NotBlank(message = "Please Provide a Valid Contact Number")
+    @Size(min = 1, max = 20)
     @Column(name = "contact_number", nullable = false, length = 20)
     private String contactNumber;
 
@@ -52,7 +56,6 @@ public class User {
     }
 
     public void setEmailAddress(String emailAddress) {
-        System.out.println("executed");
         this.emailAddress = emailAddress;
     }
 
@@ -118,5 +121,20 @@ public class User {
 
     public void setUserRole(Role userRole) {
         this.userRole = userRole;
+    }
+
+    @Override
+    public String toString() {
+        return "User{" +
+                "emailAddress='" + emailAddress + '\'' +
+                ", firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", dateOfBirth=" + dateOfBirth +
+                ", userPassword='" + userPassword + '\'' +
+                ", contactNumber='" + contactNumber + '\'' +
+                ", profilePicture=" + Arrays.toString(profilePicture) +
+                ", isBlackListed=" + isBlackListed +
+                ", userRole=" + userRole +
+                '}';
     }
 }
