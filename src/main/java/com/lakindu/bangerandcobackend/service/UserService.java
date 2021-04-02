@@ -6,6 +6,7 @@ import com.lakindu.bangerandcobackend.repository.RoleRepository;
 import com.lakindu.bangerandcobackend.repository.UserRepository;
 import com.lakindu.bangerandcobackend.util.FileHandler.CompressImage;
 import com.lakindu.bangerandcobackend.util.FileHandler.ImageHandler;
+import com.lakindu.bangerandcobackend.util.UserAlreadyExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
@@ -28,30 +29,41 @@ public class UserService {
         this.validator = validator;
     }
 
-    public void createUser(User theNewUser, MultipartFile profilePicture) throws Exception {
+    public User createUser(User theNewUser, MultipartFile profilePicture) throws Exception {
         //method used to create a User
-        DataBinder theDataBinder = new DataBinder(theNewUser);
-        theDataBinder.addValidators((org.springframework.validation.Validator) validator);
-        theDataBinder.validate();
 
-        final BindingResult theBindingResult = theDataBinder.getBindingResult();
+        //check if user exists
+        final User existingUser = theUserRepository.findUserByEmailAddress(theNewUser.getEmailAddress().toLowerCase());
 
-        if (theBindingResult.hasErrors()) {
-            throw new ValidationException("Valid inputs were not provided for the fields during Sign Up.");
-        } else {
-            theNewUser.setProfilePicture(profilePicture.getBytes());
-            ImageHandler theCompressor = new CompressImage(); //creating template method pattern
-            theCompressor.processUnhandledImage(theNewUser); //calling the template method
+        if (existingUser == null) {
+            theNewUser.setEmailAddress(theNewUser.getEmailAddress().toLowerCase()); //save the lower case email in DB
 
-            Role theRole = theRoleRepository.findRoleByRoleName("customer");
+            DataBinder theDataBinder = new DataBinder(theNewUser);
+            theDataBinder.addValidators((org.springframework.validation.Validator) validator);
+            theDataBinder.validate();
 
-            if (theRole != null) {
-                theNewUser.setUserRole(theRole);
-                theNewUser.setBlackListed(false);
-                theUserRepository.save(theNewUser);
+            final BindingResult theBindingResult = theDataBinder.getBindingResult();
+
+            if (theBindingResult.hasErrors()) {
+                throw new ValidationException("Valid inputs were not provided for the fields during Sign Up.");
             } else {
-                throw new UnsupportedOperationException("invalid role assignment");
+                theNewUser.setProfilePicture(profilePicture.getBytes());
+                ImageHandler theCompressor = new CompressImage(); //creating template method pattern
+                theCompressor.processUnhandledImage(theNewUser); //calling the template method
+
+                Role theRole = theRoleRepository.findRoleByRoleName("customer");
+
+                if (theRole != null) {
+                    theNewUser.setUserRole(theRole);
+                    theNewUser.setBlackListed(false);
+                    final User registeredUser = theUserRepository.save(theNewUser);
+                    return registeredUser;
+                } else {
+                    throw new UnsupportedOperationException("invalid role assignment");
+                }
             }
+        } else {
+            throw new UserAlreadyExistsException(String.format("an account already exists with - %s", theNewUser.getEmailAddress()));
         }
     }
 }

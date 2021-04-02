@@ -62,10 +62,10 @@ public class GuestController {
         ObjectMapper objectMapper = new ObjectMapper();
         User theUser = objectMapper.readValue(requestUser, User.class); //call setters
 
-        userService.createUser(theUser,requestProfilePic);
+        final User createdUser = userService.createUser(theUser, requestProfilePic);
 
         BangerAndCoResponse response = new BangerAndCoResponse(
-                String.format("account with email - %s created successfully", theUser.getEmailAddress()),
+                String.format("account with email - %s created successfully", createdUser.getEmailAddress()),
                 HttpStatus.OK.value()
         );
 

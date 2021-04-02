@@ -26,7 +26,7 @@ public class GlobalExceptionHandler {
                 "An error occurred",
                 ex.getLocalizedMessage(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                null);
+                new ArrayList<>());
 
         return new ResponseEntity<>(exceptionHandler, HttpStatus.INTERNAL_SERVER_ERROR);
     }
@@ -49,5 +49,20 @@ public class GlobalExceptionHandler {
         );
         //return the response entity of type Bad Request back to the resource sending client
         return new ResponseEntity<>(exceptionHandler, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler
+    public ResponseEntity<BangerAndCoExceptionHandler> userAlreadyExistsException(UserAlreadyExistsException ex) {
+        //custom exception handler for User Already Exists.
+
+        //create an exception handler object
+        BangerAndCoExceptionHandler exceptionHandler = new BangerAndCoExceptionHandler(
+                "An Account With This Email Address Exists",
+                ex.getLocalizedMessage(),
+                HttpStatus.CONFLICT.value(),
+                new ArrayList<>()
+        );
+        //return the response entity of type Conflict back to the resource sending client
+        return new ResponseEntity<>(exceptionHandler, HttpStatus.CONFLICT);
     }
 }

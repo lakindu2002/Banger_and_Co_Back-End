@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 //annotate with Repository so it is discovered during component scanning
 public interface UserRepository extends CrudRepository<User, String> {
+    User findUserByEmailAddress(String emailAddress);
 }
