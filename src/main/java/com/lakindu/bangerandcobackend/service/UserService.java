@@ -11,6 +11,7 @@ import com.lakindu.bangerandcobackend.util.mailsender.MailSender;
 import com.lakindu.bangerandcobackend.util.mailsender.MailSenderHelper;
 import com.lakindu.bangerandcobackend.util.mailsender.MailTemplateType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.DataBinder;
@@ -25,13 +26,15 @@ public class UserService {
     private final RoleRepository theRoleRepository;
     private final Validator validator;
     private final MailSender theSender;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRepository theUserRepository, RoleRepository theRoleRepository, Validator validator, MailSender theSender) {
+    public UserService(UserRepository theUserRepository, RoleRepository theRoleRepository, Validator validator, MailSender theSender, PasswordEncoder passwordEncoder) {
         this.theUserRepository = theUserRepository;
         this.theRoleRepository = theRoleRepository;
         this.validator = validator;
         this.theSender = theSender;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public User createUser(User theNewUser, MultipartFile profilePicture) throws Exception {
@@ -67,6 +70,8 @@ public class UserService {
                     //if the role has been retrieved successfully
                     theNewUser.setUserRole(theRole);
                     theNewUser.setBlackListed(false);
+                    //encode the password to store with encryption
+                    theNewUser.setUserPassword(passwordEncoder.encode(theNewUser.getUserPassword()));
 
                     final User registeredUser = theUserRepository.save(theNewUser);
                     theSender.sendMail(new MailSenderHelper(registeredUser, "Welcome To Banger and Co!", MailTemplateType.SIGNUP));
