@@ -38,7 +38,8 @@ public class User {
     @Column(name = "contact_number", nullable = false, length = 20)
     private String contactNumber;
 
-    @Column(name = "profile_picture")
+    @Lob //large object
+    @Column(name = "profile_picture", columnDefinition = "MEDIUMBLOB")
     private byte[] profilePicture;
 
     @Column(name = "is_black_listed", nullable = false)
