@@ -1,6 +1,7 @@
 package com.lakindu.bangerandcobackend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lakindu.bangerandcobackend.dto.AuthRequest;
 import com.lakindu.bangerandcobackend.entity.Inquiry;
 import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.service.InquiryService;
@@ -73,7 +74,7 @@ public class GuestController {
     }
 
     @PostMapping(path = "/authenticate")
-    public void authenticate() {
+    public void authenticate(@Valid @RequestBody AuthRequest theAuthRequest) {
 
     }
 

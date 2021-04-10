@@ -1,6 +1,5 @@
 package com.lakindu.bangerandcobackend.security;
 
-import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -9,7 +8,6 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.filter.CorsFilter;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -18,7 +16,6 @@ import java.util.Collections;
 @EnableWebSecurity //enable Spring Security for Web
 public class BangerCoSecurityConfiguration extends WebSecurityConfigurerAdapter {
     //WebSecurityConfigurerAdapter has methods used to configure Web Security
-
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         //configure method overridden to configure the http security for the application

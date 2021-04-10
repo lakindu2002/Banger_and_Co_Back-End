@@ -37,6 +37,10 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    public User findLoggingInUser(String emailAddress) {
+        return theUserRepository.findUserByEmailAddress(emailAddress);
+    }
+
     public User createUser(User theNewUser, MultipartFile profilePicture) throws Exception {
         //method used to create a User
 
