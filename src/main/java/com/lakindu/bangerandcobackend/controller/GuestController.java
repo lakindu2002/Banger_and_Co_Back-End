@@ -98,6 +98,7 @@ public class GuestController {
         CustomUserPrincipal thePrincipal = new CustomUserPrincipal(theLoggedInUser);
         String generatedToken = theTokenIssuer.generateToken(thePrincipal);
 
+        //return the User object with the JWT Token in the response header.
         return ResponseEntity.ok().header("Authorization", generatedToken).body(theLoggedInUser);
     }
 
