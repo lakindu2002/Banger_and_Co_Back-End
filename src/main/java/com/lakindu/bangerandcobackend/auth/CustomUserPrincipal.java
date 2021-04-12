@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Locale;
 
 public class CustomUserPrincipal implements UserDetails {
     //this class is used to define the implementation of the UserDetails that can be used in Spring Security Context.
@@ -22,7 +23,7 @@ public class CustomUserPrincipal implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(
-                new SimpleGrantedAuthority(String.format("ROLE_%s", theUserEntity.getUserRole().getRoleName()))
+                new SimpleGrantedAuthority(String.format("ROLE_%s", theUserEntity.getUserRole().getRoleName().toUpperCase(Locale.ROOT)))
         );
     }
 

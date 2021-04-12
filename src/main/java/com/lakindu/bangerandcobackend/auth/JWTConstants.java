@@ -16,7 +16,7 @@ public class JWTConstants {
     @Value("${custom.jwt.token_header}")
     private String TOKEN_HEADER;    //key of token
 
-    private final String TOKEN_PREFIX = "BEARER ";    //Bearer to denote the ownership of token
+    private final String TOKEN_PREFIX = "Bearer ";    //Bearer to denote the ownership of token
 
     @Value("${custom.jwt.authority}")
     private String AUTHORITIES;     //role of the user

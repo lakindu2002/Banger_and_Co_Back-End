@@ -1,6 +1,8 @@
 package com.lakindu.bangerandcobackend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lakindu.bangerandcobackend.auth.CustomUserPrincipal;
+import com.lakindu.bangerandcobackend.auth.JWTHandler;
 import com.lakindu.bangerandcobackend.dto.AuthRequest;
 import com.lakindu.bangerandcobackend.entity.Inquiry;
 import com.lakindu.bangerandcobackend.entity.User;
@@ -11,6 +13,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,11 +27,18 @@ public class GuestController {
 
     private final InquiryService inquiryService;
     private final UserService userService;
+    private final AuthenticationManager authenticationManager;
+    private final JWTHandler theTokenIssuer;
 
     //inject the inquiry service and userService bean created due to IOC by Spring.
-    public GuestController(@Autowired InquiryService inquiryService, @Autowired UserService userService) {
+    public GuestController(@Autowired InquiryService inquiryService,
+                           @Autowired UserService userService,
+                           @Autowired AuthenticationManager authenticationManager,
+                           @Autowired JWTHandler theTokenIssuer) {
         this.inquiryService = inquiryService;
         this.userService = userService;
+        this.authenticationManager = authenticationManager;
+        this.theTokenIssuer = theTokenIssuer;
     }
 
     @PostMapping(path = "/createInquiry")
@@ -73,9 +84,21 @@ public class GuestController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PostMapping(path = "/authenticate")
-    public void authenticate(@Valid @RequestBody AuthRequest theAuthRequest) {
+    @PostMapping(path = "/login")
+    public ResponseEntity<User> authenticate(@Valid @RequestBody AuthRequest theAuthRequest) throws Exception {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        theAuthRequest.getEmailAddress(),
+                        theAuthRequest.getPassword()
+                ) //spring security will authenticate the user by calling the custom UserDetailsService implementation method
+                //located in the UserService
+        );
 
+        User theLoggedInUser = userService.findLoggingInUser(theAuthRequest.getEmailAddress());
+        CustomUserPrincipal thePrincipal = new CustomUserPrincipal(theLoggedInUser);
+        String generatedToken = theTokenIssuer.generateToken(thePrincipal);
+
+        return ResponseEntity.ok().header("Authorization", generatedToken).body(theLoggedInUser);
     }
 
     @GetMapping(path = "/getAllRentableVehicle")

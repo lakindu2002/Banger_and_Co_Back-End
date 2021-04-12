@@ -1,5 +1,8 @@
 package com.lakindu.bangerandcobackend.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import javax.persistence.*;
 import java.util.List;
 
@@ -15,6 +18,7 @@ public class Role {
     private String roleName;
 
     @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH}, mappedBy = "userRole")
+    @JsonBackReference //do not serialize
     private List<User> usersForRole;
 
     public Role() {

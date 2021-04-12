@@ -3,7 +3,6 @@ package com.lakindu.bangerandcobackend.auth;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -48,7 +47,7 @@ public class JWTHandler {
                 .withArrayClaim(theConstants.getAUTHORITIES(), claimsForUser)
                 .sign(Algorithm.HMAC256(signingKey.getBytes(StandardCharsets.UTF_8)));
 
-        return generatedToken;
+        return String.format("Bearer %s", generatedToken);
     }
 
     private String[] getClaimsForUser(CustomUserPrincipal thePrincipal) {
@@ -77,12 +76,18 @@ public class JWTHandler {
     public boolean isTokenValid(String token, String emailAddress) {
         final boolean isExpired = isTokenExpired(token);
         final String tokenSubject = extractSubjectFromToken(token);
+        final String tokenIssuerName = extractIssuerNameFromToken(token);
 
-        //for token to be valid, DB username === token subject && token must not be expired
-        return tokenSubject.equals(emailAddress) && !isExpired;
+        //for token to be valid, DB username === token subject && token must not be expired && issuer name must be same as creation
+        return tokenSubject.equals(emailAddress) && !isExpired && tokenIssuerName.equalsIgnoreCase(theConstants.getTOKEN_ISSUER());
     }
 
-    private String extractSubjectFromToken(String token) {
+    private String extractIssuerNameFromToken(String token) {
+        //method used to get issuer name from token
+        return getTokenVerifier().verify(token).getIssuer();
+    }
+
+    public String extractSubjectFromToken(String token) {
         //method returns the Subject (Username) of the token
         return getTokenVerifier().verify(token).getSubject();
     }
@@ -109,15 +114,18 @@ public class JWTHandler {
     }
 
     public List<GrantedAuthority> getAuthorityListForToken(String token) {
-        final DecodedJWT verifiedToken = getTokenVerifier().verify(token);
+        //method executed to retrieve all the roles for the User
+        final DecodedJWT verifiedToken = getTokenVerifier().verify(token); //verify the token
+
+        //retrieve the claim "authorities" assigned while creating the token
         String[] claimList = verifiedToken.getClaim(theConstants.getAUTHORITIES()).asArray(String.class);
 
         List<GrantedAuthority> authorityList = new ArrayList<>();
 
         for (String claim : claimList) {
-            authorityList.add(new SimpleGrantedAuthority(claim));
+            authorityList.add(new SimpleGrantedAuthority(claim)); //create an array list from retrieved data
         }
 
-        return authorityList;
+        return authorityList; //return formatted array list containing user role
     }
 }

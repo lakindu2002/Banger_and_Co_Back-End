@@ -1,10 +1,19 @@
 package com.lakindu.bangerandcobackend.security;
 
+import com.lakindu.bangerandcobackend.auth.JWTAuthFilter;
+import com.lakindu.bangerandcobackend.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -16,6 +25,28 @@ import java.util.Collections;
 @EnableWebSecurity //enable Spring Security for Web
 public class BangerCoSecurityConfiguration extends WebSecurityConfigurerAdapter {
     //WebSecurityConfigurerAdapter has methods used to configure Web Security
+
+    private final JWTAuthFilter theAuthFilter;
+    private final UserService theUserDetailsServiceImpl;
+    private final PasswordEncoder passwordEncoder;
+
+    @Autowired
+    public BangerCoSecurityConfiguration(
+            JWTAuthFilter theAuthFilter,
+            UserService theUserDetailsServiceImpl,
+            @Qualifier("passwordEncoder") PasswordEncoder passwordEncoder
+    ) {
+        this.theAuthFilter = theAuthFilter;
+        this.theUserDetailsServiceImpl = theUserDetailsServiceImpl;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        //used to configure the authentication manager for user authentication
+        auth.userDetailsService(theUserDetailsServiceImpl).passwordEncoder(passwordEncoder);
+    }
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         //configure method overridden to configure the http security for the application
@@ -28,7 +59,14 @@ public class BangerCoSecurityConfiguration extends WebSecurityConfigurerAdapter 
                 .antMatchers("/api/guest/**") //for the Guest Endpoint
                 .permitAll() //allow all requests
                 .anyRequest() //any other request
-                .authenticated(); //must be authenticated
+                .authenticated() //must be authenticated
+                .and()
+                //add a filter before UsernamePasswordAuthenticationFilter
+                .addFilterAfter(theAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .sessionManagement()
+                //set session handling to Stateless
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+
     }
 
     @Bean
@@ -51,5 +89,12 @@ public class BangerCoSecurityConfiguration extends WebSecurityConfigurerAdapter 
         source.registerCorsConfiguration("/**", corsConfiguration);
         //create a FilterRegistrationBean and return it
         return source;
+    }
+
+    @Bean
+    @Override
+    //create bean of authentication manager so it can be injected via CDI
+    public AuthenticationManager authenticationManagerBean() throws Exception {
+        return super.authenticationManagerBean();
     }
 }

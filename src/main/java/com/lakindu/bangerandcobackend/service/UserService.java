@@ -1,16 +1,21 @@
 package com.lakindu.bangerandcobackend.service;
 
+import com.lakindu.bangerandcobackend.auth.CustomUserPrincipal;
 import com.lakindu.bangerandcobackend.entity.Role;
 import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.repository.RoleRepository;
 import com.lakindu.bangerandcobackend.repository.UserRepository;
 import com.lakindu.bangerandcobackend.util.FileHandler.CompressImage;
+import com.lakindu.bangerandcobackend.util.FileHandler.DecompressImage;
 import com.lakindu.bangerandcobackend.util.FileHandler.ImageHandler;
 import com.lakindu.bangerandcobackend.util.UserAlreadyExistsException;
 import com.lakindu.bangerandcobackend.util.mailsender.MailSender;
 import com.lakindu.bangerandcobackend.util.mailsender.MailSenderHelper;
 import com.lakindu.bangerandcobackend.util.mailsender.MailTemplateType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.BindingResult;
@@ -21,7 +26,7 @@ import javax.validation.ValidationException;
 import javax.validation.Validator;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
     private final UserRepository theUserRepository;
     private final RoleRepository theRoleRepository;
     private final Validator validator;
@@ -37,8 +42,11 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public User findLoggingInUser(String emailAddress) {
-        return theUserRepository.findUserByEmailAddress(emailAddress);
+    public User findLoggingInUser(String emailAddress) throws Exception {
+        final User retrievedUser = theUserRepository.findUserByEmailAddress(emailAddress);
+        ImageHandler theDecompressor = new DecompressImage();
+        theDecompressor.processUnhandledImage(retrievedUser);
+        return retrievedUser;
     }
 
     public User createUser(User theNewUser, MultipartFile profilePicture) throws Exception {
@@ -87,5 +95,20 @@ public class UserService {
         } else {
             throw new UserAlreadyExistsException(String.format("an account already exists with - %s", theNewUser.getEmailAddress()));
         }
+    }
+
+    @Override
+    public UserDetails loadUserByUsername(String emailAddress) throws UsernameNotFoundException {
+        //method defined by Spring Security and is called by SpringSecurity when user needs to be authenticated
+        //email address = username
+
+        User theUser = theUserRepository.findUserByEmailAddress(emailAddress);
+        if (theUser != null) {
+            return new CustomUserPrincipal(theUser); //this class implements UserDetails therefore it can be returned
+        } else {
+            //user does not exist
+            throw new UsernameNotFoundException("Invalid Email Address or Password");
+        }
+
     }
 }

@@ -1,5 +1,9 @@
 package com.lakindu.bangerandcobackend.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -31,6 +35,7 @@ public class User {
 
     @NotBlank(message = "Please Provide a Valid Password")
     @Column(name = "user_password", nullable = false)
+    @JsonIgnore //ignore the field when sending value back from API
     private String userPassword;
 
     @NotBlank(message = "Please Provide a Valid Contact Number")
@@ -47,6 +52,7 @@ public class User {
 
     @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
     @JoinColumn(name = "role_id", nullable = false)
+    @JsonManagedReference //serialize
     private Role userRole;
 
     public User() {
