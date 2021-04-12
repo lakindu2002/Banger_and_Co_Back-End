@@ -10,6 +10,7 @@ import com.lakindu.bangerandcobackend.service.InquiryService;
 import com.lakindu.bangerandcobackend.service.UserService;
 import com.lakindu.bangerandcobackend.util.BangerAndCoResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -99,7 +100,13 @@ public class GuestController {
         String generatedToken = theTokenIssuer.generateToken(thePrincipal);
 
         //return the User object with the JWT Token in the response header.
-        return ResponseEntity.ok().header("Authorization", generatedToken).body(theLoggedInUser);
+        HttpHeaders theHeaders = new HttpHeaders();
+        theHeaders.add("Authorization", generatedToken);
+        //allow the Authorization header to be accessed in the HTTP Response.
+        theHeaders.add("Access-Control-Expose-Headers", "Authorization");
+
+
+        return new ResponseEntity<>(theLoggedInUser, theHeaders, HttpStatus.OK);
     }
 
     @GetMapping(path = "/getAllRentableVehicle")
