@@ -1,6 +1,5 @@
 package com.lakindu.bangerandcobackend.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
@@ -52,7 +51,7 @@ public class User {
 
     @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
     @JoinColumn(name = "role_id", nullable = false)
-    @JsonManagedReference //serialize
+    @JsonManagedReference //get serialized normally
     private Role userRole;
 
     public User() {

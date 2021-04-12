@@ -4,11 +4,11 @@ import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
 public class AuthRequest {
-    @Email(message = "This email address is poorly formatted")
-    @NotBlank(message = "Please provide a valid Email Address")
+    @NotBlank(message = "Email Address Cannot Be Empty")
+    @Email
     private String emailAddress;
 
-    @NotBlank(message = "Please provide a valid Password")
+    @NotBlank(message = "Password Cannot Be Empty")
     private String password;
 
     public AuthRequest() {
