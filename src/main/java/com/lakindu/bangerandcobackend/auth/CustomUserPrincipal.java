@@ -23,7 +23,7 @@ public class CustomUserPrincipal implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(
-                new SimpleGrantedAuthority(String.format("ROLE_%s", theUserEntity.getUserRole().getRoleName().toUpperCase(Locale.ROOT)))
+                new SimpleGrantedAuthority(theUserEntity.getUserRole().getRoleName().toUpperCase(Locale.ROOT))
         );
     }
 

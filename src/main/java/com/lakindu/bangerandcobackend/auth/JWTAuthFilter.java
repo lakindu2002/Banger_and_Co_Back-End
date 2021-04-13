@@ -2,10 +2,13 @@ package com.lakindu.bangerandcobackend.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lakindu.bangerandcobackend.util.BangerAndCoExceptionHandler;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -14,7 +17,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.List;
 
 @Component //register as a bean in the BeanManager
 public class JWTAuthFilter extends OncePerRequestFilter {
@@ -22,47 +24,47 @@ public class JWTAuthFilter extends OncePerRequestFilter {
     //filter executed everytime a request comes in and is executed only once.
     private final JWTHandler theHandler;
     private final JWTConstants theConstants;
+    private final UserDetailsService userDetailsService;
 
-    public JWTAuthFilter(JWTHandler theHandler, JWTConstants theConstants) {
+    public JWTAuthFilter(JWTHandler theHandler, JWTConstants theConstants, @Qualifier("userService") UserDetailsService userDetailsService) {
         this.theHandler = theHandler;
         this.theConstants = theConstants;
+        this.userDetailsService = userDetailsService;
     }
 
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
         try {
-            //request the authorization header from the request
-            String requestHeader = httpServletRequest.getHeader(theConstants.getTOKEN_HEADER());
-            if (requestHeader == null || !requestHeader.startsWith(theConstants.getTOKEN_PREFIX())) {
-                //if request is null, or does not start with "Bearer "
+            //retrieve the request header
+            String jwtRequest = httpServletRequest.getHeader(theConstants.getTOKEN_HEADER());
+            if (jwtRequest == null || !jwtRequest.startsWith(theConstants.getTOKEN_PREFIX())) {
+                //if token is null or invalid do not authenticate
                 filterChain.doFilter(httpServletRequest, httpServletResponse);
-                return; //block the request
+                return;
             } else {
-                //retrieve the JWT Token
-                String passedToken = requestHeader.substring(theConstants.getTOKEN_PREFIX().length());
-                String emailAddress_userName = theHandler.extractSubjectFromToken(passedToken); //retrieve subject from token
+                //if token seems to be valid
+                String retrievedToken = jwtRequest.substring(theConstants.getTOKEN_PREFIX().length()); //retrieve JWT
+                String emailAddress_username = theHandler.extractSubjectFromToken(retrievedToken);
 
-                if (theHandler.isTokenValid(passedToken, emailAddress_userName)) {
-                    //retrieve authorities for the user
-                    List<GrantedAuthority> authorityList = theHandler.getAuthorityListForToken(passedToken);
+                if (theHandler.isTokenValid(retrievedToken, emailAddress_username)) {
+                    //if the token has not expired
 
-                    if (canGrantAuthorization(authorityList.get(0), httpServletRequest.getRequestURI())) {
-                        //if the token is a valid token and user is accessing authorized endpoints.
-                        //retrieve the valid authentication for the User.
-                        final Authentication tokenSecurityAuthentication = theHandler.getAuthenticationForValidToken(
-                                httpServletRequest, authorityList, emailAddress_userName);
+                    //authenticate the user to show that subject actually exists
+                    final UserDetails authenticatedDetails = userDetailsService.loadUserByUsername(emailAddress_username);
 
-                        //set the Authentication in the spring security context
-                        SecurityContextHolder.getContext().setAuthentication(tokenSecurityAuthentication);
-                    }
+                    //retrieve a Spring Authenticator for the User
+                    Authentication authentication = theHandler.getAuthenticationForValidToken(httpServletRequest, authenticatedDetails);
+
+                    //set the user as an authenticated user in spring security context
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+
                 } else {
-                    //clear any traces of User Authentication is Spring Security Context
                     SecurityContextHolder.clearContext();
                 }
-                filterChain.doFilter(httpServletRequest, httpServletResponse); //pass the request along filter chain
+                filterChain.doFilter(httpServletRequest, httpServletResponse);
             }
+
         } catch (NullPointerException ex) {
-            System.out.println(ex);
             //if an exception occurs, send a response back to the user.
             httpServletResponse.setContentType("application/json");
             httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
@@ -91,19 +93,5 @@ public class JWTAuthFilter extends OncePerRequestFilter {
             //write JSON response to the client using Jackson Project
             new ObjectMapper().writer().writeValue(httpServletResponse.getOutputStream(), theException);
         }
-    }
-
-    private boolean canGrantAuthorization(GrantedAuthority USER_ROLE, String ENDPOINT) {
-        boolean canAccess = false; //initially cannot access endpoint
-
-        if (USER_ROLE.getAuthority().equals("ROLE_CUSTOMER")) {
-            //if role is customer and only if endpoint is "/api/customer" allow access
-            canAccess = ENDPOINT.contains("/api/customer");
-        } else if (USER_ROLE.getAuthority().equals("ROLE_ADMINISTRATOR")) {
-            //if role is administrator and only if endpoint is "/api/administrator" allow access
-            canAccess = ENDPOINT.contains("/api/administrator");
-        }
-
-        return canAccess;
     }
 }

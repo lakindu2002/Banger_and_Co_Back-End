@@ -10,6 +10,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Service;
 
@@ -98,12 +99,12 @@ public class JWTHandler {
         return verifiedToken.getExpiresAt().getTime() < new Date(System.currentTimeMillis()).getTime();
     }
 
-    public Authentication getAuthenticationForValidToken(HttpServletRequest theRequest, List<GrantedAuthority> authorityList, String emailAddress_usernameFromToken) {
+    public Authentication getAuthenticationForValidToken(HttpServletRequest theRequest, UserDetails theDetails) {
         //method used to create the authentication object required to tell Spring Security that user is valid and can be authenticated
         UsernamePasswordAuthenticationToken securityToken = new UsernamePasswordAuthenticationToken(
-                emailAddress_usernameFromToken,
+                theDetails.getUsername(),
                 null,
-                authorityList
+                theDetails.getAuthorities()
         );//password left null as we know user is already authenticated when this method is executed
 
         securityToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(theRequest));

@@ -58,6 +58,10 @@ public class BangerCoSecurityConfiguration extends WebSecurityConfigurerAdapter 
                 .authorizeRequests() //authorize requests
                 .antMatchers("/api/guest/**") //for the Guest Endpoint
                 .permitAll() //allow all requests
+                //ensure "Customer" and "Administrator" endpoints are authenticated for anyone who authorizes as "CUSTOMER"
+                //or "ADMINISTRATOR"
+                .antMatchers("/api/customer/**").hasAuthority("CUSTOMER")
+                .antMatchers("/api/administrator/**").hasAuthority("ADMINISTRATOR")
                 .anyRequest() //any other request
                 .authenticated() //must be authenticated
                 .and()
