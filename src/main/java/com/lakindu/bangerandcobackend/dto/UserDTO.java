@@ -104,7 +104,6 @@ public class UserDTO {
     public static UserDTO getDTO(User theUser) {
         UserDTO returningDTO = new UserDTO();
         returningDTO.setBlackListed(theUser.isBlackListed());
-        returningDTO.setContactNumber(theUser.getContactNumber());
         returningDTO.setEmailAddress(theUser.getEmailAddress());
         returningDTO.setUserRole(theUser.getUserRole().getRoleName());
         returningDTO.setFirstName(theUser.getFirstName());
