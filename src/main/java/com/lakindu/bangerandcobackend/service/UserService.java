@@ -43,7 +43,7 @@ public class UserService implements UserDetailsService {
     }
 
     public User findLoggingInUser(String emailAddress) throws Exception {
-        final User retrievedUser = theUserRepository.findUserByEmailAddress(emailAddress);
+        final User retrievedUser = theUserRepository.findUserByEmailAddress(emailAddress.toLowerCase());
         ImageHandler theDecompressor = new DecompressImage();
         theDecompressor.processUnhandledImage(retrievedUser);
         return retrievedUser;
@@ -102,7 +102,7 @@ public class UserService implements UserDetailsService {
         //method defined by Spring Security and is called by SpringSecurity when user needs to be authenticated
         //email address = username
 
-        User theUser = theUserRepository.findUserByEmailAddress(emailAddress);
+        User theUser = theUserRepository.findUserByEmailAddress(emailAddress.toLowerCase());
         if (theUser != null) {
             return new CustomUserPrincipal(theUser); //this class implements UserDetails therefore it can be returned
         } else {

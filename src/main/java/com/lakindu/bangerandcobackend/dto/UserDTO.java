@@ -1,55 +1,40 @@
-package com.lakindu.bangerandcobackend.entity;
+package com.lakindu.bangerandcobackend.dto;
 
-import javax.persistence.*;
+import com.lakindu.bangerandcobackend.entity.User;
+
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.sql.Date;
-import java.util.Arrays;
 
-@Entity
-@Table(name = "user_info")
-public class User {
-    @Id
+public class UserDTO {
     @Email(message = "Please Provide a Valid Email Address")
     @NotBlank(message = "Provide a Valid Email Address")
-    @Column(name = "email_address")
     private String emailAddress;
 
     @NotBlank(message = "Please Provide a Valid First Name")
-    @Column(name = "first_name", nullable = false)
     private String firstName;
 
     @NotBlank(message = "Please Provide a Valid Last Name")
-    @Column(name = "last_name", nullable = false)
     private String lastName;
 
     @NotNull(message = "Please Provide a Valid Date of Birth")
-    @Column(name = "date_of_birth", nullable = false)
     private Date dateOfBirth;
-
-    @NotBlank(message = "Please Provide a Valid Password")
-    @Column(name = "user_password", nullable = false)
-    private String userPassword;
 
     @NotBlank(message = "Please Provide a Valid Contact Number")
     @Size(min = 1, max = 20)
-    @Column(name = "contact_number", nullable = false, length = 20)
     private String contactNumber;
 
-    @Lob //large object
-    @Column(name = "profile_picture", columnDefinition = "MEDIUMBLOB")
+    private String userPassword;
+
     private byte[] profilePicture;
 
-    @Column(name = "is_black_listed", nullable = false)
     private boolean isBlackListed;
 
-    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
-    @JoinColumn(name = "role_id", nullable = false)
-    private Role userRole;
+    private String userRole;
 
-    public User() {
+    public UserDTO() {
     }
 
     public String getEmailAddress() {
@@ -84,14 +69,6 @@ public class User {
         this.dateOfBirth = dateOfBirth;
     }
 
-    public String getUserPassword() {
-        return userPassword;
-    }
-
-    public void setUserPassword(String userPassword) {
-        this.userPassword = userPassword;
-    }
-
     public String getContactNumber() {
         return contactNumber;
     }
@@ -116,26 +93,33 @@ public class User {
         isBlackListed = blackListed;
     }
 
-    public Role getUserRole() {
+    public String getUserRole() {
         return userRole;
     }
 
-    public void setUserRole(Role userRole) {
+    public void setUserRole(String userRole) {
         this.userRole = userRole;
     }
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "emailAddress='" + emailAddress + '\'' +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", dateOfBirth=" + dateOfBirth +
-                ", userPassword='" + userPassword + '\'' +
-                ", contactNumber='" + contactNumber + '\'' +
-                ", profilePicture=" + Arrays.toString(profilePicture) +
-                ", isBlackListed=" + isBlackListed +
-                ", userRole=" + userRole +
-                '}';
+    public static UserDTO getDTO(User theUser) {
+        UserDTO returningDTO = new UserDTO();
+        returningDTO.setBlackListed(theUser.isBlackListed());
+        returningDTO.setContactNumber(theUser.getContactNumber());
+        returningDTO.setEmailAddress(theUser.getEmailAddress());
+        returningDTO.setUserRole(theUser.getUserRole().getRoleName());
+        returningDTO.setFirstName(theUser.getFirstName());
+        returningDTO.setLastName(theUser.getLastName());
+        returningDTO.setDateOfBirth(theUser.getDateOfBirth());
+        returningDTO.setProfilePicture(theUser.getProfilePicture());
+
+        return returningDTO;
+    }
+
+    public String getUserPassword() {
+        return userPassword;
+    }
+
+    public void setUserPassword(String userPassword) {
+        this.userPassword = userPassword;
     }
 }

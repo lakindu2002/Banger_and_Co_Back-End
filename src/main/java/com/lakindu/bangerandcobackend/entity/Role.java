@@ -1,9 +1,6 @@
 package com.lakindu.bangerandcobackend.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-
 import javax.persistence.*;
-import java.util.List;
 
 @Entity
 @Table(name = "user_role")
@@ -15,10 +12,6 @@ public class Role {
 
     @Column(nullable = false, name = "role_name", length = 50)
     private String roleName;
-
-    @OneToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH}, mappedBy = "userRole")
-    @JsonBackReference //do not get serialized
-    private List<User> usersForRole;
 
     public Role() {
     }
@@ -39,20 +32,11 @@ public class Role {
         this.roleName = roleName;
     }
 
-    public List<User> getUsersForRole() {
-        return usersForRole;
-    }
-
-    public void setUsersForRole(List<User> usersForRole) {
-        this.usersForRole = usersForRole;
-    }
-
     @Override
     public String toString() {
         return "Role{" +
                 "roleId=" + roleId +
                 ", roleName='" + roleName + '\'' +
-                ", usersForRole=" + usersForRole +
                 '}';
     }
 }

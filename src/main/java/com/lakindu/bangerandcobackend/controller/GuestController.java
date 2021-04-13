@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lakindu.bangerandcobackend.auth.CustomUserPrincipal;
 import com.lakindu.bangerandcobackend.auth.JWTHandler;
 import com.lakindu.bangerandcobackend.dto.AuthRequest;
+import com.lakindu.bangerandcobackend.dto.UserDTO;
 import com.lakindu.bangerandcobackend.entity.Inquiry;
 import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.service.InquiryService;
@@ -20,10 +21,11 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import java.util.HashMap;
 
 @RestController
 @RequestMapping(path = "/api/guest") //base path of the api
-//endpoint must remain unauthenticated
+///endpoint must remain unauthenticated
 public class GuestController {
 
     private final InquiryService inquiryService;
@@ -86,7 +88,7 @@ public class GuestController {
     }
 
     @PostMapping(path = "/login")
-    public ResponseEntity<User> authenticate(@Valid @RequestBody AuthRequest theAuthRequest) throws Exception {
+    public ResponseEntity<HashMap<String, Object>> authenticate(@Valid @RequestBody AuthRequest theAuthRequest) throws Exception {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         theAuthRequest.getEmailAddress(),
@@ -106,7 +108,13 @@ public class GuestController {
         theHeaders.add("Access-Control-Expose-Headers", "Authorization");
 
 
-        return new ResponseEntity<>(theLoggedInUser, theHeaders, HttpStatus.OK);
+        UserDTO returningUser = UserDTO.getDTO(theLoggedInUser);
+
+        HashMap<String, Object> returnEntity = new HashMap<>();
+        returnEntity.put("response", new BangerAndCoResponse("authenticated successfully", HttpStatus.OK.value()));
+        returnEntity.put("user_info", returningUser);
+
+        return new ResponseEntity<>(returnEntity, theHeaders, HttpStatus.OK);
     }
 
     @GetMapping(path = "/getAllRentableVehicle")
