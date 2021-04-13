@@ -47,7 +47,7 @@ public class JWTHandler {
                 .withArrayClaim(theConstants.getAUTHORITIES(), claimsForUser)
                 .sign(Algorithm.HMAC256(signingKey.getBytes(StandardCharsets.UTF_8)));
 
-        return String.format("Bearer %s", generatedToken);
+        return generatedToken;
     }
 
     private String[] getClaimsForUser(CustomUserPrincipal thePrincipal) {
@@ -127,5 +127,10 @@ public class JWTHandler {
         }
 
         return authorityList; //return formatted array list containing user role
+    }
+
+    public Long getTokenExpirationTime(String token) {
+        //method used to get the expiration date & time of the token
+        return getTokenVerifier().verify(token).getExpiresAt().getTime();
     }
 }

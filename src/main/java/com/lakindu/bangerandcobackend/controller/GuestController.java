@@ -2,6 +2,7 @@ package com.lakindu.bangerandcobackend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lakindu.bangerandcobackend.auth.CustomUserPrincipal;
+import com.lakindu.bangerandcobackend.auth.JWTConstants;
 import com.lakindu.bangerandcobackend.auth.JWTHandler;
 import com.lakindu.bangerandcobackend.dto.AuthRequest;
 import com.lakindu.bangerandcobackend.dto.UserDTO;
@@ -32,16 +33,19 @@ public class GuestController {
     private final UserService userService;
     private final AuthenticationManager authenticationManager;
     private final JWTHandler theTokenIssuer;
+    private final JWTConstants theConstants;
 
     //inject the inquiry service and userService bean created due to IOC by Spring.
     public GuestController(@Autowired InquiryService inquiryService,
                            @Autowired UserService userService,
                            @Autowired AuthenticationManager authenticationManager,
-                           @Autowired JWTHandler theTokenIssuer) {
+                           @Autowired JWTHandler theTokenIssuer,
+                           @Autowired JWTConstants theConstants) {
         this.inquiryService = inquiryService;
         this.userService = userService;
         this.authenticationManager = authenticationManager;
         this.theTokenIssuer = theTokenIssuer;
+        this.theConstants = theConstants;
     }
 
     @PostMapping(path = "/createInquiry")
@@ -103,9 +107,10 @@ public class GuestController {
 
         //return the User object with the JWT Token in the response header.
         HttpHeaders theHeaders = new HttpHeaders();
-        theHeaders.add("Authorization", generatedToken);
+        theHeaders.add("Authorization", String.format("%s%s", theConstants.getTOKEN_PREFIX(), generatedToken));
+        theHeaders.add("Token-Expiry", String.valueOf(theTokenIssuer.getTokenExpirationTime(generatedToken)));
         //allow the Authorization header to be accessed in the HTTP Response.
-        theHeaders.add("Access-Control-Expose-Headers", "Authorization");
+        theHeaders.add("Access-Control-Expose-Headers", "Authorization, Token-Expiry");
 
 
         UserDTO returningUser = UserDTO.getDTO(theLoggedInUser);
