@@ -5,7 +5,6 @@ import com.lakindu.bangerandcobackend.util.BangerAndCoExceptionHandler;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -64,20 +63,6 @@ public class JWTAuthFilter extends OncePerRequestFilter {
                 filterChain.doFilter(httpServletRequest, httpServletResponse);
             }
 
-        } catch (NullPointerException ex) {
-            //if an exception occurs, send a response back to the user.
-            httpServletResponse.setContentType("application/json");
-            httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-
-            BangerAndCoExceptionHandler theException = new BangerAndCoExceptionHandler(
-                    "authentication failed",
-                    "Poor Values Received For Authentication",
-                    HttpStatus.UNAUTHORIZED.value(),
-                    null
-            );
-
-            //write JSON response to the client using Jackson Project
-            new ObjectMapper().writer().writeValue(httpServletResponse.getOutputStream(), theException);
         } catch (Exception ex) {
             //if an exception occurs, send a response back to the user.
             httpServletResponse.setContentType("application/json");

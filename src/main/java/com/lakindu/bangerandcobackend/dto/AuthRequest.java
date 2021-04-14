@@ -5,7 +5,7 @@ import javax.validation.constraints.NotBlank;
 
 public class AuthRequest {
     @NotBlank(message = "Email Address Cannot Be Empty")
-    @Email
+    @Email(message = "Email Address is Poorly Formatted")
     private String emailAddress;
 
     @NotBlank(message = "Password Cannot Be Empty")
