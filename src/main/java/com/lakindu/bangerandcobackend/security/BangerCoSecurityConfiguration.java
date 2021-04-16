@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -43,8 +44,22 @@ public class BangerCoSecurityConfiguration extends WebSecurityConfigurerAdapter 
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-        //used to configure the authentication manager for user authentication
-        auth.userDetailsService(theUserDetailsServiceImpl).passwordEncoder(passwordEncoder);
+        //set authentication manager provider to user for authentication
+        auth.authenticationProvider(daoAuthenticationProvider());
+    }
+
+    @Bean
+    public DaoAuthenticationProvider daoAuthenticationProvider() {
+        //declare bean to enable calling of custom user details service and to allow DB Authentication
+        DaoAuthenticationProvider theProvider = new DaoAuthenticationProvider();
+
+        //set the user details service to be used by the provider
+        theProvider.setUserDetailsService(theUserDetailsServiceImpl);
+
+        //set the BCrypt Password Encoder
+        theProvider.setPasswordEncoder(passwordEncoder);
+
+        return theProvider;
     }
 
     @Override
