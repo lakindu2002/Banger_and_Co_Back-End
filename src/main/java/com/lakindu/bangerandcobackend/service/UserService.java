@@ -42,8 +42,8 @@ public class UserService implements UserDetailsService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public User findLoggingInUser(String emailAddress) throws Exception {
-        final User retrievedUser = theUserRepository.findUserByEmailAddress(emailAddress.toLowerCase());
+    public User findLoggingInUser(String username) throws Exception {
+        final User retrievedUser = theUserRepository.findUserByUsername(username);
         ImageHandler theDecompressor = new DecompressImage();
         theDecompressor.processUnhandledImage(retrievedUser);
         return retrievedUser;
@@ -51,58 +51,65 @@ public class UserService implements UserDetailsService {
 
     public User createUser(User theNewUser, MultipartFile profilePicture) throws Exception {
         //method used to create a User
-
+        theNewUser.setUsername(theNewUser.getUsername().toLowerCase());
+        theNewUser.setEmailAddress(theNewUser.getEmailAddress().toLowerCase());
         //check if user exists
-        final User existingUser = theUserRepository.findUserByEmailAddress(theNewUser.getEmailAddress().toLowerCase());
+        final User existingUser = theUserRepository.findUserByUsername(theNewUser.getUsername());
 
         if (existingUser == null) {
-            //if user doesn't exist
-            theNewUser.setEmailAddress(theNewUser.getEmailAddress().toLowerCase()); //save the lower case email in DB
+            //if username is valid
 
-            //validate the Entity class for errors.
-            DataBinder theDataBinder = new DataBinder(theNewUser);
-            theDataBinder.addValidators((org.springframework.validation.Validator) validator);
-            theDataBinder.validate();
+            //check if email address is associated to any account
+            final User emailExistingUser = theUserRepository.findUserByEmailAddress(theNewUser.getEmailAddress());
 
-            final BindingResult theBindingResult = theDataBinder.getBindingResult();
-
-            if (theBindingResult.hasErrors()) {
-                //if the entity class does not meet the expected validations
-                throw new ValidationException("Valid inputs were not provided for the fields during Sign Up.");
+            if (emailExistingUser != null) {
+                throw new UserAlreadyExistsException("This email address is already associated to an account.");
             } else {
-                //if successfully validated
-                theNewUser.setProfilePicture(profilePicture.getBytes());
-                ImageHandler theCompressor = new CompressImage(); //creating template method pattern
-                theCompressor.processUnhandledImage(theNewUser); //calling the template method
+                //validate the Entity class for errors.
+                DataBinder theDataBinder = new DataBinder(theNewUser);
+                theDataBinder.addValidators((org.springframework.validation.Validator) validator);
+                theDataBinder.validate();
 
-                //retrieve role information for the customer
-                Role theRole = theRoleRepository.findRoleByRoleName("customer");
+                final BindingResult theBindingResult = theDataBinder.getBindingResult();
 
-                if (theRole != null) {
-                    //if the role has been retrieved successfully
-                    theNewUser.setUserRole(theRole);
-                    theNewUser.setBlackListed(false);
-                    //encode the password to store with encryption
-                    theNewUser.setUserPassword(passwordEncoder.encode(theNewUser.getUserPassword()));
-
-                    final User registeredUser = theUserRepository.save(theNewUser);
-                    theSender.sendMail(new MailSenderHelper(registeredUser, "Welcome To Banger and Co!", MailTemplateType.SIGNUP));
-                    return registeredUser;
+                if (theBindingResult.hasErrors()) {
+                    //if the entity class does not meet the expected validations
+                    throw new ValidationException("Valid inputs were not provided for the fields during Sign Up.");
                 } else {
-                    throw new UnsupportedOperationException("invalid role assignment");
+                    //if successfully validated
+                    theNewUser.setProfilePicture(profilePicture.getBytes());
+                    ImageHandler theCompressor = new CompressImage(); //creating template method pattern
+                    theCompressor.processUnhandledImage(theNewUser); //calling the template method
+
+                    //retrieve role information for the customer
+                    Role theRole = theRoleRepository.findRoleByRoleName("customer");
+
+                    if (theRole != null) {
+                        //if the role has been retrieved successfully
+                        theNewUser.setUserRole(theRole);
+                        theNewUser.setBlackListed(false);
+                        //encode the password to store with encryption
+                        theNewUser.setUserPassword(passwordEncoder.encode(theNewUser.getUserPassword()));
+
+                        final User registeredUser = theUserRepository.save(theNewUser);
+                        theSender.sendMail(new MailSenderHelper(registeredUser, "Welcome To Banger and Co!", MailTemplateType.SIGNUP));
+                        return registeredUser;
+                    } else {
+                        throw new UnsupportedOperationException("invalid role assignment");
+                    }
                 }
             }
         } else {
-            throw new UserAlreadyExistsException(String.format("an account already exists with - %s", theNewUser.getEmailAddress()));
+            throw new UserAlreadyExistsException(String.format("An account already exists with the username that you provided"));
         }
     }
 
     @Override
-    public UserDetails loadUserByUsername(String emailAddress) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         //method defined by Spring Security and is called by SpringSecurity when user needs to be authenticated
         //email address = username
 
-        User theUser = theUserRepository.findUserByEmailAddress(emailAddress.toLowerCase());
+        User theUser = theUserRepository.findUserByUsername(username.toLowerCase());
         if (theUser != null) {
             return new CustomUserPrincipal(theUser); //this class implements UserDetails therefore it can be returned
         } else {

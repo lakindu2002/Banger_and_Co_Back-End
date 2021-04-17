@@ -1,12 +1,10 @@
 package com.lakindu.bangerandcobackend.dto;
 
-import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 
 public class AuthRequest {
-    @NotBlank(message = "Email Address Cannot Be Empty")
-    @Email(message = "Email Address is Poorly Formatted")
-    private String emailAddress;
+    @NotBlank(message = "Username cannot be empty")
+    private String username;
 
     @NotBlank(message = "Password Cannot Be Empty")
     private String password;
@@ -14,12 +12,12 @@ public class AuthRequest {
     public AuthRequest() {
     }
 
-    public String getEmailAddress() {
-        return emailAddress;
+    public String getUsername() {
+        return username;
     }
 
-    public void setEmailAddress(String emailAddress) {
-        this.emailAddress = emailAddress;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getPassword() {

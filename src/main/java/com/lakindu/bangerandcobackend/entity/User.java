@@ -12,6 +12,10 @@ import java.util.Arrays;
 @Table(name = "user_info")
 public class User {
     @Id
+    @Column(name = "username")
+    @NotBlank(message = "Please Provide a Valid Username")
+    private String username;
+
     @Email(message = "Please Provide a Valid Email Address")
     @NotBlank(message = "Provide a Valid Email Address")
     @Column(name = "email_address")
@@ -50,6 +54,14 @@ public class User {
     private Role userRole;
 
     public User() {
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getEmailAddress() {

@@ -36,13 +36,13 @@ public class AuthService {
     public AuthReturnBuilder performAuthentication(AuthRequest theAuthRequest) throws Exception {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
-                        theAuthRequest.getEmailAddress(),
+                        theAuthRequest.getUsername(),
                         theAuthRequest.getPassword()
                 ) //spring security will authenticate the user by calling the custom UserDetailsService implementation method
                 //located in the UserService
         );
 
-        User theLoggedInUser = userService.findLoggingInUser(theAuthRequest.getEmailAddress());
+        User theLoggedInUser = userService.findLoggingInUser(theAuthRequest.getUsername());
         CustomUserPrincipal thePrincipal = new CustomUserPrincipal(theLoggedInUser);
         String generatedToken = theTokenIssuer.generateToken(thePrincipal);
 

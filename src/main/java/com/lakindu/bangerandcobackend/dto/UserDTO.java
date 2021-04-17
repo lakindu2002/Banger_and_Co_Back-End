@@ -9,6 +9,10 @@ import javax.validation.constraints.Size;
 import java.sql.Date;
 
 public class UserDTO {
+
+    @NotBlank(message = "Please Provide a Valid Username")
+    private String username;
+
     @Email(message = "Please Provide a Valid Email Address")
     @NotBlank(message = "Provide a Valid Email Address")
     private String emailAddress;
@@ -35,6 +39,14 @@ public class UserDTO {
     private String userRole;
 
     public UserDTO() {
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public String getEmailAddress() {
@@ -103,6 +115,7 @@ public class UserDTO {
 
     public static UserDTO getDTO(User theUser) {
         UserDTO returningDTO = new UserDTO();
+        returningDTO.setUsername(theUser.getUsername());
         returningDTO.setBlackListed(theUser.isBlackListed());
         returningDTO.setContactNumber(theUser.getContactNumber());
         returningDTO.setEmailAddress(theUser.getEmailAddress());

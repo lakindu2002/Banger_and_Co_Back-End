@@ -43,13 +43,13 @@ public class JWTAuthFilter extends OncePerRequestFilter {
             } else {
                 //if token seems to be valid
                 String retrievedToken = jwtRequest.substring(theConstants.getTOKEN_PREFIX().length()); //retrieve JWT
-                String emailAddress_username = theHandler.extractSubjectFromToken(retrievedToken);
+                String username = theHandler.extractSubjectFromToken(retrievedToken);
 
-                if (theHandler.isTokenValid(retrievedToken, emailAddress_username)) {
+                if (theHandler.isTokenValid(retrievedToken, username)) {
                     //if the token has not expired
 
                     //authenticate the user to show that subject actually exists
-                    final UserDetails authenticatedDetails = userDetailsService.loadUserByUsername(emailAddress_username);
+                    final UserDetails authenticatedDetails = userDetailsService.loadUserByUsername(username);
 
                     //retrieve a Spring Authenticator for the User
                     Authentication authentication = theHandler.getAuthenticationForValidToken(httpServletRequest, authenticatedDetails);

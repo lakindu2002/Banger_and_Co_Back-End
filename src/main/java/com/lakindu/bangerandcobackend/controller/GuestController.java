@@ -73,7 +73,7 @@ public class GuestController {
         final User createdUser = userService.createUser(theUser, requestProfilePic);
 
         BangerAndCoResponse response = new BangerAndCoResponse(
-                String.format("account with email - %s created successfully", createdUser.getEmailAddress()),
+                String.format("account with username - %s created successfully", createdUser.getUsername()),
                 HttpStatus.OK.value()
         );
 

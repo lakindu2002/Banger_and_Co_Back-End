@@ -40,15 +40,13 @@ public class JWTHandler {
         //this method will generate and return a JWT Token to the Client.
 
         String[] claimsForUser = getClaimsForUser(thePrincipal);
-        final String generatedToken = JWT.create()
+        return JWT.create()
                 .withSubject(thePrincipal.getUsername())
                 .withIssuer(theConstants.getTOKEN_ISSUER())
                 .withIssuedAt(new Date(System.currentTimeMillis()))
                 .withExpiresAt(new Date(System.currentTimeMillis() + theConstants.getEXPIRATION_TIME()))
                 .withArrayClaim(theConstants.getAUTHORITIES(), claimsForUser)
                 .sign(Algorithm.HMAC256(signingKey.getBytes(StandardCharsets.UTF_8)));
-
-        return generatedToken;
     }
 
     private String[] getClaimsForUser(CustomUserPrincipal thePrincipal) {
@@ -67,20 +65,19 @@ public class JWTHandler {
     //----------------------------------------------TOKEN DECODING------------------------------------------------------
     //to verify a token, first create JWTVerifier and then call verify method on the JWTVerifier
     private JWTVerifier getTokenVerifier() {
-
         //this builds JWT Verifier with the required algorithm and signing key.
         return JWT.require(Algorithm.HMAC256(signingKey.getBytes(StandardCharsets.UTF_8)))
                 .withIssuer(theConstants.getTOKEN_ISSUER())
                 .build();
     }
 
-    public boolean isTokenValid(String token, String emailAddress) {
+    public boolean isTokenValid(String token, String username) {
         final boolean isExpired = isTokenExpired(token);
         final String tokenSubject = extractSubjectFromToken(token);
         final String tokenIssuerName = extractIssuerNameFromToken(token);
 
         //for token to be valid, DB username === token subject && token must not be expired && issuer name must be same as creation
-        return tokenSubject.equals(emailAddress) && !isExpired && tokenIssuerName.equalsIgnoreCase(theConstants.getTOKEN_ISSUER());
+        return tokenSubject.equals(username) && !isExpired && tokenIssuerName.equals(theConstants.getTOKEN_ISSUER());
     }
 
     private String extractIssuerNameFromToken(String token) {
@@ -114,21 +111,21 @@ public class JWTHandler {
         return securityToken;
     }
 
-    public List<GrantedAuthority> getAuthorityListForToken(String token) {
-        //method executed to retrieve all the roles for the User
-        final DecodedJWT verifiedToken = getTokenVerifier().verify(token); //verify the token
-
-        //retrieve the claim "authorities" assigned while creating the token
-        String[] claimList = verifiedToken.getClaim(theConstants.getAUTHORITIES()).asArray(String.class);
-
-        List<GrantedAuthority> authorityList = new ArrayList<>();
-
-        for (String claim : claimList) {
-            authorityList.add(new SimpleGrantedAuthority(claim)); //create an array list from retrieved data
-        }
-
-        return authorityList; //return formatted array list containing user role
-    }
+//    public List<GrantedAuthority> getAuthorityListForToken(String token) {
+//        //method executed to retrieve all the roles for the User
+//        final DecodedJWT verifiedToken = getTokenVerifier().verify(token); //verify the token
+//
+//        //retrieve the claim "authorities" assigned while creating the token
+//        String[] claimList = verifiedToken.getClaim(theConstants.getAUTHORITIES()).asArray(String.class);
+//
+//        List<GrantedAuthority> authorityList = new ArrayList<>();
+//
+//        for (String claim : claimList) {
+//            authorityList.add(new SimpleGrantedAuthority(claim)); //create an array list from retrieved data
+//        }
+//
+//        return authorityList; //return formatted array list containing user role
+//    }
 
     public Long getTokenExpirationTime(String token) {
         //method used to get the expiration date & time of the token

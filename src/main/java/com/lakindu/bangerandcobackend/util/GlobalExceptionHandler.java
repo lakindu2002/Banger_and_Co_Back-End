@@ -56,7 +56,7 @@ public class GlobalExceptionHandler {
 
         //create an exception handler object
         BangerAndCoExceptionHandler exceptionHandler = new BangerAndCoExceptionHandler(
-                "An Account With This Email Address Already Exists",
+                "Your Account Not Been Created Successfully",
                 ex.getLocalizedMessage(),
                 HttpStatus.CONFLICT.value(),
                 new ArrayList<>()

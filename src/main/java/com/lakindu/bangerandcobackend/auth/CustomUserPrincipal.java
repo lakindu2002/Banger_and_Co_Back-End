@@ -34,7 +34,7 @@ public class CustomUserPrincipal implements UserDetails {
 
     @Override
     public String getUsername() {
-        return theUserEntity.getEmailAddress();
+        return theUserEntity.getUsername();
     }
 
     @Override
