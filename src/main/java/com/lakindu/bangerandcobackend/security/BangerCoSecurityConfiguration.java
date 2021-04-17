@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -24,6 +25,7 @@ import java.util.Collections;
 
 @Configuration //configuration class for bean definition methods
 @EnableWebSecurity //enable Spring Security for Web
+@EnableGlobalMethodSecurity(prePostEnabled = true) //enable security at method level
 public class BangerCoSecurityConfiguration extends WebSecurityConfigurerAdapter {
     //WebSecurityConfigurerAdapter has methods used to configure Web Security
 
@@ -64,6 +66,8 @@ public class BangerCoSecurityConfiguration extends WebSecurityConfigurerAdapter 
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
+        //end point security other than auth is handled at controller
+
         //configure method overridden to configure the http security for the application
         http
                 .cors() //this uses a default bean name of "corsConfigurationSource".
@@ -71,21 +75,18 @@ public class BangerCoSecurityConfiguration extends WebSecurityConfigurerAdapter 
                 .and() //and
                 .csrf().disable() //disable CSRF (Cross Site Request Forgery)
                 .authorizeRequests() //authorize requests
-                .antMatchers("/api/guest/**") //for the Guest Endpoint
-                .permitAll() //allow all requests
-                //ensure "Customer" and "Administrator" endpoints are authenticated for anyone who authorizes as "CUSTOMER"
-                //or "ADMINISTRATOR"
-                .antMatchers("/api/customer/**").hasAuthority("CUSTOMER")
-                .antMatchers("/api/administrator/**").hasAuthority("ADMINISTRATOR")
-                .anyRequest() //any other request
-                .authenticated() //must be authenticated
+                .antMatchers("/api/auth/**") //for the Auth Endpoint
+                .permitAll() //allow all request
+                .antMatchers("/api/inquiry/createInquiry")
+                .permitAll()
+                .anyRequest()
+                .authenticated()
                 .and()
                 //add a filter before UsernamePasswordAuthenticationFilter
                 .addFilterAfter(theAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement()
                 //set session handling to Stateless
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-
     }
 
     @Bean

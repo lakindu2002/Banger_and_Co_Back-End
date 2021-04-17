@@ -8,6 +8,7 @@ import com.lakindu.bangerandcobackend.repository.UserRepository;
 import com.lakindu.bangerandcobackend.util.FileHandler.CompressImage;
 import com.lakindu.bangerandcobackend.util.FileHandler.DecompressImage;
 import com.lakindu.bangerandcobackend.util.FileHandler.ImageHandler;
+import com.lakindu.bangerandcobackend.util.NoSuchUserExistsException;
 import com.lakindu.bangerandcobackend.util.UserAlreadyExistsException;
 import com.lakindu.bangerandcobackend.util.mailsender.MailSender;
 import com.lakindu.bangerandcobackend.util.mailsender.MailSenderHelper;
@@ -18,26 +19,22 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.DataBinder;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.ValidationException;
-import javax.validation.Validator;
+import javax.transaction.Transactional;
+
 
 @Service
 public class UserService implements UserDetailsService {
     private final UserRepository theUserRepository;
     private final RoleRepository theRoleRepository;
-    private final Validator validator;
     private final MailSender theSender;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRepository theUserRepository, RoleRepository theRoleRepository, Validator validator, MailSender theSender, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository theUserRepository, RoleRepository theRoleRepository, MailSender theSender, PasswordEncoder passwordEncoder) {
         this.theUserRepository = theUserRepository;
         this.theRoleRepository = theRoleRepository;
-        this.validator = validator;
         this.theSender = theSender;
         this.passwordEncoder = passwordEncoder;
     }
@@ -49,58 +46,47 @@ public class UserService implements UserDetailsService {
         return retrievedUser;
     }
 
+    @Transactional
     public User createUser(User theNewUser, MultipartFile profilePicture) throws Exception {
         //method used to create a User
         theNewUser.setUsername(theNewUser.getUsername().toLowerCase());
         theNewUser.setEmailAddress(theNewUser.getEmailAddress().toLowerCase());
         //check if user exists
-        final User existingUser = theUserRepository.findUserByUsername(theNewUser.getUsername());
+        User userNameExists = theUserRepository.findUserByUsername(theNewUser.getUsername().toLowerCase());
 
-        if (existingUser == null) {
+        if (userNameExists == null) {
             //if username is valid
 
             //check if email address is associated to any account
-            final User emailExistingUser = theUserRepository.findUserByEmailAddress(theNewUser.getEmailAddress());
-
-            if (emailExistingUser != null) {
+            User emailExists = theUserRepository.findUserByEmailAddress(theNewUser.getEmailAddress().toLowerCase());
+            if (emailExists != null) {
                 throw new UserAlreadyExistsException("This email address is already associated to an account.");
             } else {
-                //validate the Entity class for errors.
-                DataBinder theDataBinder = new DataBinder(theNewUser);
-                theDataBinder.addValidators((org.springframework.validation.Validator) validator);
-                theDataBinder.validate();
+                theNewUser.setProfilePicture(profilePicture.getBytes());
+                ImageHandler theCompressor = new CompressImage(); //creating template method pattern
+                theCompressor.processUnhandledImage(theNewUser); //calling the template method
 
-                final BindingResult theBindingResult = theDataBinder.getBindingResult();
+                //retrieve role information for the customer
+                Role theRole = theRoleRepository.findRoleByRoleName("customer");
 
-                if (theBindingResult.hasErrors()) {
-                    //if the entity class does not meet the expected validations
-                    throw new ValidationException("Valid inputs were not provided for the fields during Sign Up.");
+                if (theRole != null) {
+                    //if the role has been retrieved successfully
+                    theNewUser.setUserRole(theRole);
+                    theNewUser.setBlackListed(false);
+                    //encode the password to store with encryption
+                    theNewUser.setUserPassword(passwordEncoder.encode(theNewUser.getUserPassword()));
+                    final User registeredUser = theUserRepository.save(theNewUser);
+                    System.out.println("--------------USER SAVED-----------------");
+                    theSender.sendMail(new MailSenderHelper(registeredUser, "Welcome To Banger and Co!", MailTemplateType.SIGNUP));
+                    System.out.println("--------------EMAIL SENT--------------");
+                    return registeredUser;
                 } else {
-                    //if successfully validated
-                    theNewUser.setProfilePicture(profilePicture.getBytes());
-                    ImageHandler theCompressor = new CompressImage(); //creating template method pattern
-                    theCompressor.processUnhandledImage(theNewUser); //calling the template method
-
-                    //retrieve role information for the customer
-                    Role theRole = theRoleRepository.findRoleByRoleName("customer");
-
-                    if (theRole != null) {
-                        //if the role has been retrieved successfully
-                        theNewUser.setUserRole(theRole);
-                        theNewUser.setBlackListed(false);
-                        //encode the password to store with encryption
-                        theNewUser.setUserPassword(passwordEncoder.encode(theNewUser.getUserPassword()));
-
-                        final User registeredUser = theUserRepository.save(theNewUser);
-                        theSender.sendMail(new MailSenderHelper(registeredUser, "Welcome To Banger and Co!", MailTemplateType.SIGNUP));
-                        return registeredUser;
-                    } else {
-                        throw new UnsupportedOperationException("invalid role assignment");
-                    }
+                    throw new UnsupportedOperationException("invalid role assignment");
                 }
+
             }
         } else {
-            throw new UserAlreadyExistsException(String.format("An account already exists with the username that you provided"));
+            throw new UserAlreadyExistsException("An account already exists with the username that you provided");
         }
     }
 
@@ -117,5 +103,14 @@ public class UserService implements UserDetailsService {
             throw new UsernameNotFoundException("Invalid Email Address or Password");
         }
 
+    }
+
+    public User getUserInfo(String username) {
+        User theUser = theUserRepository.findUserByUsername(username);
+        if (theUser == null) {
+            throw new NoSuchUserExistsException(String.format("no user found for given username - %s", username));
+        } else {
+            return theUser;
+        }
     }
 }

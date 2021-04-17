@@ -53,7 +53,6 @@ public class JWTAuthFilter extends OncePerRequestFilter {
 
                     //retrieve a Spring Authenticator for the User
                     Authentication authentication = theHandler.getAuthenticationForValidToken(httpServletRequest, authenticatedDetails);
-
                     //set the user as an authenticated user in spring security context
                     SecurityContextHolder.getContext().setAuthentication(authentication);
 

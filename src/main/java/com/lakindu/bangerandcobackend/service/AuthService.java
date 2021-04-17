@@ -46,14 +46,23 @@ public class AuthService {
         CustomUserPrincipal thePrincipal = new CustomUserPrincipal(theLoggedInUser);
         String generatedToken = theTokenIssuer.generateToken(thePrincipal);
 
-        final UserDTO convertedDTO = convertEntityToDTO(theLoggedInUser);
+        final UserDTO convertedDTO = generateAuthReturn(theLoggedInUser);
         final HttpHeaders returningHeaders = generateHeadersForAuthSuccess(generatedToken);
 
         return new AuthReturnBuilder(convertedDTO, returningHeaders, new BangerAndCoResponse("authenticated successfully", HttpStatus.OK.value()));
     }
 
-    private UserDTO convertEntityToDTO(User authenticatedUser) {
-        return UserDTO.getDTO(authenticatedUser);
+    private UserDTO generateAuthReturn(User authenticatedUser) {
+        UserDTO theDTO = new UserDTO();
+
+        theDTO.setUsername(authenticatedUser.getUsername());
+        theDTO.setProfilePicture(authenticatedUser.getProfilePicture());
+        theDTO.setFirstName(authenticatedUser.getFirstName());
+        theDTO.setLastName(authenticatedUser.getLastName());
+        theDTO.setUserRole(authenticatedUser.getUserRole().getRoleName());
+        theDTO.setBlackListed(authenticatedUser.isBlackListed());
+
+        return theDTO;
     }
 
     private HttpHeaders generateHeadersForAuthSuccess(String theToken) {

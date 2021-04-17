@@ -64,4 +64,19 @@ public class GlobalExceptionHandler {
         //return the response entity of type Conflict back to the resource sending client
         return new ResponseEntity<>(exceptionHandler, HttpStatus.CONFLICT);
     }
+
+    @ExceptionHandler
+    public ResponseEntity<BangerAndCoExceptionHandler> noUserNameExists(NoSuchUserExistsException ex) {
+        //custom exception handler for No Username Present.
+
+        //create an exception handler object
+        BangerAndCoExceptionHandler exceptionHandler = new BangerAndCoExceptionHandler(
+                "Invalid Username",
+                ex.getLocalizedMessage(),
+                HttpStatus.NOT_FOUND.value(),
+                new ArrayList<>()
+        );
+        //return the response entity of type Conflict back to the resource sending client
+        return new ResponseEntity<>(exceptionHandler, HttpStatus.NOT_FOUND);
+    }
 }

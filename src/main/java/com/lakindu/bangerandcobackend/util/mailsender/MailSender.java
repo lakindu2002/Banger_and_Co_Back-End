@@ -65,7 +65,7 @@ public class MailSender {
 
         // create a session with the provided properties in authenticated state.
         theMailSession = Session.getInstance(propertiesConfig, theAuthenticator);
-        theMailSession.setDebug(true);
+        theMailSession.setDebug(false);
     }
 
     public void sendMail(MailSenderHelper theHelper) {

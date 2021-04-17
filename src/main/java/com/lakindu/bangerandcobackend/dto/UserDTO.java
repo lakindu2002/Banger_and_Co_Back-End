@@ -1,6 +1,8 @@
 package com.lakindu.bangerandcobackend.dto;
 
 import com.lakindu.bangerandcobackend.entity.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -111,21 +113,6 @@ public class UserDTO {
 
     public void setUserRole(String userRole) {
         this.userRole = userRole;
-    }
-
-    public static UserDTO getDTO(User theUser) {
-        UserDTO returningDTO = new UserDTO();
-        returningDTO.setUsername(theUser.getUsername());
-        returningDTO.setBlackListed(theUser.isBlackListed());
-        returningDTO.setContactNumber(theUser.getContactNumber());
-        returningDTO.setEmailAddress(theUser.getEmailAddress());
-        returningDTO.setUserRole(theUser.getUserRole().getRoleName());
-        returningDTO.setFirstName(theUser.getFirstName());
-        returningDTO.setLastName(theUser.getLastName());
-        returningDTO.setDateOfBirth(theUser.getDateOfBirth());
-        returningDTO.setProfilePicture(theUser.getProfilePicture());
-
-        return returningDTO;
     }
 
     public String getUserPassword() {

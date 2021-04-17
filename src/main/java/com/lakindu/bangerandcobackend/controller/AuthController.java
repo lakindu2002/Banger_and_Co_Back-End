@@ -3,56 +3,39 @@ package com.lakindu.bangerandcobackend.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lakindu.bangerandcobackend.dto.AuthRequest;
 import com.lakindu.bangerandcobackend.dto.AuthReturnBuilder;
-import com.lakindu.bangerandcobackend.entity.Inquiry;
 import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.service.AuthService;
-import com.lakindu.bangerandcobackend.service.InquiryService;
 import com.lakindu.bangerandcobackend.service.UserService;
 import com.lakindu.bangerandcobackend.util.BangerAndCoResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.DataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import javax.validation.ValidationException;
+import javax.validation.Validator;
 import java.util.HashMap;
 
 @RestController
-@RequestMapping(path = "/api/guest") //base path of the api
-///endpoint must remain unauthenticated
-public class GuestController {
+@RequestMapping(path = "/api/auth")
+public class AuthController {
 
-    private final InquiryService inquiryService;
     private final UserService userService;
     private final AuthService authService;
+    private final Validator validator;
 
-    //inject the inquiry service and userService bean created due to IOC by Spring.
-    public GuestController(@Autowired InquiryService inquiryService,
-                           @Autowired UserService userService,
-                           @Autowired AuthService authService) {
-        this.inquiryService = inquiryService;
+    @Autowired
+    public AuthController(UserService userService, AuthService authService, Validator validator) {
         this.userService = userService;
         this.authService = authService;
+        this.validator = validator;
     }
 
-    @PostMapping(path = "/createInquiry")
-    public ResponseEntity<BangerAndCoResponse> createInquiry(@Valid @RequestBody Inquiry requestInquiry) {
-        //inquiry object is valid
-
-        //save the inquiry to the database
-        Inquiry savedInquiry = inquiryService.saveInquiry(requestInquiry);
-
-        //return the success message if inquiry is saved successfully
-        //if exception occurs will be directed to @ExceptionHandler handling Exception
-        BangerAndCoResponse response = new BangerAndCoResponse(
-                String.format("Successfully Recorded Inquiry of ID: %s",
-                        savedInquiry.getInquiryId()), HttpStatus.OK.value()
-        );
-        return new ResponseEntity<>(response, HttpStatus.OK); //return the response body as JSON
-        //JSON Body converted automatically by Jackson Project.
-    }
 
     @PostMapping(
             path = "/createAccount",
@@ -70,14 +53,28 @@ public class GuestController {
         ObjectMapper objectMapper = new ObjectMapper();
         User theUser = objectMapper.readValue(requestUser, User.class); //call setters
 
-        final User createdUser = userService.createUser(theUser, requestProfilePic);
+        DataBinder theDataBinder = new DataBinder(theUser);
+        theDataBinder.addValidators((org.springframework.validation.Validator) validator);
+        theDataBinder.validate();
 
-        BangerAndCoResponse response = new BangerAndCoResponse(
-                String.format("account with username - %s created successfully", createdUser.getUsername()),
-                HttpStatus.OK.value()
-        );
+        final BindingResult theBindingResult = theDataBinder.getBindingResult(); //retrieve error list
+        if (theBindingResult.hasErrors()) {
+            //if the entity class does not meet the expected validations
+            throw new ValidationException("Valid inputs were not provided for the fields during Sign Up.");
+        } else {
+            theUser.setEmailAddress(theUser.getEmailAddress().trim());
+            theUser.setUsername(theUser.getUsername().trim());
+            theUser.setContactNumber(theUser.getContactNumber().trim());
+            theUser.setEmailAddress(theUser.getEmailAddress().trim());
+            theUser.setLastName(theUser.getLastName().trim());
 
-        return new ResponseEntity<>(response, HttpStatus.OK);
+            final User createdUser = userService.createUser(theUser, requestProfilePic);
+            BangerAndCoResponse response = new BangerAndCoResponse(
+                    String.format("account with username - %s created successfully", createdUser.getUsername()),
+                    HttpStatus.OK.value()
+            );
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        }
     }
 
     @PostMapping(path = "/login")
@@ -85,6 +82,7 @@ public class GuestController {
         //execute body is request is valid.
         //use auth service to perform authentication
         final AuthReturnBuilder theBuiltReturn = authService.performAuthentication(theAuthRequest);
+        theAuthRequest.setUsername(theAuthRequest.getUsername().trim());
 
         //compile response body
         HashMap<String, Object> returnEntity = new HashMap<>();
@@ -92,10 +90,5 @@ public class GuestController {
         returnEntity.put("user_info", theBuiltReturn.getUserDTO());
 
         return new ResponseEntity<>(returnEntity, theBuiltReturn.getReturnHeaders(), HttpStatus.OK);
-    }
-
-    @GetMapping(path = "/getAllRentableVehicle")
-    public void getAllRentableVehicles() {
-
     }
 }
