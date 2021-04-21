@@ -1,4 +1,4 @@
-package com.lakindu.bangerandcobackend.util.passwordhashing;
+package com.lakindu.bangerandcobackend.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

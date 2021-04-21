@@ -1,5 +1,7 @@
 package com.lakindu.bangerandcobackend.entity;
 
+import com.lakindu.bangerandcobackend.dto.UserDTO;
+
 import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
@@ -13,32 +15,23 @@ import java.util.Arrays;
 public class User {
     @Id
     @Column(name = "username")
-    @NotBlank(message = "Please Provide a Valid Username")
     private String username;
 
-    @Email(message = "Please Provide a Valid Email Address")
-    @NotBlank(message = "Provide a Valid Email Address")
     @Column(name = "email_address")
     private String emailAddress;
 
-    @NotBlank(message = "Please Provide a Valid First Name")
     @Column(name = "first_name", nullable = false)
     private String firstName;
 
-    @NotBlank(message = "Please Provide a Valid Last Name")
     @Column(name = "last_name", nullable = false)
     private String lastName;
 
-    @NotNull(message = "Please Provide a Valid Date of Birth")
     @Column(name = "date_of_birth", nullable = false)
     private Date dateOfBirth;
 
-    @NotBlank(message = "Please Provide a Valid Password")
     @Column(name = "user_password", nullable = false)
     private String userPassword;
 
-    @NotBlank(message = "Please Provide a Valid Contact Number")
-    @Size(min = 1, max = 20)
     @Column(name = "contact_number", nullable = false, length = 20)
     private String contactNumber;
 
@@ -55,8 +48,6 @@ public class User {
 
     public User() {
     }
-
-
 
     public String getUsername() {
         return username;
@@ -151,5 +142,39 @@ public class User {
                 ", isBlackListed=" + isBlackListed +
                 ", userRole=" + userRole +
                 '}';
+    }
+
+    public static User convertDTOToEntity(UserDTO theUserDTO, Role theRole) {
+        User theUser = new User();
+        theUser.setBlackListed(theUserDTO.isBlackListed());
+        if (theRole != null) {
+            theUser.setUserRole(theRole);
+        }
+        if (theUserDTO.getUsername() != null) {
+            theUser.setUsername(theUserDTO.getUsername());
+        }
+        if (theUserDTO.getFirstName() != null) {
+            theUser.setFirstName(theUserDTO.getFirstName());
+        }
+        if (theUserDTO.getLastName() != null) {
+            theUser.setLastName(theUserDTO.getLastName());
+        }
+        if (theUserDTO.getUserPassword() != null) {
+            theUser.setUserPassword(theUserDTO.getUserPassword());
+        }
+        if (theUserDTO.getContactNumber() != null) {
+            theUser.setContactNumber(theUserDTO.getContactNumber());
+        }
+        if (theUserDTO.getProfilePicture() != null) {
+            theUser.setProfilePicture(theUserDTO.getProfilePicture());
+        }
+        if (theUserDTO.getEmailAddress() != null) {
+            theUser.setEmailAddress(theUserDTO.getEmailAddress());
+        }
+        if (theUserDTO.getDateOfBirth() != null) {
+            theUser.setDateOfBirth(theUserDTO.getDateOfBirth());
+        }
+
+        return theUser;
     }
 }

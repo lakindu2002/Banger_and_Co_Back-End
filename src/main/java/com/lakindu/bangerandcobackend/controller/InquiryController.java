@@ -29,7 +29,7 @@ public class InquiryController {
     @PreAuthorize("permitAll()") //permit all requests to this endpoint
     @PostMapping(path = "/createInquiry")
     public ResponseEntity<BangerAndCoResponse> createInquiry(@Valid @RequestBody InquiryDTO requestInquiry) {
-        //inquiry object is valid
+
         requestInquiry.setFirstName(requestInquiry.getFirstName().trim());
         requestInquiry.setLastName(requestInquiry.getLastName().trim());
         requestInquiry.setContactNumber(requestInquiry.getContactNumber().trim());
@@ -37,7 +37,6 @@ public class InquiryController {
         requestInquiry.setMessage(requestInquiry.getMessage().trim());
         requestInquiry.setEmailAddress(requestInquiry.getEmailAddress().trim().toLowerCase());
 
-        //save the inquiry to the database
         Inquiry savedInquiry = inquiryService.saveInquiry(requestInquiry);
 
         //return the success message if inquiry is saved successfully

@@ -5,8 +5,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import java.util.ArrayList;
 
@@ -21,7 +23,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<BangerAndCoExceptionHandler> handlerDefaultException(Exception ex) {
         //exception handler to handle all default exceptions thrown at runtime by JVM
         BangerAndCoExceptionHandler exceptionHandler = new BangerAndCoExceptionHandler(
-                "An error occurred",
+                "An Error Occurred on the Server, Please Try Again.",
                 ex.getLocalizedMessage(),
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 new ArrayList<>());
@@ -62,5 +64,41 @@ public class GlobalExceptionHandler {
         );
         //return the response entity of type Conflict back to the resource sending client
         return new ResponseEntity<>(exceptionHandler, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<BangerAndCoExceptionHandler> handleMissingRequestParameter(MissingServletRequestParameterException ex) {
+        //handle exceptions thrown when required Request Parameters are not provided
+        BangerAndCoExceptionHandler exceptionHandler = new BangerAndCoExceptionHandler(
+                "Please Provide All The Data Required",
+                ex.getLocalizedMessage(),
+                HttpStatus.BAD_REQUEST.value(),
+                new ArrayList<>());
+
+        return new ResponseEntity<>(exceptionHandler, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(MissingServletRequestPartException.class)
+    public ResponseEntity<BangerAndCoExceptionHandler> handleMissingPartInParameter(MissingServletRequestPartException ex) {
+        //handle exceptions thrown when required Part Parameters are not provided
+        BangerAndCoExceptionHandler exceptionHandler = new BangerAndCoExceptionHandler(
+                "Please Provide the Files Required",
+                ex.getLocalizedMessage(),
+                HttpStatus.BAD_REQUEST.value(),
+                new ArrayList<>());
+
+        return new ResponseEntity<>(exceptionHandler, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<BangerAndCoExceptionHandler> handleResourceNotFound(ResourceNotFoundException ex) {
+        //handle exceptions thrown when required Part Parameters are not provided
+        BangerAndCoExceptionHandler exceptionHandler = new BangerAndCoExceptionHandler(
+                "Resource Does Not Exist",
+                ex.getLocalizedMessage(),
+                HttpStatus.NOT_FOUND.value(),
+                new ArrayList<>());
+
+        return new ResponseEntity<>(exceptionHandler, HttpStatus.NOT_FOUND);
     }
 }

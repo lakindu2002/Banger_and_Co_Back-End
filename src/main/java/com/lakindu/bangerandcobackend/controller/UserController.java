@@ -3,6 +3,7 @@ package com.lakindu.bangerandcobackend.controller;
 import com.lakindu.bangerandcobackend.dto.UserDTO;
 import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.service.UserService;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,23 +24,22 @@ public class UserController {
     @GetMapping(path = "/userInformation/{username}")
     @PreAuthorize("hasAuthority('ADMINISTRATOR') or hasAuthority('CUSTOMER')")
     public ResponseEntity<UserDTO> getUserInformation(@PathVariable(name = "username", required = true) String username) throws Exception {
-        User theLoggedInUser = theUserService.getUserInformation(username);
-        if (theLoggedInUser == null) {
-            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        User theUser = theUserService.getUserInformation(username);
+        if (theUser == null) {
+            throw new ResourceNotFoundException("username does not exist in the system");
         } else {
-            UserDTO theReturningDTO = new UserDTO();
-            theReturningDTO.setFirstName(theLoggedInUser.getFirstName());
-            theReturningDTO.setLastName(theLoggedInUser.getLastName());
-            theReturningDTO.setEmailAddress(theLoggedInUser.getEmailAddress());
-            theReturningDTO.setUsername(theLoggedInUser.getUsername());
-            theReturningDTO.setProfilePicture(theLoggedInUser.getProfilePicture());
-            theReturningDTO.setUserRole(theLoggedInUser.getUserRole().getRoleName());
-            theReturningDTO.setBlackListed(theLoggedInUser.isBlackListed());
-            theReturningDTO.setContactNumber(theLoggedInUser.getContactNumber());
-            theReturningDTO.setDateOfBirth(theLoggedInUser.getDateOfBirth());
+            UserDTO theDTO = new UserDTO();
+            theDTO.setFirstName(theUser.getFirstName());
+            theDTO.setLastName(theUser.getLastName());
+            theDTO.setUsername(theUser.getUsername());
+            theDTO.setEmailAddress(theUser.getEmailAddress());
+            theDTO.setProfilePicture(theUser.getProfilePicture());
+            theDTO.setUserRole(theUser.getUserRole().getRoleName());
+            theDTO.setDateOfBirth(theUser.getDateOfBirth());
+            theDTO.setBlackListed(theUser.isBlackListed());
+            theDTO.setContactNumber(theUser.getContactNumber());
 
-            return new ResponseEntity<>(theReturningDTO, HttpStatus.OK);
+            return new ResponseEntity<>(theDTO, HttpStatus.OK);
         }
-
     }
 }

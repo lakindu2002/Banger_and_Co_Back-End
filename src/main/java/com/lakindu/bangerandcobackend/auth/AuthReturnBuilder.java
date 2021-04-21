@@ -1,4 +1,4 @@
-package com.lakindu.bangerandcobackend.util.authutils;
+package com.lakindu.bangerandcobackend.auth;
 
 import com.lakindu.bangerandcobackend.dto.UserDTO;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;

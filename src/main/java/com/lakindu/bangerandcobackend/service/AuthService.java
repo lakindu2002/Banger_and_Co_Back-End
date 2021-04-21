@@ -4,7 +4,7 @@ import com.lakindu.bangerandcobackend.auth.CustomUserPrincipal;
 import com.lakindu.bangerandcobackend.auth.JWTConstants;
 import com.lakindu.bangerandcobackend.auth.JWTHandler;
 import com.lakindu.bangerandcobackend.dto.AuthRequest;
-import com.lakindu.bangerandcobackend.util.authutils.AuthReturnBuilder;
+import com.lakindu.bangerandcobackend.auth.AuthReturnBuilder;
 import com.lakindu.bangerandcobackend.dto.UserDTO;
 import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
@@ -60,7 +60,6 @@ public class AuthService {
         theDTO.setFirstName(authenticatedUser.getFirstName());
         theDTO.setLastName(authenticatedUser.getLastName());
         theDTO.setUserRole(authenticatedUser.getUserRole().getRoleName());
-        theDTO.setBlackListed(authenticatedUser.isBlackListed());
 
         return theDTO;
     }

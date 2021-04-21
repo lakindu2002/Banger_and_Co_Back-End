@@ -1,6 +1,7 @@
 package com.lakindu.bangerandcobackend.service;
 
 import com.lakindu.bangerandcobackend.auth.CustomUserPrincipal;
+import com.lakindu.bangerandcobackend.dto.UserDTO;
 import com.lakindu.bangerandcobackend.entity.Role;
 import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.repository.UserRepository;
@@ -37,6 +38,21 @@ public class UserService implements UserDetailsService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        //method defined by Spring Security and is called by SpringSecurity when user needs to be authenticated
+        //email address = username
+
+        User theUser = theUserRepository.findUserByUsername(username);
+        if (theUser != null) {
+            return new CustomUserPrincipal(theUser); //this class implements UserDetails therefore it can be returned
+        } else {
+            //user does not exist
+            throw new UsernameNotFoundException("Invalid Email Address or Password");
+        }
+
+    }
+
     public User getUserInformation(String username) throws Exception {
         //get logged in user information by accessing database
         User theUser = theUserRepository.findUserByUsername(username);
@@ -57,61 +73,41 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public User createUser(User theNewUser, MultipartFile profilePicture) throws Exception {
-        //method used to create a User
-        theNewUser.setUsername(theNewUser.getUsername().toLowerCase());
+    public User createUser(UserDTO theNewUser, MultipartFile profilePicture) throws Exception {
+        theNewUser.setUsername(theNewUser.getUsername());
         theNewUser.setEmailAddress(theNewUser.getEmailAddress().toLowerCase());
-        //check if user exists
-        User userNameExists = theUserRepository.findUserByUsername(theNewUser.getUsername().toLowerCase());
+        theNewUser.setBlackListed(false);
+        theNewUser.setUserPassword(passwordEncoder.encode(theNewUser.getUserPassword()));
+        theNewUser.setProfilePicture(profilePicture.getBytes());
+
+        Role theRole = theRoleService.getRoleInformation("customer");
+
+        //does username exist
+        User userNameExists = theUserRepository.findUserByUsername(theNewUser.getUsername());
 
         if (userNameExists == null) {
-            //if username is valid
-
-            //check if email address is associated to any account
-            User emailExists = theUserRepository.findUserByEmailAddress(theNewUser.getEmailAddress().toLowerCase());
-            if (emailExists != null) {
-                throw new UserAlreadyExistsException("This email address is already associated to an account.");
-            } else {
-                theNewUser.setProfilePicture(profilePicture.getBytes());
-                ImageHandler theCompressor = new CompressImage(); //creating template method pattern
-                theCompressor.processUnhandledImage(theNewUser); //calling the template method
-
-                //retrieve role information for the customer
-                Role theRole = theRoleService.getRoleInformation("customer");
-
-                if (theRole != null) {
-                    //if the role has been retrieved successfully
-                    theNewUser.setUserRole(theRole);
-                    theNewUser.setBlackListed(false);
-                    //encode the password to store with encryption
-                    theNewUser.setUserPassword(passwordEncoder.encode(theNewUser.getUserPassword()));
-                    final User registeredUser = theUserRepository.save(theNewUser);
-                    System.out.println("--------------USER SAVED-----------------");
-                    theSender.sendMail(new MailSenderHelper(registeredUser, "Welcome To Banger and Co!", MailTemplateType.SIGNUP));
-                    System.out.println("--------------EMAIL SENT--------------");
-                    return registeredUser;
-                } else {
+            //does email exist
+            User emailExists = theUserRepository.findUserByEmailAddress(theNewUser.getEmailAddress());
+            if (emailExists == null) {
+                //email valid
+                if (theRole == null) {
+                    //if role is not in DB, throw an exception to display error to user
                     throw new UnsupportedOperationException("invalid role assignment");
-                }
+                } else {
+                    User entityToBeSaved = User.convertDTOToEntity(theNewUser, theRole);
+                    ImageHandler theCompressor = new CompressImage(); //creating template method pattern
+                    theCompressor.processUnhandledImage(entityToBeSaved); //calling the template method
 
+                    User registeredUser = theUserRepository.save(entityToBeSaved);
+                    //save user and send welcome email
+                    theSender.sendMail(new MailSenderHelper(registeredUser, "Welcome To Banger and Co!", MailTemplateType.SIGNUP));
+                    return registeredUser;
+                }
+            } else {
+                throw new UserAlreadyExistsException("This email address is already associated to an account.");
             }
         } else {
             throw new UserAlreadyExistsException("An account already exists with the username that you provided");
         }
-    }
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        //method defined by Spring Security and is called by SpringSecurity when user needs to be authenticated
-        //email address = username
-
-        User theUser = theUserRepository.findUserByUsername(username.toLowerCase());
-        if (theUser != null) {
-            return new CustomUserPrincipal(theUser); //this class implements UserDetails therefore it can be returned
-        } else {
-            //user does not exist
-            throw new UsernameNotFoundException("Invalid Email Address or Password");
-        }
-
     }
 }

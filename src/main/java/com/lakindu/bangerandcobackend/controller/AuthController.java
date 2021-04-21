@@ -2,7 +2,8 @@ package com.lakindu.bangerandcobackend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lakindu.bangerandcobackend.dto.AuthRequest;
-import com.lakindu.bangerandcobackend.util.authutils.AuthReturnBuilder;
+import com.lakindu.bangerandcobackend.auth.AuthReturnBuilder;
+import com.lakindu.bangerandcobackend.dto.UserDTO;
 import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.service.AuthService;
 import com.lakindu.bangerandcobackend.service.UserService;
@@ -44,16 +45,16 @@ public class AuthController {
     )
     public ResponseEntity<BangerAndCoResponse> createAccount(
             @RequestParam(name = "userProfile") String requestUser,
-            @RequestParam(name = "profilePic", required = false) MultipartFile requestProfilePic
+            @RequestParam(name = "profilePic", required = true) MultipartFile requestProfilePic
     ) throws Exception {
         //requestUser is a Stringify of the JSON sent from the API
         //method used for the Sign Up endpoint
 
-        //convert the Stringify JSON Object to an instance of User via Jackson Project
+        //convert the Stringify JSON Object to an instance of UserDTO via Jackson Project
         ObjectMapper objectMapper = new ObjectMapper();
-        User theUser = objectMapper.readValue(requestUser, User.class); //call setters
+        UserDTO theUserDTO = objectMapper.readValue(requestUser, UserDTO.class); //call setters
 
-        DataBinder theDataBinder = new DataBinder(theUser);
+        DataBinder theDataBinder = new DataBinder(theUserDTO);
         theDataBinder.addValidators((org.springframework.validation.Validator) validator);
         theDataBinder.validate();
 
@@ -62,13 +63,15 @@ public class AuthController {
             //if the entity class does not meet the expected validations
             throw new ValidationException("Valid inputs were not provided for the fields during Sign Up.");
         } else {
-            theUser.setEmailAddress(theUser.getEmailAddress().trim());
-            theUser.setUsername(theUser.getUsername().trim());
-            theUser.setContactNumber(theUser.getContactNumber().trim());
-            theUser.setEmailAddress(theUser.getEmailAddress().trim());
-            theUser.setLastName(theUser.getLastName().trim());
+            theUserDTO.setEmailAddress(theUserDTO.getEmailAddress().trim());
+            theUserDTO.setUsername(theUserDTO.getUsername().trim());
+            theUserDTO.setContactNumber(theUserDTO.getContactNumber().trim());
+            theUserDTO.setEmailAddress(theUserDTO.getEmailAddress().trim());
+            theUserDTO.setLastName(theUserDTO.getLastName().trim());
+            theUserDTO.setFirstName(theUserDTO.getFirstName().trim());
 
-            final User createdUser = userService.createUser(theUser, requestProfilePic);
+            User createdUser = userService.createUser(theUserDTO, requestProfilePic);
+
             BangerAndCoResponse response = new BangerAndCoResponse(
                     String.format("account with username - %s created successfully", createdUser.getUsername()),
                     HttpStatus.OK.value()
@@ -77,18 +80,21 @@ public class AuthController {
         }
     }
 
+
     @PostMapping(path = "/login")
-    public ResponseEntity<HashMap<String, Object>> authenticate(@Valid @RequestBody AuthRequest theAuthRequest) throws Exception {
+    public ResponseEntity<HashMap<String, Object>> authenticate(@Valid @RequestBody AuthRequest theAuthRequest) throws
+            Exception {
         //execute body is request is valid.
         //use auth service to perform authentication
-        final AuthReturnBuilder theBuiltReturn = authService.performAuthentication(theAuthRequest);
         theAuthRequest.setUsername(theAuthRequest.getUsername().trim());
+        final AuthReturnBuilder theBuiltReturn = authService.performAuthentication(theAuthRequest);
 
         //compile response body
         HashMap<String, Object> returnEntity = new HashMap<>();
         returnEntity.put("response", theBuiltReturn.getTheAPIResponse());
         returnEntity.put("user_info", theBuiltReturn.getUserDTO());
 
+        //body, header, code
         return new ResponseEntity<>(returnEntity, theBuiltReturn.getReturnHeaders(), HttpStatus.OK);
     }
 }

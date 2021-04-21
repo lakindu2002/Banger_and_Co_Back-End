@@ -1,7 +1,5 @@
 package com.lakindu.bangerandcobackend.dto;
 
-import com.lakindu.bangerandcobackend.entity.User;
-
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
@@ -38,7 +36,7 @@ public class InquiryDTO {
 
     private Timestamp createdAt;
 
-    private User resolvedBy;
+    private String resolvedByUsername;
 
     public InquiryDTO() {
     }
@@ -115,11 +113,11 @@ public class InquiryDTO {
         this.createdAt = createdAt;
     }
 
-    public User getResolvedBy() {
-        return resolvedBy;
+    public String getResolvedByUsername() {
+        return resolvedByUsername;
     }
 
-    public void setResolvedBy(User resolvedBy) {
-        this.resolvedBy = resolvedBy;
+    public void setResolvedByUsername(String resolvedByUsername) {
+        this.resolvedByUsername = resolvedByUsername;
     }
 }
