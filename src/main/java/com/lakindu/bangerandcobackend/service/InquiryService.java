@@ -1,5 +1,6 @@
 package com.lakindu.bangerandcobackend.service;
 
+import com.lakindu.bangerandcobackend.dto.InquiryDTO;
 import com.lakindu.bangerandcobackend.entity.Inquiry;
 import com.lakindu.bangerandcobackend.repository.InquiryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +19,7 @@ public class InquiryService {
         this.inquiryRepository = inquiryRepository;
     }
 
-    public Inquiry saveInquiry(Inquiry requestInquiry) {
+    public Inquiry saveInquiry(InquiryDTO requestInquiry) {
         Inquiry theSubmittingInquiry = new Inquiry();
         //construct the entity object to be persisted onto the database via JPA
         theSubmittingInquiry.calculateLodgedTime();

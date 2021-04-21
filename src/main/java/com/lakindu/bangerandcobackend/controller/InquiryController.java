@@ -1,8 +1,9 @@
 package com.lakindu.bangerandcobackend.controller;
 
+import com.lakindu.bangerandcobackend.dto.InquiryDTO;
 import com.lakindu.bangerandcobackend.entity.Inquiry;
 import com.lakindu.bangerandcobackend.service.InquiryService;
-import com.lakindu.bangerandcobackend.util.BangerAndCoResponse;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,7 +28,7 @@ public class InquiryController {
 
     @PreAuthorize("permitAll()") //permit all requests to this endpoint
     @PostMapping(path = "/createInquiry")
-    public ResponseEntity<BangerAndCoResponse> createInquiry(@Valid @RequestBody Inquiry requestInquiry) {
+    public ResponseEntity<BangerAndCoResponse> createInquiry(@Valid @RequestBody InquiryDTO requestInquiry) {
         //inquiry object is valid
         requestInquiry.setFirstName(requestInquiry.getFirstName().trim());
         requestInquiry.setLastName(requestInquiry.getLastName().trim());

@@ -1,4 +1,4 @@
-package com.lakindu.bangerandcobackend.util;
+package com.lakindu.bangerandcobackend.util.exceptionhandling;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,10 +17,9 @@ public class GlobalExceptionHandler {
     //the annotation @RestControllerAdvice enables this
     //this is the best practise for handling exceptions in Spring Boot Rest
 
-    @ExceptionHandler
+    @ExceptionHandler(Exception.class)
     public ResponseEntity<BangerAndCoExceptionHandler> handlerDefaultException(Exception ex) {
         //exception handler to handle all default exceptions thrown at runtime by JVM
-        System.out.println(ex);
         BangerAndCoExceptionHandler exceptionHandler = new BangerAndCoExceptionHandler(
                 "An error occurred",
                 ex.getLocalizedMessage(),
@@ -30,7 +29,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(exceptionHandler, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<BangerAndCoExceptionHandler> methodArgumentNotValid(MethodArgumentNotValidException ex) {
         //custom exception handler for JPA Bean Validation Errors.
         ArrayList<MultipleErrorSupporter> errorList = new ArrayList<>();
@@ -50,7 +49,7 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(exceptionHandler, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler
+    @ExceptionHandler(UserAlreadyExistsException.class)
     public ResponseEntity<BangerAndCoExceptionHandler> userAlreadyExistsException(UserAlreadyExistsException ex) {
         //custom exception handler for User Already Exists.
 
@@ -63,20 +62,5 @@ public class GlobalExceptionHandler {
         );
         //return the response entity of type Conflict back to the resource sending client
         return new ResponseEntity<>(exceptionHandler, HttpStatus.CONFLICT);
-    }
-
-    @ExceptionHandler
-    public ResponseEntity<BangerAndCoExceptionHandler> noUserNameExists(NoSuchUserExistsException ex) {
-        //custom exception handler for No Username Present.
-
-        //create an exception handler object
-        BangerAndCoExceptionHandler exceptionHandler = new BangerAndCoExceptionHandler(
-                "Invalid Username",
-                ex.getLocalizedMessage(),
-                HttpStatus.NOT_FOUND.value(),
-                new ArrayList<>()
-        );
-        //return the response entity of type Conflict back to the resource sending client
-        return new ResponseEntity<>(exceptionHandler, HttpStatus.NOT_FOUND);
     }
 }

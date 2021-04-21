@@ -1,4 +1,4 @@
-package com.lakindu.bangerandcobackend.util;
+package com.lakindu.bangerandcobackend.util.exceptionhandling;
 
 public class MultipleErrorSupporter {
     //class used in join with BangerAndCoExceptionHandler to provide composite exceptions

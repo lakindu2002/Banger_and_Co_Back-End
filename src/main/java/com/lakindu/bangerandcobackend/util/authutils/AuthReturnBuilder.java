@@ -1,6 +1,7 @@
-package com.lakindu.bangerandcobackend.dto;
+package com.lakindu.bangerandcobackend.util.authutils;
 
-import com.lakindu.bangerandcobackend.util.BangerAndCoResponse;
+import com.lakindu.bangerandcobackend.dto.UserDTO;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
 import org.springframework.http.HttpHeaders;
 
 public class AuthReturnBuilder {

@@ -1,4 +1,4 @@
-package com.lakindu.bangerandcobackend.util;
+package com.lakindu.bangerandcobackend.util.exceptionhandling;
 
 import java.util.List;
 

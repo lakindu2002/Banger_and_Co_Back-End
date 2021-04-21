@@ -3,13 +3,11 @@ package com.lakindu.bangerandcobackend.service;
 import com.lakindu.bangerandcobackend.auth.CustomUserPrincipal;
 import com.lakindu.bangerandcobackend.entity.Role;
 import com.lakindu.bangerandcobackend.entity.User;
-import com.lakindu.bangerandcobackend.repository.RoleRepository;
 import com.lakindu.bangerandcobackend.repository.UserRepository;
 import com.lakindu.bangerandcobackend.util.FileHandler.CompressImage;
 import com.lakindu.bangerandcobackend.util.FileHandler.DecompressImage;
 import com.lakindu.bangerandcobackend.util.FileHandler.ImageHandler;
-import com.lakindu.bangerandcobackend.util.NoSuchUserExistsException;
-import com.lakindu.bangerandcobackend.util.UserAlreadyExistsException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.UserAlreadyExistsException;
 import com.lakindu.bangerandcobackend.util.mailsender.MailSender;
 import com.lakindu.bangerandcobackend.util.mailsender.MailSenderHelper;
 import com.lakindu.bangerandcobackend.util.mailsender.MailTemplateType;
@@ -27,16 +25,28 @@ import javax.transaction.Transactional;
 @Service
 public class UserService implements UserDetailsService {
     private final UserRepository theUserRepository;
-    private final RoleRepository theRoleRepository;
+    private final RoleService theRoleService;
     private final MailSender theSender;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRepository theUserRepository, RoleRepository theRoleRepository, MailSender theSender, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository theUserRepository, RoleService theRoleService, MailSender theSender, PasswordEncoder passwordEncoder) {
         this.theUserRepository = theUserRepository;
-        this.theRoleRepository = theRoleRepository;
+        this.theRoleService = theRoleService;
         this.theSender = theSender;
         this.passwordEncoder = passwordEncoder;
+    }
+
+    public User getUserInformation(String username) throws Exception {
+        //get logged in user information by accessing database
+        User theUser = theUserRepository.findUserByUsername(username);
+        if (theUser != null) {
+            ImageHandler theDecompressor = new DecompressImage();
+            theDecompressor.processUnhandledImage(theUser);
+            return theUser;
+        } else {
+            return null;
+        }
     }
 
     public User findLoggingInUser(String username) throws Exception {
@@ -67,7 +77,7 @@ public class UserService implements UserDetailsService {
                 theCompressor.processUnhandledImage(theNewUser); //calling the template method
 
                 //retrieve role information for the customer
-                Role theRole = theRoleRepository.findRoleByRoleName("customer");
+                Role theRole = theRoleService.getRoleInformation("customer");
 
                 if (theRole != null) {
                     //if the role has been retrieved successfully
@@ -103,14 +113,5 @@ public class UserService implements UserDetailsService {
             throw new UsernameNotFoundException("Invalid Email Address or Password");
         }
 
-    }
-
-    public User getUserInfo(String username) {
-        User theUser = theUserRepository.findUserByUsername(username);
-        if (theUser == null) {
-            throw new NoSuchUserExistsException(String.format("no user found for given username - %s", username));
-        } else {
-            return theUser;
-        }
     }
 }

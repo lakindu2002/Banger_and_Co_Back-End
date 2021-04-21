@@ -1,4 +1,4 @@
-package com.lakindu.bangerandcobackend.util;
+package com.lakindu.bangerandcobackend.util.exceptionhandling;
 
 public class BangerAndCoResponse {
     //class added to handle API Success Responses to client

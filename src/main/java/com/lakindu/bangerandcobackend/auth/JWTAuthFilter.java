@@ -1,7 +1,7 @@
 package com.lakindu.bangerandcobackend.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lakindu.bangerandcobackend.util.BangerAndCoExceptionHandler;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoExceptionHandler;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;

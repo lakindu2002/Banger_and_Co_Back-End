@@ -2,11 +2,11 @@ package com.lakindu.bangerandcobackend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lakindu.bangerandcobackend.dto.AuthRequest;
-import com.lakindu.bangerandcobackend.dto.AuthReturnBuilder;
+import com.lakindu.bangerandcobackend.util.authutils.AuthReturnBuilder;
 import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.service.AuthService;
 import com.lakindu.bangerandcobackend.service.UserService;
-import com.lakindu.bangerandcobackend.util.BangerAndCoResponse;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;

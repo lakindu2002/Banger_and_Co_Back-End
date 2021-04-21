@@ -13,36 +13,33 @@ import org.springframework.web.bind.annotation.*;
 @PreAuthorize("isAuthenticated()")
 @RequestMapping(path = "/api/user")
 public class UserController {
-    private final UserService userService;
+    private final UserService theUserService;
 
-    @Autowired
-    public UserController(UserService userService) {
-        this.userService = userService;
+    @Autowired //dependency injection handled by entity manager
+    public UserController(UserService theUserService) {
+        this.theUserService = theUserService;
     }
 
+    @GetMapping(path = "/userInformation/{username}")
     @PreAuthorize("hasAuthority('ADMINISTRATOR') or hasAuthority('CUSTOMER')")
-    @GetMapping(path = "/getUserInfo/{username}")
-    public ResponseEntity<UserDTO> getUserInformation(@PathVariable(name = "username", required = true) String username) {
-        final User retrievedUser = userService.getUserInfo(username);
-        UserDTO returningDTO = new UserDTO();
-        //construct the return data transmission object for the client.
-        //done to reduce coupling between Persistence Layer and Service Layer.
-        returningDTO.setFirstName(retrievedUser.getFirstName());
-        returningDTO.setLastName(retrievedUser.getLastName());
-        returningDTO.setEmailAddress(retrievedUser.getEmailAddress());
-        returningDTO.setDateOfBirth(retrievedUser.getDateOfBirth());
-        returningDTO.setContactNumber(retrievedUser.getContactNumber());
-        returningDTO.setProfilePicture(retrievedUser.getProfilePicture());
-        returningDTO.setBlackListed(retrievedUser.isBlackListed());
-        returningDTO.setUsername(retrievedUser.getUsername());
-        returningDTO.setUserRole(retrievedUser.getUserRole().getRoleName());
+    public ResponseEntity<UserDTO> getUserInformation(@PathVariable(name = "username", required = true) String username) throws Exception {
+        User theLoggedInUser = theUserService.getUserInformation(username);
+        if (theLoggedInUser == null) {
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        } else {
+            UserDTO theReturningDTO = new UserDTO();
+            theReturningDTO.setFirstName(theLoggedInUser.getFirstName());
+            theReturningDTO.setLastName(theLoggedInUser.getLastName());
+            theReturningDTO.setEmailAddress(theLoggedInUser.getEmailAddress());
+            theReturningDTO.setUsername(theLoggedInUser.getUsername());
+            theReturningDTO.setProfilePicture(theLoggedInUser.getProfilePicture());
+            theReturningDTO.setUserRole(theLoggedInUser.getUserRole().getRoleName());
+            theReturningDTO.setBlackListed(theLoggedInUser.isBlackListed());
+            theReturningDTO.setContactNumber(theLoggedInUser.getContactNumber());
+            theReturningDTO.setDateOfBirth(theLoggedInUser.getDateOfBirth());
 
-        return new ResponseEntity<>(returningDTO, HttpStatus.OK); //return the User DTO with user information to the client
-    }
-
-    @PreAuthorize("hasAuthority('ADMINISTRATOR') or hasAuthority('CUSTOMER')")
-    @PutMapping(path = "/updateUserInfo/{username}")
-    public void updateUserInfo(@PathVariable(name = "username") String username) {
+            return new ResponseEntity<>(theReturningDTO, HttpStatus.OK);
+        }
 
     }
 }

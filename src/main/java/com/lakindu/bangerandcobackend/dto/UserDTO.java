@@ -1,9 +1,5 @@
 package com.lakindu.bangerandcobackend.dto;
 
-import com.lakindu.bangerandcobackend.entity.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
-
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
