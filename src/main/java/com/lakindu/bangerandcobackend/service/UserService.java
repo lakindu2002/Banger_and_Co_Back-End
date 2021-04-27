@@ -65,10 +65,8 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public User findLoggingInUser(String username) throws Exception {
+    public User getUserInformationWithoutImageDecompression(String username) throws Exception {
         final User retrievedUser = theUserRepository.findUserByUsername(username);
-        ImageHandler theDecompressor = new DecompressImage();
-        theDecompressor.processUnhandledImage(retrievedUser);
         return retrievedUser;
     }
 
@@ -77,7 +75,7 @@ public class UserService implements UserDetailsService {
         theNewUser.setUsername(theNewUser.getUsername());
         theNewUser.setEmailAddress(theNewUser.getEmailAddress().toLowerCase());
         theNewUser.setBlackListed(false);
-        theNewUser.setUserPassword(passwordEncoder.encode(theNewUser.getUserPassword()));
+        theNewUser.setUserPassword(encodePassword(theNewUser.getUserPassword()));
         theNewUser.setProfilePicture(profilePicture.getBytes());
 
         Role theRole = theRoleService.getRoleInformation("customer");
@@ -109,5 +107,20 @@ public class UserService implements UserDetailsService {
         } else {
             throw new UserAlreadyExistsException("An account already exists with the username that you provided");
         }
+    }
+
+    @Transactional
+    public void updateUserInformation(User userInfo) {
+        //updated the user information and send an email.
+        final User updatedUser = theUserRepository.save(userInfo);
+        theSender.sendMail(new MailSenderHelper(
+                updatedUser,
+                "Account Details Updated Successfully!",
+                MailTemplateType.UPDATEACCOUNT
+        ));
+    }
+
+    public String encodePassword(String password) {
+        return passwordEncoder.encode(password);
     }
 }

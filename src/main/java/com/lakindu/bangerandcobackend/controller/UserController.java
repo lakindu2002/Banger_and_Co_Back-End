@@ -1,14 +1,18 @@
 package com.lakindu.bangerandcobackend.controller;
 
+import com.lakindu.bangerandcobackend.dto.UpdateUserDTO;
 import com.lakindu.bangerandcobackend.dto.UserDTO;
 import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.service.UserService;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 
 @RestController
 @PreAuthorize("isAuthenticated()")
@@ -41,5 +45,24 @@ public class UserController {
 
             return new ResponseEntity<>(theDTO, HttpStatus.OK);
         }
+    }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR') or hasAuthority('CUSTOMER')")
+    @PutMapping(path = "/update")
+    public ResponseEntity<BangerAndCoResponse> updateUser(@Valid @RequestBody UpdateUserDTO theDTO) throws Exception {
+        //if the request body is valid
+        final User userInfo = theUserService.getUserInformationWithoutImageDecompression(theDTO.getUsername());
+        if (userInfo == null) {
+            //if the user does not exist
+            throw new ResourceNotFoundException("The Username Provided Does Not Exist.");
+        } else {
+            if (theDTO.getUserPassword() != null) {
+                //if the client has sent a password to be updated, hash it and save it.
+                userInfo.setUserPassword(theUserService.encodePassword(theDTO.getUserPassword()));
+            }
+            userInfo.setContactNumber(theDTO.getContactNumber().trim()); //set the new contact number
+            theUserService.updateUserInformation(userInfo); //call the update method
+        }
+        return new ResponseEntity<>(new BangerAndCoResponse("User Updated Successfully", HttpStatus.OK.value()), HttpStatus.OK);
     }
 }

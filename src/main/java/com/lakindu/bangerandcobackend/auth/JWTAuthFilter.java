@@ -16,6 +16,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.ArrayList;
 
 @Component //register as a bean in the BeanManager
 public class JWTAuthFilter extends OncePerRequestFilter {
@@ -71,8 +72,7 @@ public class JWTAuthFilter extends OncePerRequestFilter {
                     "This Credential Could Not Be Authenticated.",
                     ex.getMessage(),
                     HttpStatus.UNAUTHORIZED.value(),
-                    null
-            );
+                    new ArrayList<>());
 
             //write JSON response to the client using Jackson Project
             new ObjectMapper().writer().writeValue(httpServletResponse.getOutputStream(), theException);

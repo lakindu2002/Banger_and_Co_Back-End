@@ -94,21 +94,27 @@ public class MailSender {
         configurer.setSuffix(".html"); //templates are of html
 
         Handlebars handlebars = new Handlebars(configurer); //create a Handlebars class with current loader used to load templates
+        dynamicData.put("firstName", theHelper.getUserToBeInformed().getFirstName());
+        dynamicData.put("lastName", theHelper.getUserToBeInformed().getLastName());
 
         switch (theType) {
             case SIGNUP: {
                 Template theTemplate = handlebars.compile("SignUpMail"); //retrieve the template based on required type
-
-                dynamicData.put("firstName", theHelper.getUserToBeInformed().getFirstName());
-                dynamicData.put("lastName", theHelper.getUserToBeInformed().getLastName());
-
-                String formattedTemplate = theTemplate.apply(dynamicData);//apply the template data with the hashmap.
                 //the template will be searched for {{}} and the relevant data will be assigned by the apply method.
                 //library provided by jknack.
 
+                final String formattedTemplate = theTemplate.apply(dynamicData);//return formatted template to the caller
+                dynamicData.clear(); //clear hashmap contents after formatting template
+                return formattedTemplate;
+            }
+            case UPDATEACCOUNT: {
+                Template theTemplate = handlebars.compile("AccountUpdate"); //retrieve the template based on required type
+                dynamicData.put("updatedTime", new Date().toString());
+                final String formattedTemplate = theTemplate.apply(dynamicData);//return formatted template to the caller
+
                 dynamicData.clear(); //clear hashmap contents after formatting template
 
-                return formattedTemplate; //return formatted template to the caller
+                return formattedTemplate;
             }
             default: {
                 return null;

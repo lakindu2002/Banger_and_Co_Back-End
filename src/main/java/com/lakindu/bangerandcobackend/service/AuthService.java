@@ -43,7 +43,7 @@ public class AuthService {
                 //located in the UserService
         );
 
-        User theLoggedInUser = userService.findLoggingInUser(theAuthRequest.getUsername());
+        User theLoggedInUser = userService.getUserInformation(theAuthRequest.getUsername());
         CustomUserPrincipal thePrincipal = new CustomUserPrincipal(theLoggedInUser);
         String generatedToken = theTokenIssuer.generateToken(thePrincipal);
 
