@@ -5,6 +5,7 @@ import com.lakindu.bangerandcobackend.auth.JWTConstants;
 import com.lakindu.bangerandcobackend.auth.JWTHandler;
 import com.lakindu.bangerandcobackend.dto.AuthRequest;
 import com.lakindu.bangerandcobackend.auth.AuthReturnBuilder;
+import com.lakindu.bangerandcobackend.dto.AuthReturnDTO;
 import com.lakindu.bangerandcobackend.dto.UserDTO;
 import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
@@ -46,14 +47,14 @@ public class AuthService {
         CustomUserPrincipal thePrincipal = new CustomUserPrincipal(theLoggedInUser);
         String generatedToken = theTokenIssuer.generateToken(thePrincipal);
 
-        final UserDTO convertedDTO = generateAuthReturn(theLoggedInUser);
+        final AuthReturnDTO convertedDTO = generateAuthReturn(theLoggedInUser);
         final HttpHeaders returningHeaders = generateHeadersForAuthSuccess(generatedToken);
 
         return new AuthReturnBuilder(convertedDTO, returningHeaders, new BangerAndCoResponse("authenticated successfully", HttpStatus.OK.value()));
     }
 
-    private UserDTO generateAuthReturn(User authenticatedUser) {
-        UserDTO theDTO = new UserDTO();
+    private AuthReturnDTO generateAuthReturn(User authenticatedUser) {
+        AuthReturnDTO theDTO = new AuthReturnDTO();
 
         theDTO.setUsername(authenticatedUser.getUsername());
         theDTO.setProfilePicture(authenticatedUser.getProfilePicture());

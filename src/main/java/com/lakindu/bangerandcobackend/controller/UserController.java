@@ -26,7 +26,7 @@ public class UserController {
     public ResponseEntity<UserDTO> getUserInformation(@PathVariable(name = "username", required = true) String username) throws Exception {
         User theUser = theUserService.getUserInformation(username);
         if (theUser == null) {
-            throw new ResourceNotFoundException("username does not exist in the system");
+            throw new ResourceNotFoundException("The Username Provided Does Not Exist.");
         } else {
             UserDTO theDTO = new UserDTO();
             theDTO.setFirstName(theUser.getFirstName());

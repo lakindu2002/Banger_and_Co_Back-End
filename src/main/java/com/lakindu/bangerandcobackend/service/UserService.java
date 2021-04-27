@@ -92,7 +92,7 @@ public class UserService implements UserDetailsService {
                 //email valid
                 if (theRole == null) {
                     //if role is not in DB, throw an exception to display error to user
-                    throw new UnsupportedOperationException("invalid role assignment");
+                    throw new UnsupportedOperationException("The Role Does Not Exist In The System");
                 } else {
                     User entityToBeSaved = User.convertDTOToEntity(theNewUser, theRole);
                     ImageHandler theCompressor = new CompressImage(); //creating template method pattern

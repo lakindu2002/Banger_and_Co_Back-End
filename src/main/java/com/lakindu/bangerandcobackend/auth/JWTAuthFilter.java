@@ -68,7 +68,7 @@ public class JWTAuthFilter extends OncePerRequestFilter {
             httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 
             BangerAndCoExceptionHandler theException = new BangerAndCoExceptionHandler(
-                    "authentication failed",
+                    "This Credential Could Not Be Authenticated.",
                     ex.getMessage(),
                     HttpStatus.UNAUTHORIZED.value(),
                     null
