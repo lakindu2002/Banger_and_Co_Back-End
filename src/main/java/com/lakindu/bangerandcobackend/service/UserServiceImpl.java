@@ -5,6 +5,8 @@ import com.lakindu.bangerandcobackend.dto.UserDTO;
 import com.lakindu.bangerandcobackend.entity.Role;
 import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.repository.UserRepository;
+import com.lakindu.bangerandcobackend.serviceinterface.RoleService;
+import com.lakindu.bangerandcobackend.serviceinterface.UserService;
 import com.lakindu.bangerandcobackend.util.FileHandler.CompressImage;
 import com.lakindu.bangerandcobackend.util.FileHandler.DecompressImage;
 import com.lakindu.bangerandcobackend.util.FileHandler.ImageHandler;
@@ -13,8 +15,8 @@ import com.lakindu.bangerandcobackend.util.mailsender.MailSender;
 import com.lakindu.bangerandcobackend.util.mailsender.MailSenderHelper;
 import com.lakindu.bangerandcobackend.util.mailsender.MailTemplateType;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,14 +26,18 @@ import javax.transaction.Transactional;
 
 
 @Service
-public class UserService implements UserDetailsService {
+public class UserServiceImpl implements UserService {
     private final UserRepository theUserRepository;
     private final RoleService theRoleService;
     private final MailSender theSender;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserService(UserRepository theUserRepository, RoleService theRoleService, MailSender theSender, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(
+            UserRepository theUserRepository,
+            @Qualifier("roleServiceImpl") RoleService theRoleService,
+            MailSender theSender,
+            PasswordEncoder passwordEncoder) {
         this.theUserRepository = theUserRepository;
         this.theRoleService = theRoleService;
         this.theSender = theSender;
@@ -53,6 +59,7 @@ public class UserService implements UserDetailsService {
 
     }
 
+    @Override
     public User getUserInformation(String username) throws Exception {
         //get logged in user information by accessing database
         User theUser = theUserRepository.findUserByUsername(username);
@@ -65,11 +72,12 @@ public class UserService implements UserDetailsService {
         }
     }
 
+    @Override
     public User getUserInformationWithoutImageDecompression(String username) throws Exception {
-        final User retrievedUser = theUserRepository.findUserByUsername(username);
-        return retrievedUser;
+        return theUserRepository.findUserByUsername(username);
     }
 
+    @Override
     @Transactional
     public User createUser(UserDTO theNewUser, MultipartFile profilePicture) throws Exception {
         theNewUser.setUsername(theNewUser.getUsername());
@@ -109,6 +117,7 @@ public class UserService implements UserDetailsService {
         }
     }
 
+    @Override
     @Transactional
     public void updateUserInformation(User userInfo) {
         //updated the user information and send an email.
@@ -120,6 +129,7 @@ public class UserService implements UserDetailsService {
         ));
     }
 
+    @Override
     public String encodePassword(String password) {
         return passwordEncoder.encode(password);
     }

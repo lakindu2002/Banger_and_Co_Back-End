@@ -2,20 +2,22 @@ package com.lakindu.bangerandcobackend.service;
 
 import com.lakindu.bangerandcobackend.entity.Role;
 import com.lakindu.bangerandcobackend.repository.RoleRepository;
+import com.lakindu.bangerandcobackend.serviceinterface.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 //creating a service class to interact with the persistence Layer of Role
-public class RoleService {
+public class RoleServiceImpl implements RoleService {
     private final RoleRepository roleRepository;
 
     @Autowired
     //constructor injection
-    public RoleService(RoleRepository roleRepository) {
+    public RoleServiceImpl(RoleRepository roleRepository) {
         this.roleRepository = roleRepository;
     }
 
+    @Override
     public Role getRoleInformation(String roleName) {
         //call the method in the repository that queries the database
         final Role theRole = roleRepository.findRoleByRoleName(roleName);

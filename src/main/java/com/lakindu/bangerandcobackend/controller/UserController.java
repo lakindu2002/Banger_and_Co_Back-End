@@ -3,10 +3,11 @@ package com.lakindu.bangerandcobackend.controller;
 import com.lakindu.bangerandcobackend.dto.UpdateUserDTO;
 import com.lakindu.bangerandcobackend.dto.UserDTO;
 import com.lakindu.bangerandcobackend.entity.User;
-import com.lakindu.bangerandcobackend.service.UserService;
+import com.lakindu.bangerandcobackend.serviceinterface.UserService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,7 +22,9 @@ public class UserController {
     private final UserService theUserService;
 
     @Autowired //dependency injection handled by entity manager
-    public UserController(UserService theUserService) {
+    public UserController(
+            @Qualifier("userServiceImpl") UserService theUserService
+    ) {
         this.theUserService = theUserService;
     }
 

@@ -26,7 +26,7 @@ public class JWTAuthFilter extends OncePerRequestFilter {
     private final JWTConstants theConstants;
     private final UserDetailsService userDetailsService;
 
-    public JWTAuthFilter(JWTHandler theHandler, JWTConstants theConstants, @Qualifier("userService") UserDetailsService userDetailsService) {
+    public JWTAuthFilter(JWTHandler theHandler, JWTConstants theConstants, @Qualifier("userServiceImpl") UserDetailsService userDetailsService) {
         this.theHandler = theHandler;
         this.theConstants = theConstants;
         this.userDetailsService = userDetailsService;

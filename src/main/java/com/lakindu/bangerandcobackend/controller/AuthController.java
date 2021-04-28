@@ -5,10 +5,11 @@ import com.lakindu.bangerandcobackend.dto.AuthRequest;
 import com.lakindu.bangerandcobackend.auth.AuthReturnBuilder;
 import com.lakindu.bangerandcobackend.dto.UserDTO;
 import com.lakindu.bangerandcobackend.entity.User;
-import com.lakindu.bangerandcobackend.service.AuthService;
-import com.lakindu.bangerandcobackend.service.UserService;
+import com.lakindu.bangerandcobackend.serviceinterface.AuthService;
+import com.lakindu.bangerandcobackend.serviceinterface.UserService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,7 +32,10 @@ public class AuthController {
     private final Validator validator;
 
     @Autowired
-    public AuthController(UserService userService, AuthService authService, Validator validator) {
+    public AuthController(
+            @Qualifier("userServiceImpl") UserService userService,
+            @Qualifier("authServiceImpl") AuthService authService,
+            Validator validator) {
         this.userService = userService;
         this.authService = authService;
         this.validator = validator;

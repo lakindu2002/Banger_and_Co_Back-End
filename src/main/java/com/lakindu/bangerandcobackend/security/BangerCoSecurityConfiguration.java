@@ -1,7 +1,8 @@
 package com.lakindu.bangerandcobackend.security;
 
 import com.lakindu.bangerandcobackend.auth.JWTAuthFilter;
-import com.lakindu.bangerandcobackend.service.UserService;
+import com.lakindu.bangerandcobackend.service.UserServiceImpl;
+import com.lakindu.bangerandcobackend.serviceinterface.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
@@ -36,7 +37,7 @@ public class BangerCoSecurityConfiguration extends WebSecurityConfigurerAdapter 
     @Autowired
     public BangerCoSecurityConfiguration(
             JWTAuthFilter theAuthFilter,
-            UserService theUserDetailsServiceImpl,
+            @Qualifier("userServiceImpl") UserService theUserDetailsServiceImpl,
             @Qualifier("passwordEncoder") PasswordEncoder passwordEncoder
     ) {
         this.theAuthFilter = theAuthFilter;

@@ -6,10 +6,12 @@ import com.lakindu.bangerandcobackend.auth.JWTHandler;
 import com.lakindu.bangerandcobackend.dto.AuthRequest;
 import com.lakindu.bangerandcobackend.auth.AuthReturnBuilder;
 import com.lakindu.bangerandcobackend.dto.AuthReturnDTO;
-import com.lakindu.bangerandcobackend.dto.UserDTO;
 import com.lakindu.bangerandcobackend.entity.User;
+import com.lakindu.bangerandcobackend.serviceinterface.AuthService;
+import com.lakindu.bangerandcobackend.serviceinterface.UserService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -18,7 +20,7 @@ import org.springframework.stereotype.Service;
 
 
 @Service
-public class AuthService {
+public class AuthServiceImpl implements AuthService {
     //service used to handle authentication
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
@@ -26,14 +28,18 @@ public class AuthService {
     private final JWTConstants theConstants;
 
     @Autowired
-    public AuthService(AuthenticationManager authenticationManager, UserService userService, JWTHandler theTokenIssuer, JWTConstants theConstants) {
+    public AuthServiceImpl(
+            AuthenticationManager authenticationManager,
+            @Qualifier("userServiceImpl") UserService userService,
+            JWTHandler theTokenIssuer,
+            JWTConstants theConstants) {
         this.authenticationManager = authenticationManager;
         this.userService = userService;
         this.theTokenIssuer = theTokenIssuer;
         this.theConstants = theConstants;
     }
 
-
+    @Override
     public AuthReturnBuilder performAuthentication(AuthRequest theAuthRequest) throws Exception {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
