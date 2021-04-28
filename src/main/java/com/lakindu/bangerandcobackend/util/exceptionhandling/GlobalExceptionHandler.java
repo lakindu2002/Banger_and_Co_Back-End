@@ -94,7 +94,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<BangerAndCoExceptionHandler> handleResourceNotFound(ResourceNotFoundException ex) {
         //handle exceptions thrown when required Part Parameters are not provided
         BangerAndCoExceptionHandler exceptionHandler = new BangerAndCoExceptionHandler(
-                "The Requested Data Does Not Exist",
+                "The data that you wish to perform an action on does not exist",
                 ex.getLocalizedMessage(),
                 HttpStatus.NOT_FOUND.value(),
                 new ArrayList<>());

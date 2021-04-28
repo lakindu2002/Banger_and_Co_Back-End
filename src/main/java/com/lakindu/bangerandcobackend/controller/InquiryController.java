@@ -12,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @PreAuthorize("isAuthenticated()") //only authenticated can access
@@ -49,9 +50,22 @@ public class InquiryController {
         //JSON Body converted automatically by Jackson Project.
     }
 
-//    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
-//    @GetMapping(path = "/all")
-//    public ResponseEntity<List<InquiryDTO>> getAllInquiries() {
-//
-//    }
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @GetMapping(path = "/all")
+    public ResponseEntity<List<InquiryDTO>> getAllPendingInquiries() {
+        //an administrator can view all the pending inquiries.
+        //inquiry service method will retrieve all the inquiries and return an OK status code to the client
+        List<InquiryDTO> allInquiries = inquiryService.getAllPendingInquiries();
+        return new ResponseEntity<>(allInquiries, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @DeleteMapping(path = "/remove/{id}")
+    public ResponseEntity<BangerAndCoResponse> deleteInquiry(@PathVariable(name = "id", required = true) int id) {
+        inquiryService.removeInquiry(id);
+        return new ResponseEntity<>(
+                new BangerAndCoResponse("Inquiry Removed Successfully", HttpStatus.OK.value()),
+                HttpStatus.OK
+        );
+    }
 }

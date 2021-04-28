@@ -34,7 +34,7 @@ public class InquiryDTO {
 
     private boolean isReplied;
 
-    private Timestamp createdAt;
+    private String createdAt;
 
     private String resolvedByUsername;
 
@@ -105,11 +105,11 @@ public class InquiryDTO {
         isReplied = replied;
     }
 
-    public Timestamp getCreatedAt() {
+    public String getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Timestamp createdAt) {
+    public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
     }
 
