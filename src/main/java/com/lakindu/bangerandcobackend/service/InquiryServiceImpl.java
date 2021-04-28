@@ -74,7 +74,7 @@ public class InquiryServiceImpl implements InquiryService {
             theDTO.setEmailAddress(theInquiry.getEmailAddress());
             theDTO.setContactNumber(theInquiry.getContactNumber());
             theDTO.setReplied(theInquiry.isReplied());
-            theDTO.setCreatedAt(new Date(theInquiry.getCreatedAt().getTime()).toString());
+            theDTO.setCreatedAt(theInquiry.getCreatedAt());
             theDTO.setResolvedByUsername(null);
 
             returningList.add(theDTO);
