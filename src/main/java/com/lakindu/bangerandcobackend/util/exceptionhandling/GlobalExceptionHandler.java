@@ -43,7 +43,7 @@ public class GlobalExceptionHandler {
         //create an exception handler object
         BangerAndCoExceptionHandler exceptionHandler = new BangerAndCoExceptionHandler(
                 "Please Provide Valid Inputs For the Fields",
-                ex.getLocalizedMessage(),
+                "The data you sent was poorly formatted.",
                 HttpStatus.BAD_REQUEST.value(),
                 errorList
         );
@@ -71,7 +71,7 @@ public class GlobalExceptionHandler {
         //handle exceptions thrown when required Request Parameters are not provided
         BangerAndCoExceptionHandler exceptionHandler = new BangerAndCoExceptionHandler(
                 "Please Provide All The Data Required",
-                ex.getLocalizedMessage(),
+                "Please try again after providing all the data required",
                 HttpStatus.BAD_REQUEST.value(),
                 new ArrayList<>());
 
@@ -83,7 +83,7 @@ public class GlobalExceptionHandler {
         //handle exceptions thrown when required Part Parameters are not provided
         BangerAndCoExceptionHandler exceptionHandler = new BangerAndCoExceptionHandler(
                 "Please Provide the Files Required",
-                ex.getLocalizedMessage(),
+                "Please try again after uploading all the files required",
                 HttpStatus.BAD_REQUEST.value(),
                 new ArrayList<>());
 
@@ -94,7 +94,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<BangerAndCoExceptionHandler> handleResourceNotFound(ResourceNotFoundException ex) {
         //handle exceptions thrown when required Part Parameters are not provided
         BangerAndCoExceptionHandler exceptionHandler = new BangerAndCoExceptionHandler(
-                "The data that you wish to perform an action on does not exist",
+                "The Resource Could Not Be Found",
                 ex.getLocalizedMessage(),
                 HttpStatus.NOT_FOUND.value(),
                 new ArrayList<>());

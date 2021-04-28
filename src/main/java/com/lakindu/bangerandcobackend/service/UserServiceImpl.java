@@ -10,6 +10,7 @@ import com.lakindu.bangerandcobackend.serviceinterface.UserService;
 import com.lakindu.bangerandcobackend.util.FileHandler.CompressImage;
 import com.lakindu.bangerandcobackend.util.FileHandler.DecompressImage;
 import com.lakindu.bangerandcobackend.util.FileHandler.ImageHandler;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceNotFoundException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.UserAlreadyExistsException;
 import com.lakindu.bangerandcobackend.util.mailsender.MailSender;
 import com.lakindu.bangerandcobackend.util.mailsender.MailSenderHelper;
@@ -121,12 +122,16 @@ public class UserServiceImpl implements UserService {
     @Transactional
     public void updateUserInformation(User userInfo) {
         //updated the user information and send an email.
-        final User updatedUser = theUserRepository.save(userInfo);
-        theSender.sendMail(new MailSenderHelper(
-                updatedUser,
-                "Account Details Updated Successfully!",
-                MailTemplateType.UPDATEACCOUNT
-        ));
+        if (theUserRepository.existsById(userInfo.getUsername())) {
+            final User updatedUser = theUserRepository.save(userInfo);
+            theSender.sendMail(new MailSenderHelper(
+                    updatedUser,
+                    "Account Details Updated Successfully!",
+                    MailTemplateType.UPDATEACCOUNT
+            ));
+        } else {
+            throw new ResourceNotFoundException("The username that you are trying to update does not exist in the system");
+        }
     }
 
     @Override
