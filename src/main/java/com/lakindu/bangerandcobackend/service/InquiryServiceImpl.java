@@ -37,7 +37,7 @@ public class InquiryServiceImpl implements InquiryService {
         theSubmittingInquiry.setInquirySubject(requestInquiry.getInquirySubject());
         theSubmittingInquiry.setMessage(requestInquiry.getMessage());
         theSubmittingInquiry.setContactNumber(requestInquiry.getContactNumber());
-        theSubmittingInquiry.setEmailAddress(requestInquiry.getEmailAddress());
+        theSubmittingInquiry.setEmailAddress(requestInquiry.getEmailAddress().toLowerCase());
 
         //method to save the inquiry in the database
         //let the JAVA EE - Java Persistence API handle the underlying SQL
