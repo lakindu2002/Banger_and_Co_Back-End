@@ -5,14 +5,14 @@ import java.util.zip.Inflater;
 
 public class DecompressImage extends ImageHandler {
     @Override
-    protected byte[] handleTheImage() throws Exception {
+    protected byte[] handleTheImage(byte[] rawImage) throws Exception {
         Inflater theInflater = new Inflater();
-        theInflater.setInput(unHandledPicture); //set the bytes to be decompressed
+        theInflater.setInput(rawImage); //set the bytes to be decompressed
 
         byte[] decompressedData = new byte[1024]; //decompressed data for 1024 Bytes
 
         //create output stream with size of image bytes
-        ByteArrayOutputStream theByteArrayOutputStream = new ByteArrayOutputStream(unHandledPicture.length);
+        ByteArrayOutputStream theByteArrayOutputStream = new ByteArrayOutputStream(rawImage.length);
 
         while (!theInflater.finished()) {
             //while the deflater compresses the data

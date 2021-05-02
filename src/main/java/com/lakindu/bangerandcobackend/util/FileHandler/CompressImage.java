@@ -5,15 +5,15 @@ import java.util.zip.Deflater;
 
 public class CompressImage extends ImageHandler {
     @Override
-    protected byte[] handleTheImage() throws Exception {
+    protected byte[] handleTheImage(byte[] rawImage) throws Exception {
         Deflater theDeflater = new Deflater();
-        theDeflater.setInput(unHandledPicture); //set the bytes to be compressed
+        theDeflater.setInput(rawImage); //set the bytes to be compressed
         theDeflater.finish(); //compression should end with current contents of input buffer
 
         byte[] compressedData = new byte[1024]; //compress data for 1024 Bytes
 
         //create output stream with size of image bytes
-        ByteArrayOutputStream theByteArrayOutputStream = new ByteArrayOutputStream(unHandledPicture.length);
+        ByteArrayOutputStream theByteArrayOutputStream = new ByteArrayOutputStream(rawImage.length);
 
         while (!theDeflater.finished()) {
             //while the deflater compresses the data

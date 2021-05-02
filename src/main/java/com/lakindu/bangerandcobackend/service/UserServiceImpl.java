@@ -62,11 +62,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserInformation(String username) throws Exception {
-        //get logged in user information by accessing database
+        //get logged in user information by accessing database after successful authentication
         User theUser = theUserRepository.findUserByUsername(username);
         if (theUser != null) {
             ImageHandler theDecompressor = new DecompressImage();
-            theDecompressor.processUnhandledImage(theUser);
+            final byte[] decompressedImage = theDecompressor.processUnhandledImage(theUser.getProfilePicture());
+            theUser.setProfilePicture(decompressedImage);
             return theUser;
         } else {
             return null;
@@ -92,6 +93,11 @@ public class UserServiceImpl implements UserService {
         //does username exist
         User userNameExists = theUserRepository.findUserByUsername(theNewUser.getUsername());
 
+        User entityToBeSaved = User.convertDTOToEntity(theNewUser, theRole);
+        ImageHandler theCompressor = new CompressImage(); //creating template method pattern
+        final byte[] compressImage = theCompressor.processUnhandledImage(entityToBeSaved.getProfilePicture());//calling the template method
+        entityToBeSaved.setProfilePicture(compressImage);
+
         if (userNameExists == null) {
             //does email exist
             User emailExists = theUserRepository.findUserByEmailAddress(theNewUser.getEmailAddress());
@@ -100,16 +106,12 @@ public class UserServiceImpl implements UserService {
                 if (theRole == null) {
                     //if role is not in DB, throw an exception to display error to user
                     throw new UnsupportedOperationException("The Role Does Not Exist In The System");
-                } else {
-                    User entityToBeSaved = User.convertDTOToEntity(theNewUser, theRole);
-                    ImageHandler theCompressor = new CompressImage(); //creating template method pattern
-                    theCompressor.processUnhandledImage(entityToBeSaved); //calling the template method
-
-                    User registeredUser = theUserRepository.save(entityToBeSaved);
-                    //save user and send welcome email
-                    theSender.sendMail(new MailSenderHelper(registeredUser, "Welcome To Banger and Co!", MailTemplateType.SIGNUP));
-                    return registeredUser;
                 }
+                User registeredUser = theUserRepository.save(entityToBeSaved);
+                //save user and send welcome email
+                theSender.sendMail(new MailSenderHelper(registeredUser, "Welcome To Banger and Co!", MailTemplateType.SIGNUP));
+                return registeredUser;
+
             } else {
                 throw new UserAlreadyExistsException("This email address is already associated to an account.");
             }
