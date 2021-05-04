@@ -18,4 +18,8 @@ public interface InquiryRepository extends CrudRepository<Inquiry, Integer> {
     //JPQL Query to select all the inquiries from the Database
     @Query("SELECT inquiry FROM Inquiry inquiry WHERE inquiry.isReplied = false AND inquiry.resolvedBy is null")
     List<Inquiry> getAllPendingInquiries();
+
+    @Query("SELECT inquiry FROM Inquiry inquiry WHERE inquiry.inquiryId = :id")
+    Inquiry getDetailedInquiry(int id);
+
 }

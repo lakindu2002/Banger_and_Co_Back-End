@@ -1,6 +1,7 @@
 package com.lakindu.bangerandcobackend.controller;
 
 import com.lakindu.bangerandcobackend.dto.InquiryDTO;
+import com.lakindu.bangerandcobackend.dto.InquiryReplyDTO;
 import com.lakindu.bangerandcobackend.entity.Inquiry;
 import com.lakindu.bangerandcobackend.serviceinterface.InquiryService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
@@ -65,6 +66,33 @@ public class InquiryController {
         inquiryService.removeInquiry(id);
         return new ResponseEntity<>(
                 new BangerAndCoResponse("Inquiry Removed Successfully", HttpStatus.OK.value()),
+                HttpStatus.OK
+        );
+    }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @GetMapping(path = "/find/{id}")
+    public ResponseEntity<InquiryDTO> getDetailedInquiry(@PathVariable(name = "id") int id) {
+        Inquiry theInquiry = inquiryService.getDetailedInquiry(id);
+        final InquiryDTO theDTO = inquiryService.getTheReturnConstructed(theInquiry);
+
+        return new ResponseEntity<>(theDTO, HttpStatus.OK); //return a 200 to the client along with the inquiry DTO
+    }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @PutMapping(path = "/reply")
+    public ResponseEntity<BangerAndCoResponse> replyInquiry(@Valid @RequestBody InquiryReplyDTO theDTO) {
+        //if request body is validated, execute method
+
+        //retrieve inquiry information for ID
+        Inquiry theInquiry = inquiryService.getDetailedInquiry(Integer.parseInt(theDTO.getInquiryId()));
+
+
+        //-------------------------WORK ON THE INQUIRY REPLY AND DATABASE UPDATE----------------------------------------
+
+        //after replying to the inquiry send a 200 code back to the user
+        return new ResponseEntity<>(
+                new BangerAndCoResponse("inquiry replied successfully", HttpStatus.OK.value()),
                 HttpStatus.OK
         );
     }

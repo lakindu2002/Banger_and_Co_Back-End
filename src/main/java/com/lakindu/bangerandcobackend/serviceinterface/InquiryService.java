@@ -11,4 +11,8 @@ public interface InquiryService {
     List<InquiryDTO> getAllPendingInquiries();
 
     void removeInquiry(int id);
+
+    Inquiry getDetailedInquiry(int id);
+
+    InquiryDTO getTheReturnConstructed(Inquiry theInquiry);
 }

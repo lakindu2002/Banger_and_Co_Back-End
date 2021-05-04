@@ -10,8 +10,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -60,26 +58,44 @@ public class InquiryServiceImpl implements InquiryService {
         }
     }
 
+    @Override
+    public Inquiry getDetailedInquiry(int id) {
+        Inquiry theInquiry = inquiryRepository.getDetailedInquiry(id);
+        if (theInquiry == null) {
+            //if inquiry is not present in DB, show the user a 404 error
+            throw new ResourceNotFoundException("The inquiry that you requested could not be found");
+        } else {
+            //if inquiry object is there in database, return it to the client
+            return theInquiry;
+        }
+    }
+
     private List<InquiryDTO> getTheReturnConstructed(List<Inquiry> inquiryList) {
         //for the array of entity type returned, convert in to an array of DTO that can be returned to the client
         List<InquiryDTO> returningList = new ArrayList<>();
         for (Inquiry theInquiry : inquiryList) {
-            InquiryDTO theDTO = new InquiryDTO();
-
-            theDTO.setInquiryId(theInquiry.getInquiryId());
-            theDTO.setFirstName(theInquiry.getFirstName());
-            theDTO.setLastName(theInquiry.getLastName());
-            theDTO.setInquirySubject(theInquiry.getInquirySubject());
-            theDTO.setMessage(theInquiry.getMessage());
-            theDTO.setEmailAddress(theInquiry.getEmailAddress());
-            theDTO.setContactNumber(theInquiry.getContactNumber());
-            theDTO.setReplied(theInquiry.isReplied());
-            theDTO.setCreatedAt(theInquiry.getCreatedAt());
-            theDTO.setResolvedByUsername(null);
-
-            returningList.add(theDTO);
+            returningList.add(getTheReturnConstructed(theInquiry));
         }
 
         return returningList;
+    }
+
+    @Override
+    public InquiryDTO getTheReturnConstructed(Inquiry theInquiry) {
+        //map entity to DTO
+        InquiryDTO theDTO = new InquiryDTO();
+
+        theDTO.setInquiryId(theInquiry.getInquiryId());
+        theDTO.setFirstName(theInquiry.getFirstName());
+        theDTO.setLastName(theInquiry.getLastName());
+        theDTO.setInquirySubject(theInquiry.getInquirySubject());
+        theDTO.setMessage(theInquiry.getMessage());
+        theDTO.setEmailAddress(theInquiry.getEmailAddress());
+        theDTO.setContactNumber(theInquiry.getContactNumber());
+        theDTO.setReplied(theInquiry.isReplied());
+        theDTO.setCreatedAt(theInquiry.getCreatedAt());
+        theDTO.setResolvedByUsername(null);
+
+        return theDTO;
     }
 }
