@@ -5,7 +5,7 @@ import javax.validation.constraints.Pattern;
 
 public class InquiryReplyDTO {
     @NotBlank(message = "Please Provide a Valid Inquiry ID")
-    @Pattern(regexp = "^[0-9]+$",message = "Inquiry ID was not in a Valid Format (Requires Numerics)")
+    @Pattern(regexp = "^[0-9]+$", message = "Inquiry ID was not in a Valid Format (Requires Numerics)")
     private String inquiryId;
 
     @NotBlank(message = "Please Provide a Valid Inquiry Reply")

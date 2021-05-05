@@ -78,7 +78,11 @@ public class MailSender {
             theMessage.setSubject(theHelper.getSubject()); //set the Subject for the Mail
 
             //set receiver
-            theMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(theHelper.getUserToBeInformed().getEmailAddress()));
+            if (theHelper.getTemplateName() == MailTemplateType.INQUIRY_REPLY) {
+                theMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(theHelper.getTheInquiry().getEmailAddress()));
+            } else {
+                theMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(theHelper.getUserToBeInformed().getEmailAddress()));
+            }
             theMessage.setFlag(Flags.Flag.FLAGGED, true); //mark the email as an important email
             theMessage.setContent(contentToEmail, mailType); //attach the body with mail type - html
 
@@ -94,11 +98,12 @@ public class MailSender {
         configurer.setSuffix(".html"); //templates are of html
 
         Handlebars handlebars = new Handlebars(configurer); //create a Handlebars class with current loader used to load templates
-        dynamicData.put("firstName", theHelper.getUserToBeInformed().getFirstName());
-        dynamicData.put("lastName", theHelper.getUserToBeInformed().getLastName());
 
         switch (theType) {
             case SIGNUP: {
+                dynamicData.put("firstName", theHelper.getUserToBeInformed().getFirstName());
+                dynamicData.put("lastName", theHelper.getUserToBeInformed().getLastName());
+
                 Template theTemplate = handlebars.compile("SignUpMail"); //retrieve the template based on required type
                 //the template will be searched for {{}} and the relevant data will be assigned by the apply method.
                 //library provided by jknack.
@@ -108,8 +113,27 @@ public class MailSender {
                 return formattedTemplate;
             }
             case UPDATEACCOUNT: {
+                dynamicData.put("firstName", theHelper.getUserToBeInformed().getFirstName());
+                dynamicData.put("lastName", theHelper.getUserToBeInformed().getLastName());
+
                 Template theTemplate = handlebars.compile("AccountUpdate"); //retrieve the template based on required type
                 dynamicData.put("updatedTime", new Date().toString());
+                final String formattedTemplate = theTemplate.apply(dynamicData);//return formatted template to the caller
+
+                dynamicData.clear(); //clear hashmap contents after formatting template
+
+                return formattedTemplate;
+            }
+            case INQUIRY_REPLY: {
+                //construct the reply data.
+                dynamicData.put("firstName", theHelper.getTheInquiry().getFirstName());
+                dynamicData.put("lastName", theHelper.getTheInquiry().getLastName());
+                dynamicData.put("yourSubject", theHelper.getTheInquiry().getInquirySubject());
+                dynamicData.put("yourInquiry", theHelper.getTheInquiry().getMessage());
+                dynamicData.put("ourReply", theHelper.getInquiryReply());
+                dynamicData.put("submittedDate", new java.sql.Date(theHelper.getTheInquiry().getCreatedAt().getTime()).toString());
+
+                Template theTemplate = handlebars.compile("InquiryReply"); //retrieve the template based on required type
                 final String formattedTemplate = theTemplate.apply(dynamicData);//return formatted template to the caller
 
                 dynamicData.clear(); //clear hashmap contents after formatting template

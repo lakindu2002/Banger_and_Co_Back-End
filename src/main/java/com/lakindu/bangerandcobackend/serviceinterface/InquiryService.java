@@ -15,4 +15,6 @@ public interface InquiryService {
     Inquiry getDetailedInquiry(int id);
 
     InquiryDTO getTheReturnConstructed(Inquiry theInquiry);
+
+    void replyToInquiry(Inquiry theInquiry, String inquiryReply);
 }

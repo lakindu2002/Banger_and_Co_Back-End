@@ -4,7 +4,11 @@ import com.lakindu.bangerandcobackend.dto.InquiryDTO;
 import com.lakindu.bangerandcobackend.entity.Inquiry;
 import com.lakindu.bangerandcobackend.repository.InquiryRepository;
 import com.lakindu.bangerandcobackend.serviceinterface.InquiryService;
+import com.lakindu.bangerandcobackend.serviceinterface.UserService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceNotFoundException;
+import com.lakindu.bangerandcobackend.util.mailsender.MailSender;
+import com.lakindu.bangerandcobackend.util.mailsender.MailSenderHelper;
+import com.lakindu.bangerandcobackend.util.mailsender.MailTemplateType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -17,11 +21,15 @@ import java.util.List;
 public class InquiryServiceImpl implements InquiryService {
 
     private final InquiryRepository inquiryRepository;
+    private final MailSender theMailSender;
 
     //autowire the inquiry repository for dependency injection
     //autowire the inquiryRepository bean
-    public InquiryServiceImpl(@Autowired @Qualifier("inquiryRepository") InquiryRepository inquiryRepository) {
+    @Autowired
+    public InquiryServiceImpl(@Qualifier("inquiryRepository") InquiryRepository inquiryRepository,
+                              @Qualifier("mailSender") MailSender theMailSender) {
         this.inquiryRepository = inquiryRepository;
+        this.theMailSender = theMailSender;
     }
 
     @Override
@@ -97,5 +105,18 @@ public class InquiryServiceImpl implements InquiryService {
         theDTO.setResolvedByUsername(null);
 
         return theDTO;
+    }
+
+    @Override
+    public void replyToInquiry(Inquiry theInquiry, String inquiryReply) {
+        //send am email to the client that lodged the email
+        MailSenderHelper theHelper = new MailSenderHelper();
+        theHelper.setInquiryReply(inquiryReply);
+        theHelper.setTheInquiry(theInquiry);
+        theHelper.setSubject(String.format("Replying to Your Inquiry - %s", theInquiry.getInquirySubject()));
+        theHelper.setTemplateName(MailTemplateType.INQUIRY_REPLY);
+
+        inquiryRepository.save(theInquiry); //resolve the inquiry in the database
+        theMailSender.sendMail(theHelper); //send the mail to the client to lodged the inquiry
     }
 }

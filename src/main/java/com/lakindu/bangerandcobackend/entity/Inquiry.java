@@ -1,9 +1,6 @@
 package com.lakindu.bangerandcobackend.entity;
 
 import javax.persistence.*;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Size;
 import java.sql.Timestamp;
 import java.util.Date;
 
@@ -42,7 +39,7 @@ public class Inquiry {
     @Column(nullable = false, name = "created_at")
     private Timestamp createdAt;
 
-    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.DETACH, CascadeType.REFRESH})
+    @ManyToOne()
     @JoinColumn(name = "handled_by")
     private User resolvedBy;
 

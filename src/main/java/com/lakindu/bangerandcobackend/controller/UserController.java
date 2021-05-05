@@ -31,7 +31,7 @@ public class UserController {
     @GetMapping(path = "/userInformation/{username}")
     @PreAuthorize("hasAuthority('ADMINISTRATOR') or hasAuthority('CUSTOMER')")
     public ResponseEntity<UserDTO> getUserInformation(@PathVariable(name = "username", required = true) String username) throws Exception {
-        User theUser = theUserService.getUserInformation(username);
+        User theUser = theUserService.getUserInformationWithImageDecompression(username);
         if (theUser == null) {
             throw new ResourceNotFoundException("The Username Provided Does Not Exist.");
         } else {

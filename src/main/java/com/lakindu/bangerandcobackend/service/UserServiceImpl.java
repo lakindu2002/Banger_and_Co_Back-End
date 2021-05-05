@@ -61,7 +61,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUserInformation(String username) throws Exception {
+    public User getUserInformationWithImageDecompression(String username) throws Exception {
         //get logged in user information by accessing database after successful authentication
         User theUser = theUserRepository.findUserByUsername(username);
         if (theUser != null) {

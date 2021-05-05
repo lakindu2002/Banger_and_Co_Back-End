@@ -8,7 +8,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface UserService extends UserDetailsService {
-    User getUserInformation(String username) throws Exception;
+    User getUserInformationWithImageDecompression(String username) throws Exception;
 
     User getUserInformationWithoutImageDecompression(String username) throws Exception;
 

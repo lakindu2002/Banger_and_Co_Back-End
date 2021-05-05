@@ -4,12 +4,14 @@ import com.lakindu.bangerandcobackend.dto.InquiryDTO;
 import com.lakindu.bangerandcobackend.dto.InquiryReplyDTO;
 import com.lakindu.bangerandcobackend.entity.Inquiry;
 import com.lakindu.bangerandcobackend.serviceinterface.InquiryService;
+import com.lakindu.bangerandcobackend.serviceinterface.UserService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -20,12 +22,14 @@ import java.util.List;
 @RequestMapping(path = "/api/inquiry")
 public class InquiryController {
     private final InquiryService inquiryService;
+    private final UserService userService;
 
     @Autowired
     public InquiryController(
-            @Qualifier("inquiryServiceImpl") InquiryService inquiryService
-    ) {
+            @Qualifier("inquiryServiceImpl") InquiryService inquiryService,
+            @Qualifier("userServiceImpl") UserService userService) {
         this.inquiryService = inquiryService;
+        this.userService = userService;
     }
 
     @PreAuthorize("permitAll()") //permit all requests to this endpoint
@@ -81,14 +85,19 @@ public class InquiryController {
 
     @PreAuthorize("hasAuthority('ADMINISTRATOR')")
     @PutMapping(path = "/reply")
-    public ResponseEntity<BangerAndCoResponse> replyInquiry(@Valid @RequestBody InquiryReplyDTO theDTO) {
+    public ResponseEntity<BangerAndCoResponse> replyInquiry(
+            @Valid @RequestBody InquiryReplyDTO theDTO,
+            Authentication theAuthentication
+    ) throws Exception {
         //if request body is validated, execute method
 
         //retrieve inquiry information for ID
         Inquiry theInquiry = inquiryService.getDetailedInquiry(Integer.parseInt(theDTO.getInquiryId()));
+        theInquiry.setReplied(true);
+        theInquiry.setResolvedBy(userService.getUserInformationWithoutImageDecompression(theAuthentication.getName()));
 
-
-        //-------------------------WORK ON THE INQUIRY REPLY AND DATABASE UPDATE----------------------------------------
+        //call the service method to ensure that the inquiry will be replied over email
+        inquiryService.replyToInquiry(theInquiry, theDTO.getInquiryReply());
 
         //after replying to the inquiry send a 200 code back to the user
         return new ResponseEntity<>(

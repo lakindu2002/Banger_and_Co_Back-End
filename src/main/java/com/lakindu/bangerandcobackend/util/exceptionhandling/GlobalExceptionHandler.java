@@ -22,9 +22,16 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<BangerAndCoExceptionHandler> handlerDefaultException(Exception ex) {
         //exception handler to handle all default exceptions thrown at runtime by JVM
+        String errorException = "";
+        if (ex.getLocalizedMessage() == null) {
+            errorException = "An Error Occurred on the Server, Please Try Again.";
+        } else {
+            errorException = ex.getLocalizedMessage();
+        }
+
         BangerAndCoExceptionHandler exceptionHandler = new BangerAndCoExceptionHandler(
                 "An Error Occurred on the Server, Please Try Again.",
-                ex.getLocalizedMessage(),
+                errorException,
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 new ArrayList<>());
 
