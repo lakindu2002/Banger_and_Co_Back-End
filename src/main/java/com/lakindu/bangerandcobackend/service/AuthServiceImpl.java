@@ -49,7 +49,7 @@ public class AuthServiceImpl implements AuthService {
                 //located in the UserService
         );
 
-        User theLoggedInUser = userService.getUserInformationWithImageDecompression(theAuthRequest.getUsername());
+        User theLoggedInUser = userService.getUserInfoAfterLogin(theAuthRequest.getUsername());
         CustomUserPrincipal thePrincipal = new CustomUserPrincipal(theLoggedInUser);
         String generatedToken = theTokenIssuer.generateToken(thePrincipal);
 

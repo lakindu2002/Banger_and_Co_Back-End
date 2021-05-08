@@ -1,15 +1,18 @@
 package com.lakindu.bangerandcobackend.service;
 
 import com.lakindu.bangerandcobackend.dto.InquiryDTO;
+import com.lakindu.bangerandcobackend.dto.InquiryReplyDTO;
 import com.lakindu.bangerandcobackend.entity.Inquiry;
 import com.lakindu.bangerandcobackend.repository.InquiryRepository;
 import com.lakindu.bangerandcobackend.serviceinterface.InquiryService;
+import com.lakindu.bangerandcobackend.serviceinterface.UserService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceNotFoundException;
 import com.lakindu.bangerandcobackend.util.mailsender.MailSender;
 import com.lakindu.bangerandcobackend.util.mailsender.MailSenderHelper;
 import com.lakindu.bangerandcobackend.util.mailsender.MailTemplateType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -21,14 +24,17 @@ public class InquiryServiceImpl implements InquiryService {
 
     private final InquiryRepository inquiryRepository;
     private final MailSender theMailSender;
+    private final UserService userService;
 
     //autowire the inquiry repository for dependency injection
     //autowire the inquiryRepository bean
     @Autowired
     public InquiryServiceImpl(@Qualifier("inquiryRepository") InquiryRepository inquiryRepository,
-                              @Qualifier("mailSender") MailSender theMailSender) {
+                              @Qualifier("mailSender") MailSender theMailSender,
+                              @Qualifier("userServiceImpl") UserService userService) {
         this.inquiryRepository = inquiryRepository;
         this.theMailSender = theMailSender;
+        this.userService = userService;
     }
 
     @Override
@@ -66,14 +72,14 @@ public class InquiryServiceImpl implements InquiryService {
     }
 
     @Override
-    public Inquiry getDetailedInquiry(int id) throws ResourceNotFoundException {
+    public InquiryDTO getDetailedInquiry(int id) throws ResourceNotFoundException {
         Inquiry theInquiry = inquiryRepository.getDetailedInquiry(id);
         if (theInquiry == null) {
             //if inquiry is not present in DB, show the user a 404 error
             throw new ResourceNotFoundException("The inquiry that you requested could not be found");
         } else {
-            //if inquiry object is there in database, return it to the client
-            return theInquiry;
+            //if inquiry object is there in database, return it to the client as a DTO
+            return getTheReturnConstructed(theInquiry);
         }
     }
 
@@ -83,12 +89,10 @@ public class InquiryServiceImpl implements InquiryService {
         for (Inquiry theInquiry : inquiryList) {
             returningList.add(getTheReturnConstructed(theInquiry));
         }
-
         return returningList;
     }
 
-    @Override
-    public InquiryDTO getTheReturnConstructed(Inquiry theInquiry) {
+    private InquiryDTO getTheReturnConstructed(Inquiry theInquiry) {
         //map entity to DTO
         InquiryDTO theDTO = new InquiryDTO();
 
@@ -107,15 +111,22 @@ public class InquiryServiceImpl implements InquiryService {
     }
 
     @Override
-    public void replyToInquiry(Inquiry theInquiry, String inquiryReply) {
-        //send am email to the client that lodged the email
-        MailSenderHelper theHelper = new MailSenderHelper();
-        theHelper.setInquiryReply(inquiryReply);
-        theHelper.setTheInquiry(theInquiry);
-        theHelper.setSubject(String.format("Replying to Your Inquiry - %s", theInquiry.getInquirySubject()));
-        theHelper.setTemplateName(MailTemplateType.INQUIRY_REPLY);
+    public void replyToInquiry(InquiryReplyDTO replyDTO, String inquiryReply, Authentication theAuthentication) throws ResourceNotFoundException {
+        Inquiry theInquiry = inquiryRepository.getDetailedInquiry(Integer.parseInt(replyDTO.getInquiryId()));
+        if (theInquiry == null) {
+            throw new ResourceNotFoundException("The inquiry does not exist");
+        } else {
+            //send am email to the client that lodged the email
+            theInquiry.setReplied(true);
+            theInquiry.setResolvedBy(userService.getUserInformationWithoutImageDecompression(theAuthentication.getName()));
+            MailSenderHelper theHelper = new MailSenderHelper();
+            theHelper.setInquiryReply(inquiryReply);
+            theHelper.setTheInquiry(theInquiry);
+            theHelper.setSubject(String.format("Replying to Your Inquiry - %s", theInquiry.getInquirySubject()));
+            theHelper.setTemplateName(MailTemplateType.INQUIRY_REPLY);
 
-        inquiryRepository.save(theInquiry); //resolve the inquiry in the database
-        theMailSender.sendMail(theHelper); //send the mail to the client to lodged the inquiry
+            inquiryRepository.save(theInquiry); //resolve the inquiry in the database
+            theMailSender.sendMail(theHelper); //send the mail to the client to lodged the inquiry
+        }
     }
 }

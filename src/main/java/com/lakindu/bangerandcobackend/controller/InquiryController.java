@@ -78,9 +78,7 @@ public class InquiryController {
     @PreAuthorize("hasAuthority('ADMINISTRATOR')")
     @GetMapping(path = "/find/{id}")
     public ResponseEntity<InquiryDTO> getDetailedInquiry(@PathVariable(name = "id") int id) throws ResourceNotFoundException {
-        Inquiry theInquiry = inquiryService.getDetailedInquiry(id);
-        final InquiryDTO theDTO = inquiryService.getTheReturnConstructed(theInquiry);
-
+        InquiryDTO theDTO = inquiryService.getDetailedInquiry(id);
         return new ResponseEntity<>(theDTO, HttpStatus.OK); //return a 200 to the client along with the inquiry DTO
     }
 
@@ -90,15 +88,8 @@ public class InquiryController {
             @Valid @RequestBody InquiryReplyDTO theDTO,
             Authentication theAuthentication
     ) throws ResourceNotFoundException, NumberFormatException {
-        //if request body is validated, execute method
-
-        //retrieve inquiry information for ID
-        Inquiry theInquiry = inquiryService.getDetailedInquiry(Integer.parseInt(theDTO.getInquiryId()));
-        theInquiry.setReplied(true);
-        theInquiry.setResolvedBy(userService.getUserInformationWithoutImageDecompression(theAuthentication.getName()));
-
-        //call the service method to ensure that the inquiry will be replied over email
-        inquiryService.replyToInquiry(theInquiry, theDTO.getInquiryReply());
+        //if request body is validated, execute method, reply to the inquiry by calling service method
+        inquiryService.replyToInquiry(theDTO, theDTO.getInquiryReply(), theAuthentication);
 
         //after replying to the inquiry send a 200 code back to the user
         return new ResponseEntity<>(

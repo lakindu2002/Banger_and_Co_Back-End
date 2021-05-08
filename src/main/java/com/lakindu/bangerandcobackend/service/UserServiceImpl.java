@@ -61,7 +61,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUserInformationWithImageDecompression(String username) throws Exception {
+    public User getUserInfoAfterLogin(String username) throws Exception {
         //get logged in user information by accessing database
         User theUser = theUserRepository.findUserByUsername(username);
         if (theUser != null) {
@@ -72,6 +72,31 @@ public class UserServiceImpl implements UserService {
             return theUser;
         } else {
             throw new ResourceNotFoundException("The Username Provided Does Not Exist.");
+        }
+    }
+
+    @Override
+    public UserDTO getUserInformation(String username) throws Exception {
+        final User theUser = theUserRepository.findUserByUsername(username);
+        if (theUser == null) {
+            throw new ResourceNotFoundException("The username does not exist");
+        } else {
+            ImageHandler theDecompressor = new DecompressImage();
+            final byte[] decompressedImage = theDecompressor.processUnhandledImage(theUser.getProfilePicture());
+            theUser.setProfilePicture(decompressedImage);
+
+            UserDTO theDTO = new UserDTO();
+            theDTO.setFirstName(theUser.getFirstName());
+            theDTO.setLastName(theUser.getLastName());
+            theDTO.setUsername(theUser.getUsername());
+            theDTO.setEmailAddress(theUser.getEmailAddress());
+            theDTO.setProfilePicture(theUser.getProfilePicture());
+            theDTO.setUserRole(theUser.getUserRole().getRoleName());
+            theDTO.setDateOfBirth(theUser.getDateOfBirth());
+            theDTO.setBlackListed(theUser.isBlackListed());
+            theDTO.setContactNumber(theUser.getContactNumber());
+
+            return theDTO;
         }
     }
 

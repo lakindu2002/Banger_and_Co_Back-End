@@ -31,19 +31,7 @@ public class UserController {
     @GetMapping(path = "/userInformation/{username}")
     @PreAuthorize("hasAuthority('ADMINISTRATOR') or hasAuthority('CUSTOMER')")
     public ResponseEntity<UserDTO> getUserInformation(@PathVariable(name = "username", required = true) String username) throws Exception {
-        User theUser = theUserService.getUserInformationWithImageDecompression(username);
-
-        UserDTO theDTO = new UserDTO();
-        theDTO.setFirstName(theUser.getFirstName());
-        theDTO.setLastName(theUser.getLastName());
-        theDTO.setUsername(theUser.getUsername());
-        theDTO.setEmailAddress(theUser.getEmailAddress());
-        theDTO.setProfilePicture(theUser.getProfilePicture());
-        theDTO.setUserRole(theUser.getUserRole().getRoleName());
-        theDTO.setDateOfBirth(theUser.getDateOfBirth());
-        theDTO.setBlackListed(theUser.isBlackListed());
-        theDTO.setContactNumber(theUser.getContactNumber());
-
+        UserDTO theDTO = theUserService.getUserInformation(username);
         return new ResponseEntity<>(theDTO, HttpStatus.OK);
     }
 

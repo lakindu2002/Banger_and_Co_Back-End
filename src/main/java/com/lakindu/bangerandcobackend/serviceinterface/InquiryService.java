@@ -1,8 +1,10 @@
 package com.lakindu.bangerandcobackend.serviceinterface;
 
 import com.lakindu.bangerandcobackend.dto.InquiryDTO;
+import com.lakindu.bangerandcobackend.dto.InquiryReplyDTO;
 import com.lakindu.bangerandcobackend.entity.Inquiry;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceNotFoundException;
+import org.springframework.security.core.Authentication;
 
 import java.util.List;
 
@@ -13,9 +15,7 @@ public interface InquiryService {
 
     void removeInquiry(int id) throws ResourceNotFoundException;
 
-    Inquiry getDetailedInquiry(int id) throws ResourceNotFoundException;
+    InquiryDTO getDetailedInquiry(int id) throws ResourceNotFoundException;
 
-    InquiryDTO getTheReturnConstructed(Inquiry theInquiry);
-
-    void replyToInquiry(Inquiry theInquiry, String inquiryReply);
+    void replyToInquiry(InquiryReplyDTO replyDTO, String inquiryReply, Authentication theAuthentication) throws ResourceNotFoundException;
 }
