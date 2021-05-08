@@ -1,9 +1,6 @@
 package com.lakindu.bangerandcobackend.dto;
 
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.sql.Date;
 
 public class UserDTO {
@@ -24,8 +21,9 @@ public class UserDTO {
     @NotNull(message = "Please Provide a Valid Date of Birth")
     private Date dateOfBirth;
 
-    @NotBlank(message = "Please Provide a Valid Contact Number")
-    @Size(min = 1, max = 20)
+    @NotBlank(message = "Please Provide a Valid Contact Number of 10 Digits")
+    @Pattern(regexp = "^[0-9]+$", message = "Please provide numerical inputs for your contact number.")
+    @Size(min = 10, max = 10, message = "Please Provide a Valid Contact Number of 10 Digits")
     private String contactNumber;
 
     private String userPassword;

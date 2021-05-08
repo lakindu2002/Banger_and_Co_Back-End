@@ -6,6 +6,7 @@ import com.lakindu.bangerandcobackend.entity.Inquiry;
 import com.lakindu.bangerandcobackend.serviceinterface.InquiryService;
 import com.lakindu.bangerandcobackend.serviceinterface.UserService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -66,7 +67,7 @@ public class InquiryController {
 
     @PreAuthorize("hasAuthority('ADMINISTRATOR')")
     @DeleteMapping(path = "/remove/{id}")
-    public ResponseEntity<BangerAndCoResponse> deleteInquiry(@PathVariable(name = "id", required = true) int id) {
+    public ResponseEntity<BangerAndCoResponse> deleteInquiry(@PathVariable(name = "id", required = true) int id) throws ResourceNotFoundException {
         inquiryService.removeInquiry(id);
         return new ResponseEntity<>(
                 new BangerAndCoResponse("Inquiry Removed Successfully", HttpStatus.OK.value()),
@@ -76,7 +77,7 @@ public class InquiryController {
 
     @PreAuthorize("hasAuthority('ADMINISTRATOR')")
     @GetMapping(path = "/find/{id}")
-    public ResponseEntity<InquiryDTO> getDetailedInquiry(@PathVariable(name = "id") int id) {
+    public ResponseEntity<InquiryDTO> getDetailedInquiry(@PathVariable(name = "id") int id) throws ResourceNotFoundException {
         Inquiry theInquiry = inquiryService.getDetailedInquiry(id);
         final InquiryDTO theDTO = inquiryService.getTheReturnConstructed(theInquiry);
 
@@ -88,7 +89,7 @@ public class InquiryController {
     public ResponseEntity<BangerAndCoResponse> replyInquiry(
             @Valid @RequestBody InquiryReplyDTO theDTO,
             Authentication theAuthentication
-    ) throws Exception {
+    ) throws ResourceNotFoundException, NumberFormatException {
         //if request body is validated, execute method
 
         //retrieve inquiry information for ID

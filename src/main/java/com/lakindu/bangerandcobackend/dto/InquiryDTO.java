@@ -2,6 +2,7 @@ package com.lakindu.bangerandcobackend.dto;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.sql.Timestamp;
 
@@ -28,8 +29,9 @@ public class InquiryDTO {
     @Email(message = "Please Provide a Valid Email Address")
     private String emailAddress;
 
-    @NotBlank(message = "Please Provide a Valid Contact Number")
-    @Size(min = 1, max = 20, message = "Please Keep Your Contact Number Between 1 and 20 Characters")
+    @NotBlank(message = "Please Provide a Valid Contact Number of 10 Digits")
+    @Pattern(regexp = "^[0-9]+$", message = "Please provide numerical inputs for your contact number.")
+    @Size(min = 10, max = 10, message = "Please Provide a Valid Contact Number of 10 Digits")
     private String contactNumber;
 
     private boolean isReplied;

@@ -1,13 +1,15 @@
 package com.lakindu.bangerandcobackend.dto;
 
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
 public class UpdateUserDTO {
     @NotBlank(message = "Please Provide a Valid Username")
     private String username;
-    @NotBlank(message = "Please Provide a Valid Contact Number")
-    @Size(min = 1, max = 20, message = "Please Keep Contact Number Between 1 to 20 Characters")
+    @NotBlank(message = "Please Provide a Valid Contact Number of 10 Digits")
+    @Pattern(regexp = "^[0-9]+$", message = "Please provide numerical inputs for your contact number.")
+    @Size(min = 10, max = 10,message = "Please Provide a Valid Contact Number of 10 Digits")
     private String contactNumber;
     private String userPassword;
 

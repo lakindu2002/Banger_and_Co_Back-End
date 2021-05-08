@@ -4,7 +4,6 @@ import com.lakindu.bangerandcobackend.dto.InquiryDTO;
 import com.lakindu.bangerandcobackend.entity.Inquiry;
 import com.lakindu.bangerandcobackend.repository.InquiryRepository;
 import com.lakindu.bangerandcobackend.serviceinterface.InquiryService;
-import com.lakindu.bangerandcobackend.serviceinterface.UserService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceNotFoundException;
 import com.lakindu.bangerandcobackend.util.mailsender.MailSender;
 import com.lakindu.bangerandcobackend.util.mailsender.MailSenderHelper;
@@ -58,7 +57,7 @@ public class InquiryServiceImpl implements InquiryService {
     }
 
     @Override
-    public void removeInquiry(int id) {
+    public void removeInquiry(int id) throws ResourceNotFoundException {
         if (inquiryRepository.existsById(id)) {
             inquiryRepository.deleteById(id);
         } else {
@@ -67,7 +66,7 @@ public class InquiryServiceImpl implements InquiryService {
     }
 
     @Override
-    public Inquiry getDetailedInquiry(int id) {
+    public Inquiry getDetailedInquiry(int id) throws ResourceNotFoundException {
         Inquiry theInquiry = inquiryRepository.getDetailedInquiry(id);
         if (theInquiry == null) {
             //if inquiry is not present in DB, show the user a 404 error

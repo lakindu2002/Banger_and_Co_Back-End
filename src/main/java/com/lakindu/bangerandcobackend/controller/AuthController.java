@@ -74,10 +74,10 @@ public class AuthController {
             theUserDTO.setLastName(theUserDTO.getLastName().trim());
             theUserDTO.setFirstName(theUserDTO.getFirstName().trim());
 
-            User createdUser = userService.createUser(theUserDTO, requestProfilePic);
+            userService.createUser(theUserDTO, requestProfilePic);
 
             BangerAndCoResponse response = new BangerAndCoResponse(
-                    String.format("account with username - %s created successfully", createdUser.getUsername()),
+                    "account created successfully",
                     HttpStatus.OK.value()
             );
             return new ResponseEntity<>(response, HttpStatus.OK);

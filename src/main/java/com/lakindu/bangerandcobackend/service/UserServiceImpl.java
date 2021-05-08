@@ -62,26 +62,33 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserInformationWithImageDecompression(String username) throws Exception {
-        //get logged in user information by accessing database after successful authentication
+        //get logged in user information by accessing database
         User theUser = theUserRepository.findUserByUsername(username);
         if (theUser != null) {
             ImageHandler theDecompressor = new DecompressImage();
             final byte[] decompressedImage = theDecompressor.processUnhandledImage(theUser.getProfilePicture());
             theUser.setProfilePicture(decompressedImage);
+
             return theUser;
         } else {
-            return null;
+            throw new ResourceNotFoundException("The Username Provided Does Not Exist.");
         }
     }
 
     @Override
-    public User getUserInformationWithoutImageDecompression(String username) throws Exception {
-        return theUserRepository.findUserByUsername(username);
+    public User getUserInformationWithoutImageDecompression(String username) throws ResourceNotFoundException {
+        //internal method used to get logged in user information for update purposes
+        final User userByUsername = theUserRepository.findUserByUsername(username);
+        if (userByUsername == null) {
+            throw new ResourceNotFoundException("The Username Provided Does Not Exist.");
+        } else {
+            return userByUsername;
+        }
     }
 
     @Override
     @Transactional
-    public User createUser(UserDTO theNewUser, MultipartFile profilePicture) throws Exception {
+    public void createUser(UserDTO theNewUser, MultipartFile profilePicture) throws Exception {
         theNewUser.setUsername(theNewUser.getUsername());
         theNewUser.setEmailAddress(theNewUser.getEmailAddress().toLowerCase());
         theNewUser.setBlackListed(false);
@@ -110,8 +117,6 @@ public class UserServiceImpl implements UserService {
                 User registeredUser = theUserRepository.save(entityToBeSaved);
                 //save user and send welcome email
                 theSender.sendMail(new MailSenderHelper(registeredUser, "Welcome To Banger and Co!", MailTemplateType.SIGNUP));
-                return registeredUser;
-
             } else {
                 throw new UserAlreadyExistsException("This email address is already associated to an account.");
             }
@@ -122,7 +127,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateUserInformation(User userInfo) {
+    public void updateUserInformation(User userInfo) throws ResourceNotFoundException {
         //updated the user information and send an email.
         if (theUserRepository.existsById(userInfo.getUsername())) {
             final User updatedUser = theUserRepository.save(userInfo);

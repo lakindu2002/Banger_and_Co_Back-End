@@ -32,40 +32,34 @@ public class UserController {
     @PreAuthorize("hasAuthority('ADMINISTRATOR') or hasAuthority('CUSTOMER')")
     public ResponseEntity<UserDTO> getUserInformation(@PathVariable(name = "username", required = true) String username) throws Exception {
         User theUser = theUserService.getUserInformationWithImageDecompression(username);
-        if (theUser == null) {
-            throw new ResourceNotFoundException("The Username Provided Does Not Exist.");
-        } else {
-            UserDTO theDTO = new UserDTO();
-            theDTO.setFirstName(theUser.getFirstName());
-            theDTO.setLastName(theUser.getLastName());
-            theDTO.setUsername(theUser.getUsername());
-            theDTO.setEmailAddress(theUser.getEmailAddress());
-            theDTO.setProfilePicture(theUser.getProfilePicture());
-            theDTO.setUserRole(theUser.getUserRole().getRoleName());
-            theDTO.setDateOfBirth(theUser.getDateOfBirth());
-            theDTO.setBlackListed(theUser.isBlackListed());
-            theDTO.setContactNumber(theUser.getContactNumber());
 
-            return new ResponseEntity<>(theDTO, HttpStatus.OK);
-        }
+        UserDTO theDTO = new UserDTO();
+        theDTO.setFirstName(theUser.getFirstName());
+        theDTO.setLastName(theUser.getLastName());
+        theDTO.setUsername(theUser.getUsername());
+        theDTO.setEmailAddress(theUser.getEmailAddress());
+        theDTO.setProfilePicture(theUser.getProfilePicture());
+        theDTO.setUserRole(theUser.getUserRole().getRoleName());
+        theDTO.setDateOfBirth(theUser.getDateOfBirth());
+        theDTO.setBlackListed(theUser.isBlackListed());
+        theDTO.setContactNumber(theUser.getContactNumber());
+
+        return new ResponseEntity<>(theDTO, HttpStatus.OK);
     }
 
     @PreAuthorize("hasAuthority('ADMINISTRATOR') or hasAuthority('CUSTOMER')")
     @PutMapping(path = "/update")
-    public ResponseEntity<BangerAndCoResponse> updateUser(@Valid @RequestBody UpdateUserDTO theDTO) throws Exception {
+    public ResponseEntity<BangerAndCoResponse> updateUser(@Valid @RequestBody UpdateUserDTO theDTO) throws ResourceNotFoundException {
         //if the request body is valid
         final User userInfo = theUserService.getUserInformationWithoutImageDecompression(theDTO.getUsername());
-        if (userInfo == null) {
-            //if the user does not exist
-            throw new ResourceNotFoundException("The Username Provided Does Not Exist.");
-        } else {
-            if (theDTO.getUserPassword() != null) {
-                //if the client has sent a password to be updated, hash it and save it.
-                userInfo.setUserPassword(theUserService.encodePassword(theDTO.getUserPassword()));
-            }
-            userInfo.setContactNumber(theDTO.getContactNumber().trim()); //set the new contact number
-            theUserService.updateUserInformation(userInfo); //call the update method
+
+        if (theDTO.getUserPassword() != null) {
+            //if the client has sent a password to be updated, hash it and save it.
+            userInfo.setUserPassword(theUserService.encodePassword(theDTO.getUserPassword()));
         }
+        userInfo.setContactNumber(theDTO.getContactNumber().trim()); //set the new contact number
+        theUserService.updateUserInformation(userInfo); //call the update method
+
         return new ResponseEntity<>(new BangerAndCoResponse("User Updated Successfully", HttpStatus.OK.value()), HttpStatus.OK);
     }
 }
