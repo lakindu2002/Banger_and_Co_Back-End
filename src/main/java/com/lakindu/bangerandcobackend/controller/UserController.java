@@ -39,15 +39,7 @@ public class UserController {
     @PutMapping(path = "/update")
     public ResponseEntity<BangerAndCoResponse> updateUser(@Valid @RequestBody UpdateUserDTO theDTO) throws ResourceNotFoundException {
         //if the request body is valid
-        final User userInfo = theUserService.getUserInformationWithoutImageDecompression(theDTO.getUsername());
-
-        if (theDTO.getUserPassword() != null) {
-            //if the client has sent a password to be updated, hash it and save it.
-            userInfo.setUserPassword(theUserService.encodePassword(theDTO.getUserPassword()));
-        }
-        userInfo.setContactNumber(theDTO.getContactNumber().trim()); //set the new contact number
-        theUserService.updateUserInformation(userInfo); //call the update method
-
+        theUserService.updateUserInformation(theDTO); //call the update method
         return new ResponseEntity<>(new BangerAndCoResponse("User Updated Successfully", HttpStatus.OK.value()), HttpStatus.OK);
     }
 }

@@ -111,14 +111,14 @@ public class InquiryServiceImpl implements InquiryService {
     }
 
     @Override
-    public void replyToInquiry(InquiryReplyDTO replyDTO, String inquiryReply, Authentication theAuthentication) throws ResourceNotFoundException {
+    public void replyToInquiry(InquiryReplyDTO replyDTO, String inquiryReply, Authentication theAuthentication) throws Exception {
         Inquiry theInquiry = inquiryRepository.getDetailedInquiry(Integer.parseInt(replyDTO.getInquiryId()));
         if (theInquiry == null) {
             throw new ResourceNotFoundException("The inquiry does not exist");
         } else {
             //send am email to the client that lodged the email
             theInquiry.setReplied(true);
-            theInquiry.setResolvedBy(userService.getUserInformationWithoutImageDecompression(theAuthentication.getName()));
+            theInquiry.setResolvedBy(userService.getUserForInquiryReply(theAuthentication.getName()));
             MailSenderHelper theHelper = new MailSenderHelper();
             theHelper.setInquiryReply(inquiryReply);
             theHelper.setTheInquiry(theInquiry);

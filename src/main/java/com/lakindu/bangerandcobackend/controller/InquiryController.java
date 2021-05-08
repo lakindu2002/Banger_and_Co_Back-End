@@ -87,7 +87,7 @@ public class InquiryController {
     public ResponseEntity<BangerAndCoResponse> replyInquiry(
             @Valid @RequestBody InquiryReplyDTO theDTO,
             Authentication theAuthentication
-    ) throws ResourceNotFoundException, NumberFormatException {
+    ) throws Exception {
         //if request body is validated, execute method, reply to the inquiry by calling service method
         inquiryService.replyToInquiry(theDTO, theDTO.getInquiryReply(), theAuthentication);
 

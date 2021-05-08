@@ -17,5 +17,5 @@ public interface InquiryService {
 
     InquiryDTO getDetailedInquiry(int id) throws ResourceNotFoundException;
 
-    void replyToInquiry(InquiryReplyDTO replyDTO, String inquiryReply, Authentication theAuthentication) throws ResourceNotFoundException;
+    void replyToInquiry(InquiryReplyDTO replyDTO, String inquiryReply, Authentication theAuthentication) throws Exception;
 }

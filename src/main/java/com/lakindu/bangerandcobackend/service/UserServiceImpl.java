@@ -1,6 +1,7 @@
 package com.lakindu.bangerandcobackend.service;
 
 import com.lakindu.bangerandcobackend.auth.CustomUserPrincipal;
+import com.lakindu.bangerandcobackend.dto.UpdateUserDTO;
 import com.lakindu.bangerandcobackend.dto.UserDTO;
 import com.lakindu.bangerandcobackend.entity.Role;
 import com.lakindu.bangerandcobackend.entity.User;
@@ -61,7 +62,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUserInfoAfterLogin(String username) throws Exception {
+    public User getUserInternalMethodWithDecompression(String username) throws Exception {
         //get logged in user information by accessing database
         User theUser = theUserRepository.findUserByUsername(username);
         if (theUser != null) {
@@ -73,6 +74,11 @@ public class UserServiceImpl implements UserService {
         } else {
             throw new ResourceNotFoundException("The Username Provided Does Not Exist.");
         }
+    }
+
+    @Override
+    public User getUserForInquiryReply(String username) {
+        return theUserRepository.findUserByUsername(username);
     }
 
     @Override
@@ -97,17 +103,6 @@ public class UserServiceImpl implements UserService {
             theDTO.setContactNumber(theUser.getContactNumber());
 
             return theDTO;
-        }
-    }
-
-    @Override
-    public User getUserInformationWithoutImageDecompression(String username) throws ResourceNotFoundException {
-        //internal method used to get logged in user information for update purposes
-        final User userByUsername = theUserRepository.findUserByUsername(username);
-        if (userByUsername == null) {
-            throw new ResourceNotFoundException("The Username Provided Does Not Exist.");
-        } else {
-            return userByUsername;
         }
     }
 
@@ -152,10 +147,16 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateUserInformation(User userInfo) throws ResourceNotFoundException {
+    public void updateUserInformation(UpdateUserDTO userInfo) throws ResourceNotFoundException {
         //updated the user information and send an email.
         if (theUserRepository.existsById(userInfo.getUsername())) {
-            final User updatedUser = theUserRepository.save(userInfo);
+            final User updatingUser = theUserRepository.findUserByUsername(userInfo.getUsername());
+            if (userInfo.getUserPassword() != null) {
+                //if the client has sent a password to be updated, hash it and save it.
+                updatingUser.setUserPassword(encodePassword(userInfo.getUserPassword()));
+            }
+            updatingUser.setContactNumber(userInfo.getContactNumber().trim()); //set the new contact number
+            final User updatedUser = theUserRepository.save(updatingUser);
             theSender.sendMail(new MailSenderHelper(
                     updatedUser,
                     "Account Details Updated Successfully!",

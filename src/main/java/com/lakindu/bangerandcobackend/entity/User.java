@@ -42,7 +42,7 @@ public class User {
     @Column(name = "is_black_listed", nullable = false)
     private boolean isBlackListed;
 
-    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
+    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH})
     @JoinColumn(name = "role_id", nullable = false)
     private Role userRole;
 
