@@ -3,6 +3,11 @@ package com.lakindu.bangerandcobackend.auth;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+/**
+ * Class used when constructing the JWT Token
+ *
+ * @author Lakindu Hewawasam
+ */
 @Component
 public class JWTConstants {
     //class setup to hold the constants required by JWT

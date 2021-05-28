@@ -1,11 +1,13 @@
 package com.lakindu.bangerandcobackend.util.FileHandler;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
 public class DecompressImage extends ImageHandler {
     @Override
-    protected byte[] handleTheImage(byte[] rawImage) throws Exception {
+    protected byte[] handleTheImage(byte[] rawImage) throws DataFormatException, IOException {
         Inflater theInflater = new Inflater();
         theInflater.setInput(rawImage); //set the bytes to be decompressed
 

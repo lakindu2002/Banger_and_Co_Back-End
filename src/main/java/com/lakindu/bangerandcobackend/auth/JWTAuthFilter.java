@@ -18,6 +18,11 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 
+/**
+ * The once per request filter will act as a filter to intercept every HTTP Request to check if the subject in JWT Token is valid.
+ *
+ * @author Lakindu Hewawasam
+ */
 @Component //register as a bean in the BeanManager
 public class JWTAuthFilter extends OncePerRequestFilter {
     //filter responsible for validating the JWT and authenticating the user and authorizing the user.

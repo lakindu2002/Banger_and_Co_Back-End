@@ -9,8 +9,13 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.util.zip.DataFormatException;
+
 public interface UserService extends UserDetailsService {
-    User getUserInternalMethodWithDecompression(String username) throws Exception;
+    User _getUserWithImageDecompression(String username) throws DataFormatException, IOException, ResourceNotFoundException;
+
+    User _getUserWithoutDecompression(String username);
 
     UserDTO getUserInformation(String username) throws Exception;
 
@@ -22,6 +27,4 @@ public interface UserService extends UserDetailsService {
 
     @Override
     UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
-
-    User getUserForInquiryReply(String username);
 }

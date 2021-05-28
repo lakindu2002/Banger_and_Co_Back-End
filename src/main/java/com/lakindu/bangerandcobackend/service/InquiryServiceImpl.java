@@ -59,7 +59,12 @@ public class InquiryServiceImpl implements InquiryService {
     public List<InquiryDTO> getAllPendingInquiries() {
         //service layer method used to get inquiries that are pending
         final List<Inquiry> inquiryList = inquiryRepository.getAllPendingInquiries();
-        return getTheReturnConstructed(inquiryList);
+        List<InquiryDTO> theInquiryReturn = new ArrayList<>();
+
+        for (Inquiry eachInquiry : inquiryList) {
+            theInquiryReturn.add(getTheReturnConstructed(eachInquiry));
+        }
+        return theInquiryReturn;
     }
 
     @Override
@@ -81,15 +86,6 @@ public class InquiryServiceImpl implements InquiryService {
             //if inquiry object is there in database, return it to the client as a DTO
             return getTheReturnConstructed(theInquiry);
         }
-    }
-
-    private List<InquiryDTO> getTheReturnConstructed(List<Inquiry> inquiryList) {
-        //for the array of entity type returned, convert in to an array of DTO that can be returned to the client
-        List<InquiryDTO> returningList = new ArrayList<>();
-        for (Inquiry theInquiry : inquiryList) {
-            returningList.add(getTheReturnConstructed(theInquiry));
-        }
-        return returningList;
     }
 
     private InquiryDTO getTheReturnConstructed(Inquiry theInquiry) {
@@ -118,7 +114,7 @@ public class InquiryServiceImpl implements InquiryService {
         } else {
             //send am email to the client that lodged the email
             theInquiry.setReplied(true);
-            theInquiry.setResolvedBy(userService.getUserForInquiryReply(theAuthentication.getName()));
+            theInquiry.setResolvedBy(userService._getUserWithoutDecompression(theAuthentication.getName()));
             MailSenderHelper theHelper = new MailSenderHelper();
             theHelper.setInquiryReply(inquiryReply);
             theHelper.setTheInquiry(theInquiry);

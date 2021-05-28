@@ -6,16 +6,20 @@ import java.sql.Date;
 public class UserDTO {
 
     @NotBlank(message = "Please Provide a Valid Username")
+    @Size(min = 6, max = 15, message = "Please keep username between 6 and 15 characters")
     private String username;
 
     @Email(message = "Please Provide a Valid Email Address")
     @NotBlank(message = "Provide a Valid Email Address")
+    @Size(max = 255, message = "Please keep email address less than 255 characters")
     private String emailAddress;
 
     @NotBlank(message = "Please Provide a Valid First Name")
+    @Size(max = 100, message = "Please keep first name less than 100 characters")
     private String firstName;
 
     @NotBlank(message = "Please Provide a Valid Last Name")
+    @Size(max = 100, message = "Please keep last name less than 100 characters")
     private String lastName;
 
     @NotNull(message = "Please Provide a Valid Date of Birth")
@@ -26,6 +30,8 @@ public class UserDTO {
     @Size(min = 10, max = 10, message = "Please Provide a Valid Contact Number of 10 Digits")
     private String contactNumber;
 
+    @NotBlank(message = "Please Provide a Valid Password")
+    @Size(min = 6, max = 15, message = "Please keep password between 6 and 15 characters")
     private String userPassword;
 
     private byte[] profilePicture;

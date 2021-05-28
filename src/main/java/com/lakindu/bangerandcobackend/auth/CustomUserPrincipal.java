@@ -9,11 +9,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Locale;
 
+/**
+ * Class contains a custom implementation of the Spring User Details.
+ *
+ * @author Lakindu Hewawasam
+ */
 public class CustomUserPrincipal implements UserDetails {
     //this class is used to define the implementation of the UserDetails that can be used in Spring Security Context.
     //this class mainly handles the Spring Security User.
-
-
     private final User theUserEntity;
 
     public CustomUserPrincipal(User theUserEntity) {
