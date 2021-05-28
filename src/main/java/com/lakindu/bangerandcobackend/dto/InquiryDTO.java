@@ -12,9 +12,11 @@ public class InquiryDTO {
     private int inquiryId;
 
     @NotBlank(message = "Please Provide a Valid First Name")
+    @Size(max = 255, message = "Please keep First Name Less Than 255 Characters")
     private String firstName;
 
     @NotBlank(message = "Please Prove a Valid Last Name")
+    @Size(max = 255, message = "Please keep Last Name Less Than 255 Characters")
     private String lastName;
 
     @NotBlank(message = "Please Provide a Valid Subject")
@@ -27,6 +29,7 @@ public class InquiryDTO {
 
     @NotBlank(message = "Please Email Address Cannot Be Left Empty")
     @Email(message = "Please Provide a Valid Email Address")
+    @Size(max = 255, message = "Please keep Email Address Less Than 255 Characters")
     private String emailAddress;
 
     @NotBlank(message = "Please Provide a Valid Contact Number of 10 Digits")

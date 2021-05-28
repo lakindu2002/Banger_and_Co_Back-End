@@ -25,6 +25,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
+import java.io.IOException;
+import java.util.zip.DataFormatException;
 
 
 @Service
@@ -62,7 +64,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUserInternalMethodWithDecompression(String username) throws Exception {
+    public User _getUserWithImageDecompression(String username) throws DataFormatException, IOException, ResourceNotFoundException {
         //get logged in user information by accessing database
         User theUser = theUserRepository.findUserByUsername(username);
         if (theUser != null) {
@@ -77,7 +79,7 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUserForInquiryReply(String username) {
+    public User _getUserWithoutDecompression(String username) {
         return theUserRepository.findUserByUsername(username);
     }
 
@@ -108,19 +110,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void createUser(UserDTO theNewUser, MultipartFile profilePicture) throws Exception {
+    public void createUser(UserDTO theNewUser, MultipartFile profilePicture) throws IOException, ResourceNotFoundException, DataFormatException, UserAlreadyExistsException {
         theNewUser.setUsername(theNewUser.getUsername());
         theNewUser.setEmailAddress(theNewUser.getEmailAddress().toLowerCase());
         theNewUser.setBlackListed(false);
         theNewUser.setUserPassword(encodePassword(theNewUser.getUserPassword()));
         theNewUser.setProfilePicture(profilePicture.getBytes());
 
-        Role theRole = theRoleService.getRoleInformation("customer");
+        Role theRole = theRoleService._getRoleInformation("customer");
 
         //does username exist
         User userNameExists = theUserRepository.findUserByUsername(theNewUser.getUsername());
 
-        User entityToBeSaved = User.convertDTOToEntity(theNewUser, theRole);
+        User entityToBeSaved = User.convertDTOToEntity(theNewUser, theRole); //convert DTO to entity.
+
         ImageHandler theCompressor = new CompressImage(); //creating template method pattern
         final byte[] compressImage = theCompressor.processUnhandledImage(entityToBeSaved.getProfilePicture());//calling the template method
         entityToBeSaved.setProfilePicture(compressImage);
@@ -130,10 +133,6 @@ public class UserServiceImpl implements UserService {
             User emailExists = theUserRepository.findUserByEmailAddress(theNewUser.getEmailAddress());
             if (emailExists == null) {
                 //email valid
-                if (theRole == null) {
-                    //if role is not in DB, throw an exception to display error to user
-                    throw new UnsupportedOperationException("The Role Does Not Exist In The System");
-                }
                 User registeredUser = theUserRepository.save(entityToBeSaved);
                 //save user and send welcome email
                 theSender.sendMail(new MailSenderHelper(registeredUser, "Welcome To Banger and Co!", MailTemplateType.SIGNUP));
@@ -150,7 +149,7 @@ public class UserServiceImpl implements UserService {
     public void updateUserInformation(UpdateUserDTO userInfo) throws ResourceNotFoundException {
         //updated the user information and send an email.
         if (theUserRepository.existsById(userInfo.getUsername())) {
-            final User updatingUser = theUserRepository.findUserByUsername(userInfo.getUsername());
+            final User updatingUser = _getUserWithoutDecompression(userInfo.getUsername()); //retrieve the user information
             if (userInfo.getUserPassword() != null) {
                 //if the client has sent a password to be updated, hash it and save it.
                 updatingUser.setUserPassword(encodePassword(userInfo.getUserPassword()));

@@ -1,10 +1,14 @@
 package com.lakindu.bangerandcobackend.auth;
 
 import com.lakindu.bangerandcobackend.dto.AuthReturnDTO;
-import com.lakindu.bangerandcobackend.dto.UserDTO;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
 import org.springframework.http.HttpHeaders;
 
+/**
+ * This class will be responsible for generating a return to send back to the client via a HTTP response
+ *
+ * @author Lakindu Hewawasam
+ */
 public class AuthReturnBuilder {
     //class used as a helper to communicate between Auth Success State and Controller
     private final AuthReturnDTO userDTO;

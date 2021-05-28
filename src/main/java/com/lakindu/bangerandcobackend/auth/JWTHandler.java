@@ -19,6 +19,11 @@ import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Class used to create the JWT Token.
+ *
+ * @author Lakindu Hewawasam
+ */
 @Service
 public class JWTHandler {
     //class used to define the service methods for JWT Issuing and Decoding

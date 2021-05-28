@@ -1,11 +1,12 @@
 package com.lakindu.bangerandcobackend.util.FileHandler;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.zip.Deflater;
 
 public class CompressImage extends ImageHandler {
     @Override
-    protected byte[] handleTheImage(byte[] rawImage) throws Exception {
+    protected byte[] handleTheImage(byte[] rawImage) throws IOException {
         Deflater theDeflater = new Deflater();
         theDeflater.setInput(rawImage); //set the bytes to be compressed
         theDeflater.finish(); //compression should end with current contents of input buffer

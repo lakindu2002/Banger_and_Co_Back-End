@@ -1,9 +1,10 @@
 package com.lakindu.bangerandcobackend.util.FileHandler;
 
-import com.lakindu.bangerandcobackend.entity.User;
+import java.io.IOException;
+import java.util.zip.DataFormatException;
 
 public abstract class ImageHandler {
-    public final byte[] processUnhandledImage(byte[] rawImage) throws Exception {
+    public final byte[] processUnhandledImage(byte[] rawImage) throws DataFormatException, IOException {
         byte[] handledDataForUser = handleTheImage(rawImage);
         return returnTheData(handledDataForUser);
     }
@@ -12,6 +13,6 @@ public abstract class ImageHandler {
         return handledDataForUser;
     }
 
-    protected abstract byte[] handleTheImage(byte[] rawImage) throws Exception;
+    protected abstract byte[] handleTheImage(byte[] rawImage) throws DataFormatException, IOException;
 
 }
