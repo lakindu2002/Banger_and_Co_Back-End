@@ -4,6 +4,7 @@ import com.lakindu.bangerandcobackend.dto.UpdateUserDTO;
 import com.lakindu.bangerandcobackend.dto.UserDTO;
 import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.serviceinterface.UserService;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.BadValuePassedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +38,7 @@ public class UserController {
 
     @PreAuthorize("hasAuthority('ADMINISTRATOR') or hasAuthority('CUSTOMER')")
     @PutMapping(path = "/update")
-    public ResponseEntity<BangerAndCoResponse> updateUser(@Valid @RequestBody UpdateUserDTO theDTO) throws ResourceNotFoundException {
+    public ResponseEntity<BangerAndCoResponse> updateUser(@Valid @RequestBody UpdateUserDTO theDTO) throws ResourceNotFoundException, BadValuePassedException {
         //if the request body is valid
         theUserService.updateUserInformation(theDTO); //call the update method
         return new ResponseEntity<>(new BangerAndCoResponse("User Updated Successfully", HttpStatus.OK.value()), HttpStatus.OK);

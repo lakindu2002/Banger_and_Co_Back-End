@@ -58,13 +58,13 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(exceptionHandler, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(UserAlreadyExistsException.class)
-    public ResponseEntity<BangerAndCoExceptionHandler> userAlreadyExistsException(UserAlreadyExistsException ex) {
-        //custom exception handler for User Already Exists.
+    @ExceptionHandler(ResourceAlreadyExistsException.class)
+    public ResponseEntity<BangerAndCoExceptionHandler> userAlreadyExistsException(ResourceAlreadyExistsException ex) {
+        //custom exception handler for a resource already existing.
 
         //create an exception handler object
         BangerAndCoExceptionHandler exceptionHandler = new BangerAndCoExceptionHandler(
-                "Your Account Not Been Created Successfully",
+                "This resource already exists",
                 ex.getLocalizedMessage(),
                 HttpStatus.CONFLICT.value(),
                 new ArrayList<>()
@@ -107,5 +107,17 @@ public class GlobalExceptionHandler {
                 new ArrayList<>());
 
         return new ResponseEntity<>(exceptionHandler, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(BadValuePassedException.class)
+    public ResponseEntity<BangerAndCoExceptionHandler> handleBadValueException(BadValuePassedException ex) {
+        //handle exceptions thrown when required Bad values are detected are not provided
+        BangerAndCoExceptionHandler exceptionHandler = new BangerAndCoExceptionHandler(
+                "Bad Input Detected",
+                ex.getLocalizedMessage(),
+                HttpStatus.BAD_REQUEST.value(),
+                new ArrayList<>());
+
+        return new ResponseEntity<>(exceptionHandler, HttpStatus.BAD_REQUEST);
     }
 }

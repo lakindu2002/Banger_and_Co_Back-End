@@ -1,15 +1,15 @@
 package com.lakindu.bangerandcobackend.repository;
 
 import com.lakindu.bangerandcobackend.entity.Inquiry;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
 //create repository for data access layer
-public interface InquiryRepository extends CrudRepository<Inquiry, Integer> {
+public interface InquiryRepository extends JpaRepository<Inquiry, Integer> {
     //class to be mapped is Inquiry
     //primary key is of type Integer
 

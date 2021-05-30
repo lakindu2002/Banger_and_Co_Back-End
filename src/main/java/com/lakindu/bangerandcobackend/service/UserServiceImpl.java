@@ -11,8 +11,9 @@ import com.lakindu.bangerandcobackend.serviceinterface.UserService;
 import com.lakindu.bangerandcobackend.util.FileHandler.CompressImage;
 import com.lakindu.bangerandcobackend.util.FileHandler.DecompressImage;
 import com.lakindu.bangerandcobackend.util.FileHandler.ImageHandler;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.BadValuePassedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceNotFoundException;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.UserAlreadyExistsException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceAlreadyExistsException;
 import com.lakindu.bangerandcobackend.util.mailsender.MailSender;
 import com.lakindu.bangerandcobackend.util.mailsender.MailSenderHelper;
 import com.lakindu.bangerandcobackend.util.mailsender.MailTemplateType;
@@ -110,7 +111,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void createUser(UserDTO theNewUser, MultipartFile profilePicture) throws IOException, ResourceNotFoundException, DataFormatException, UserAlreadyExistsException {
+    public void createUser(UserDTO theNewUser, MultipartFile profilePicture) throws IOException, ResourceNotFoundException, DataFormatException, ResourceAlreadyExistsException {
         theNewUser.setUsername(theNewUser.getUsername());
         theNewUser.setEmailAddress(theNewUser.getEmailAddress().toLowerCase());
         theNewUser.setBlackListed(false);
@@ -137,22 +138,28 @@ public class UserServiceImpl implements UserService {
                 //save user and send welcome email
                 theSender.sendMail(new MailSenderHelper(registeredUser, "Welcome To Banger and Co!", MailTemplateType.SIGNUP));
             } else {
-                throw new UserAlreadyExistsException("This email address is already associated to an account.");
+                throw new ResourceAlreadyExistsException("This email address is already associated to an account.");
             }
         } else {
-            throw new UserAlreadyExistsException("An account already exists with the username that you provided");
+            throw new ResourceAlreadyExistsException("An account already exists with the username that you provided");
         }
     }
 
     @Override
     @Transactional
-    public void updateUserInformation(UpdateUserDTO userInfo) throws ResourceNotFoundException {
+    public void updateUserInformation(UpdateUserDTO userInfo) throws ResourceNotFoundException, BadValuePassedException {
         //updated the user information and send an email.
         if (theUserRepository.existsById(userInfo.getUsername())) {
             final User updatingUser = _getUserWithoutDecompression(userInfo.getUsername()); //retrieve the user information
             if (userInfo.getUserPassword() != null) {
                 //if the client has sent a password to be updated, hash it and save it.
-                updatingUser.setUserPassword(encodePassword(userInfo.getUserPassword()));
+                //check if password sent is between 6 and 15 characters
+                if (userInfo.getUserPassword().length() >= 6 && userInfo.getUserPassword().length() <= 15) {
+                    updatingUser.setUserPassword(encodePassword(userInfo.getUserPassword()));
+                } else {
+                    //do not allow password updating
+                    throw new BadValuePassedException("The password is not between 6 and 15 characters. Please make sure password is between 6 and 15 characters");
+                }
             }
             updatingUser.setContactNumber(userInfo.getContactNumber().trim()); //set the new contact number
             final User updatedUser = theUserRepository.save(updatingUser);

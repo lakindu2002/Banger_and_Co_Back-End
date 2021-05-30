@@ -39,7 +39,7 @@ public class Inquiry {
     @Column(nullable = false, name = "created_at")
     private Timestamp createdAt;
 
-    @ManyToOne(cascade = {})
+    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH})
     @JoinColumn(name = "handled_by")
     private User resolvedBy;
 
