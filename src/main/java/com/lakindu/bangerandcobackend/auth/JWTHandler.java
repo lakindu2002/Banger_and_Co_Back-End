@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Service;
@@ -115,21 +116,21 @@ public class JWTHandler {
         return securityToken;
     }
 
-//    public List<GrantedAuthority> getAuthorityListForToken(String token) {
-//        //method executed to retrieve all the roles for the User
-//        final DecodedJWT verifiedToken = getTokenVerifier().verify(token); //verify the token
-//
-//        //retrieve the claim "authorities" assigned while creating the token
-//        String[] claimList = verifiedToken.getClaim(theConstants.getAUTHORITIES()).asArray(String.class);
-//
-//        List<GrantedAuthority> authorityList = new ArrayList<>();
-//
-//        for (String claim : claimList) {
-//            authorityList.add(new SimpleGrantedAuthority(claim)); //create an array list from retrieved data
-//        }
-//
-//        return authorityList; //return formatted array list containing user role
-//    }
+    public List<GrantedAuthority> getAuthorityListForToken(String token) {
+        //method executed to retrieve all the roles for the User
+        final DecodedJWT verifiedToken = getTokenVerifier().verify(token); //verify the token
+
+        //retrieve the claim "authorities" assigned while creating the token
+        String[] claimList = verifiedToken.getClaim(theConstants.getAUTHORITIES()).asArray(String.class);
+
+        List<GrantedAuthority> authorityList = new ArrayList<>();
+
+        for (String claim : claimList) {
+            authorityList.add(new SimpleGrantedAuthority(claim)); //create an array list from retrieved data
+        }
+
+        return authorityList; //return formatted array list containing user role
+    }
 
     public Long getTokenExpirationTime(String token) {
         //method used to get the expiration date & time of the token

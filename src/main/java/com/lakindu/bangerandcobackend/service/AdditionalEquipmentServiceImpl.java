@@ -46,12 +46,15 @@ public class AdditionalEquipmentServiceImpl implements AdditionalEquipmentServic
 
         //check if the equipment already exists in the database, if it exists throw an exception handled by @RestControllerAdvice
         final Optional<AdditionalEquipment> theOptionalEquipment = additionalEquipmentRepository.findAdditionalEquipmentByEquipmentName(theDomainEntity.getEquipmentName());
-        final AdditionalEquipment theExistingEquipment = theOptionalEquipment.orElseThrow(
-                () -> new ResourceAlreadyExistsException(String.format(
-                        "The additional equipment with the name - \"%s\" already exists at Banger and Co.",
-                        theDomainEntity.getEquipmentName()
-                ))
-        );
+        if (theOptionalEquipment.isPresent()) {
+            throw new ResourceAlreadyExistsException(String.format(
+                    "The additional equipment with the name '%s' already exists at Banger and Co.",
+                    theDomainEntity.getEquipmentName()
+            ));
+        }
+
+        //persist the entity on the database.
+        additionalEquipmentRepository.save(theDomainEntity);
     }
 
     @Override
