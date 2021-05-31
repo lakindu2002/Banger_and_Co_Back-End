@@ -5,6 +5,7 @@ import com.lakindu.bangerandcobackend.repository.RoleRepository;
 import com.lakindu.bangerandcobackend.serviceinterface.RoleService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,7 +15,7 @@ public class RoleServiceImpl implements RoleService {
 
     @Autowired
     //constructor injection
-    public RoleServiceImpl(RoleRepository roleRepository) {
+    public RoleServiceImpl(@Qualifier("roleRepository") RoleRepository roleRepository) {
         this.roleRepository = roleRepository;
     }
 

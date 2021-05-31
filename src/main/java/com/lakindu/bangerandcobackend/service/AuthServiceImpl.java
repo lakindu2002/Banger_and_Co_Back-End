@@ -31,8 +31,8 @@ public class AuthServiceImpl implements AuthService {
     public AuthServiceImpl(
             AuthenticationManager authenticationManager,
             @Qualifier("userServiceImpl") UserService userService,
-            JWTHandler theTokenIssuer,
-            JWTConstants theConstants) {
+            @Qualifier("JWTHandler") JWTHandler theTokenIssuer,
+            @Qualifier("JWTConstants") JWTConstants theConstants) {
         this.authenticationManager = authenticationManager;
         this.userService = userService;
         this.theTokenIssuer = theTokenIssuer;

@@ -39,10 +39,10 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     public UserServiceImpl(
-            UserRepository theUserRepository,
+            @Qualifier("userRepository") UserRepository theUserRepository,
             @Qualifier("roleServiceImpl") RoleService theRoleService,
-            MailSender theSender,
-            PasswordEncoder passwordEncoder) {
+            @Qualifier("mailSender") MailSender theSender,
+            @Qualifier("passwordEncoder") PasswordEncoder passwordEncoder) {
         this.theUserRepository = theUserRepository;
         this.theRoleService = theRoleService;
         this.theSender = theSender;
