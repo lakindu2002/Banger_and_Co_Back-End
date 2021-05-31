@@ -1,6 +1,7 @@
 package com.lakindu.bangerandcobackend.serviceinterface;
 
 import com.lakindu.bangerandcobackend.dto.AdditionalEquipmentDTO;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.BadValuePassedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceAlreadyExistsException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceNotFoundException;
 
@@ -33,9 +34,11 @@ public interface AdditionalEquipmentService {
      * Used to update the details of the additional equipment
      *
      * @param theDTO The object to containing the information to update
-     * @throws ResourceNotFoundException The exception thrown when the equipment with ID passed cannot be located in the database
+     * @throws ResourceNotFoundException      The exception thrown when the equipment with ID passed cannot be located in the database
+     * @throws BadValuePassedException        Thrown when the client passes an equipment ID of 0
+     * @throws ResourceAlreadyExistsException Thrown when the equipment with passed name already exists in database for a different ID
      */
-    void updateEquipment(AdditionalEquipmentDTO theDTO) throws ResourceNotFoundException;
+    void updateEquipment(AdditionalEquipmentDTO theDTO) throws ResourceNotFoundException, BadValuePassedException, ResourceAlreadyExistsException;
 
     /**
      * Used to remove additional equipment from the database when no item has been taken for a rental

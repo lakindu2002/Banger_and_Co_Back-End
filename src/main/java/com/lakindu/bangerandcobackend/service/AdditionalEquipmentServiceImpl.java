@@ -4,6 +4,7 @@ import com.lakindu.bangerandcobackend.dto.AdditionalEquipmentDTO;
 import com.lakindu.bangerandcobackend.entity.AdditionalEquipment;
 import com.lakindu.bangerandcobackend.repository.AdditionalEquipmentRepository;
 import com.lakindu.bangerandcobackend.serviceinterface.AdditionalEquipmentService;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.BadValuePassedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceAlreadyExistsException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,8 +59,38 @@ public class AdditionalEquipmentServiceImpl implements AdditionalEquipmentServic
     }
 
     @Override
-    public void updateEquipment(AdditionalEquipmentDTO theDTO) throws ResourceNotFoundException {
+    public void updateEquipment(AdditionalEquipmentDTO theDTO) throws ResourceNotFoundException, BadValuePassedException, ResourceAlreadyExistsException {
+        theDTO.setEquipmentName(theDTO.getEquipmentName().trim().toUpperCase());
 
+        if (theDTO.getEquipmentId() == 0) {
+            throw new BadValuePassedException("Please provide a valid equipment ID"
+            );
+        }
+
+        //check - 1 check if the ID passed is valid. (If equipment being updated exists in database)
+        //check - 2 check if an equipment exists with the given name but it should exist on a separate ID and not the one being updated.
+
+        //check - 1
+        final AdditionalEquipment theItem = additionalEquipmentRepository.findById(theDTO.getEquipmentId()).orElseThrow(
+                () -> new ResourceNotFoundException("The equipment you are trying to update does not exist")
+        );
+
+        //check  - 2
+        AdditionalEquipment check2 = additionalEquipmentRepository.getItemWithSameNameButAsASeperateEntry(
+                theDTO.getEquipmentName(),
+                theItem.getEquipmentId()
+        );
+
+        if (check2 != null) {
+            throw new ResourceAlreadyExistsException("An equipment with the name you provided already exists. Please try again");
+        }
+
+        //if all validations pass.
+        theItem.setEquipmentName(theDTO.getEquipmentName());
+        theItem.setEquipmentQuantity(theDTO.getEquipmentQuantity());
+
+        //update the equipment information.
+        additionalEquipmentRepository.save(theItem);
     }
 
     @Override

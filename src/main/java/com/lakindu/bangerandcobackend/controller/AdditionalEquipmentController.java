@@ -2,17 +2,16 @@ package com.lakindu.bangerandcobackend.controller;
 
 import com.lakindu.bangerandcobackend.dto.AdditionalEquipmentDTO;
 import com.lakindu.bangerandcobackend.serviceinterface.AdditionalEquipmentService;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.BadValuePassedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceAlreadyExistsException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 
@@ -39,6 +38,23 @@ public class AdditionalEquipmentController {
 
         return new ResponseEntity<>(
                 new BangerAndCoResponse("Additional Equipment Created Successfully", HttpStatus.OK.value()),
+                HttpStatus.OK
+        );
+    }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @PutMapping(path = "/update")
+    public ResponseEntity<BangerAndCoResponse> updateAdditionalEquipment(
+            @Valid @RequestBody AdditionalEquipmentDTO theUpdateDTO
+    ) throws ResourceNotFoundException, BadValuePassedException, ResourceAlreadyExistsException {
+
+        //call the service method
+        additionalEquipmentService.updateEquipment(theUpdateDTO);
+
+        //return success 200 back to client.
+        return new ResponseEntity<>(
+                new BangerAndCoResponse("Additional equipment information updated successfully",
+                        HttpStatus.OK.value()),
                 HttpStatus.OK
         );
     }

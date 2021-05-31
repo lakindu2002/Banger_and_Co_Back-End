@@ -2,6 +2,7 @@ package com.lakindu.bangerandcobackend.repository;
 
 import com.lakindu.bangerandcobackend.entity.AdditionalEquipment;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
@@ -15,4 +16,7 @@ public interface AdditionalEquipmentRepository extends JpaRepository<AdditionalE
      * @return The optional checking if item exists or not.
      */
     Optional<AdditionalEquipment> findAdditionalEquipmentByEquipmentName(String equipmentName);
+
+    @Query("FROM AdditionalEquipment theItem WHERE theItem.equipmentName=:name AND theItem.equipmentId<>:id")
+    AdditionalEquipment getItemWithSameNameButAsASeperateEntry(String name, int id);
 }
