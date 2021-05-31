@@ -14,6 +14,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController //handle rest interactions (JSON Response)
 @RequestMapping(path = "/api/equipment")
@@ -37,7 +38,7 @@ public class AdditionalEquipmentController {
         additionalEquipmentService.createAdditionalEquipment(theDTO);
 
         return new ResponseEntity<>(
-                new BangerAndCoResponse("Additional Equipment Created Successfully", HttpStatus.OK.value()),
+                new BangerAndCoResponse("The additional equipment was created successfully", HttpStatus.OK.value()),
                 HttpStatus.OK
         );
     }
@@ -53,8 +54,20 @@ public class AdditionalEquipmentController {
 
         //return success 200 back to client.
         return new ResponseEntity<>(
-                new BangerAndCoResponse("Additional equipment information updated successfully",
+                new BangerAndCoResponse("The information was updated successfully",
                         HttpStatus.OK.value()),
+                HttpStatus.OK
+        );
+    }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @GetMapping(path = "/all")
+    public ResponseEntity<List<AdditionalEquipmentDTO>> getAllAdditionalEquipment() {
+        //retrieve all the information from the database
+        List<AdditionalEquipmentDTO> theList = additionalEquipmentService.getAllAdditionalEquipment();
+        //return it back in the response body to the client.
+        return new ResponseEntity<>(
+                theList,
                 HttpStatus.OK
         );
     }

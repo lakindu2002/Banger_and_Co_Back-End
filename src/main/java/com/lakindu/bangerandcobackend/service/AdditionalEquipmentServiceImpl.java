@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -29,7 +30,20 @@ public class AdditionalEquipmentServiceImpl implements AdditionalEquipmentServic
 
     @Override
     public List<AdditionalEquipmentDTO> getAllAdditionalEquipment() {
-        return null;
+        //retrieve all data from database
+        List<AdditionalEquipment> theDatabaseList = additionalEquipmentRepository.findAll();
+        List<AdditionalEquipmentDTO> theReturnList = new ArrayList<>();
+
+        //insert every record in to a DTO Array and return the array back to the client
+        for (AdditionalEquipment theEquipment : theDatabaseList) {
+            AdditionalEquipmentDTO theDTO = new AdditionalEquipmentDTO();
+            theDTO.setEquipmentName(theEquipment.getEquipmentName());
+            theDTO.setEquipmentQuantity(theEquipment.getEquipmentQuantity());
+            theDTO.setEquipmentId(theEquipment.getEquipmentId());
+
+            theReturnList.add(theDTO);
+        }
+        return theReturnList;
     }
 
     @Override
