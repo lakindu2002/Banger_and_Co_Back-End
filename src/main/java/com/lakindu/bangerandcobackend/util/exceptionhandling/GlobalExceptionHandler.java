@@ -13,7 +13,7 @@ import org.springframework.web.multipart.support.MissingServletRequestPartExcept
 import java.util.ArrayList;
 
 @RestControllerAdvice
-//combination of @ControllerAdvice and @ResponseBody
+//combination of @ControllerAdvice and @ResponseBody (automatically uses JSON)
 public class GlobalExceptionHandler {
     //this class will handle all the global exceptions thrown throughout the spring application.
     //the annotation @RestControllerAdvice enables this
