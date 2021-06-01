@@ -2,6 +2,7 @@ package com.lakindu.bangerandcobackend.util.exceptionhandling;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -119,5 +120,17 @@ public class GlobalExceptionHandler {
                 new ArrayList<>());
 
         return new ResponseEntity<>(exceptionHandler, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<BangerAndCoExceptionHandler> handleNoAccess(AccessDeniedException ex) {
+        //handle exceptions thrown when required Bad values are detected are not provided
+        BangerAndCoExceptionHandler exceptionHandler = new BangerAndCoExceptionHandler(
+                "Access Denied",
+                "You are not allowed to view this resource.",
+                HttpStatus.FORBIDDEN.value(),
+                new ArrayList<>());
+
+        return new ResponseEntity<>(exceptionHandler, HttpStatus.FORBIDDEN);
     }
 }

@@ -28,7 +28,7 @@ public interface AdditionalEquipmentService {
      *
      * @throws ResourceAlreadyExistsException Thrown when an equipment with the passed already exists in the database
      */
-    void createAdditionalEquipment(AdditionalEquipmentDTO theDTO) throws ResourceAlreadyExistsException;
+    void createAdditionalEquipment(AdditionalEquipmentDTO theDTO) throws ResourceAlreadyExistsException, BadValuePassedException;
 
     /**
      * Used to update the details of the additional equipment

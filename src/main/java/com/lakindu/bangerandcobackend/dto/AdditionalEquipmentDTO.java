@@ -1,7 +1,5 @@
 package com.lakindu.bangerandcobackend.dto;
 
-import com.lakindu.bangerandcobackend.util.validators.CheckQuantity;
-
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -21,7 +19,6 @@ public class AdditionalEquipmentDTO {
 
     @NotNull(message = "Please provide an equipment quantity")
     @Digits(integer = 4, fraction = 0, message = "Please keep quantity between to 4 digits maximum (eg:9999)")
-    @CheckQuantity(minimumQuantity = 1, message = "Quantity cannot be less than 1")
     private int equipmentQuantity;
 
     public AdditionalEquipmentDTO() {

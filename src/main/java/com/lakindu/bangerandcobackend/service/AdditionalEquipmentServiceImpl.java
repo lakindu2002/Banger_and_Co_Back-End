@@ -53,11 +53,16 @@ public class AdditionalEquipmentServiceImpl implements AdditionalEquipmentServic
 
     @Override
     @Transactional
-    public void createAdditionalEquipment(AdditionalEquipmentDTO theDTO) throws ResourceAlreadyExistsException {
+    public void createAdditionalEquipment(AdditionalEquipmentDTO theDTO) throws ResourceAlreadyExistsException, BadValuePassedException {
         //construct a domain entity that can be persisted in the database
         AdditionalEquipment theDomainEntity = new AdditionalEquipment();
         theDomainEntity.setEquipmentName(theDTO.getEquipmentName().trim().toUpperCase());
-        theDomainEntity.setEquipmentQuantity(theDomainEntity.getEquipmentQuantity());
+        theDomainEntity.setEquipmentQuantity(theDTO.getEquipmentQuantity());
+
+        if (theDomainEntity.getEquipmentQuantity() == 0) {
+            //if the quantity being added while creating a new item is at 0, it cannot be added
+            throw new BadValuePassedException("The quantity at hand cannot be 0 when creating a new additional equipment for rental vehicles.");
+        }
 
         //check if the equipment already exists in the database, if it exists throw an exception handled by @RestControllerAdvice
         final Optional<AdditionalEquipment> theOptionalEquipment = additionalEquipmentRepository.findAdditionalEquipmentByEquipmentName(theDomainEntity.getEquipmentName());
@@ -77,34 +82,33 @@ public class AdditionalEquipmentServiceImpl implements AdditionalEquipmentServic
         theDTO.setEquipmentName(theDTO.getEquipmentName().trim().toUpperCase());
 
         if (theDTO.getEquipmentId() == 0) {
-            throw new BadValuePassedException("Please provide a valid equipment ID"
-            );
+            throw new BadValuePassedException("Please provide a valid equipment ID");
         }
 
         //check - 1 check if the ID passed is valid. (If equipment being updated exists in database)
         //check - 2 check if an equipment exists with the given name but it should exist on a separate ID and not the one being updated.
 
         //check - 1
-        final AdditionalEquipment theItem = additionalEquipmentRepository.findById(theDTO.getEquipmentId()).orElseThrow(
+        final AdditionalEquipment updatingItem = additionalEquipmentRepository.findById(theDTO.getEquipmentId()).orElseThrow(
                 () -> new ResourceNotFoundException("The equipment you are trying to update does not exist")
         );
 
         //check  - 2
-        AdditionalEquipment check2 = additionalEquipmentRepository.getItemWithSameNameButAsASeperateEntry(
+        AdditionalEquipment itemNameExistingInDifferentId = additionalEquipmentRepository.getItemWithSameNameButAsASeperateEntry(
                 theDTO.getEquipmentName(),
-                theItem.getEquipmentId()
+                updatingItem.getEquipmentId()
         );
 
-        if (check2 != null) {
+        if (itemNameExistingInDifferentId != null) {
             throw new ResourceAlreadyExistsException("An equipment with the name you provided already exists. Please try again");
         }
 
         //if all validations pass.
-        theItem.setEquipmentName(theDTO.getEquipmentName());
-        theItem.setEquipmentQuantity(theDTO.getEquipmentQuantity());
+        updatingItem.setEquipmentName(theDTO.getEquipmentName());
+        updatingItem.setEquipmentQuantity(theDTO.getEquipmentQuantity());
 
         //update the equipment information.
-        additionalEquipmentRepository.save(theItem);
+        additionalEquipmentRepository.save(updatingItem);
     }
 
     @Override

@@ -31,7 +31,7 @@ public class AdditionalEquipmentController {
     @PostMapping(path = "/create")
     public ResponseEntity<BangerAndCoResponse> createAdditionalEquipment(
             @Valid @RequestBody AdditionalEquipmentDTO theDTO
-    ) throws ResourceAlreadyExistsException {
+    ) throws ResourceAlreadyExistsException, BadValuePassedException {
         //@RequestBody will automatically de-serialize the HTTP Request Body for the AdditionalEquipmentDTO object.
 
         //call service method to create the additional equipment.
