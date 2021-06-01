@@ -71,4 +71,13 @@ public class AdditionalEquipmentController {
                 HttpStatus.OK
         );
     }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @GetMapping(path = "/get/{id}")
+    public ResponseEntity<AdditionalEquipmentDTO> getEquipmentById(@PathVariable(name = "id", required = true) int equipmentId) throws ResourceNotFoundException {
+        //method used to retrieve additional equipment by the id to display on update.
+        AdditionalEquipmentDTO theViewingDTO = additionalEquipmentService.getEquipmentByID(equipmentId);
+        //if successfully retrieved.
+        return new ResponseEntity<>(theViewingDTO, HttpStatus.OK);
+    }
 }

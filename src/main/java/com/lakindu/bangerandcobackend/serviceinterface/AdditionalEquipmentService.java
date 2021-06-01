@@ -47,4 +47,12 @@ public interface AdditionalEquipmentService {
      * @throws ResourceNotFoundException Thrown when the ID passed does not exist in the database.
      */
     void removeEquipment(int equipmentId) throws ResourceNotFoundException;
+
+    /**
+     * Method used to retrieve equipment information by the ID.
+     *
+     * @param equipmentId The ID to get the information for
+     * @return The object containing the information based on the ID passed.
+     */
+    AdditionalEquipmentDTO getEquipmentByID(int equipmentId) throws ResourceNotFoundException;
 }

@@ -18,7 +18,7 @@ public class AdditionalEquipmentDTO {
     private String equipmentName;
 
     @NotNull(message = "Please provide an equipment quantity")
-    @Digits(integer = 4, fraction = 0, message = "Please keep quantity between to 4 digits maximum (eg:9999)")
+    @Digits(integer = 4, fraction = 0, message = "Please keep quantity to 4 digits maximum (eg:9999)")
     private int equipmentQuantity;
 
     public AdditionalEquipmentDTO() {

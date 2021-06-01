@@ -115,4 +115,20 @@ public class AdditionalEquipmentServiceImpl implements AdditionalEquipmentServic
     public void removeEquipment(int equipmentId) throws ResourceNotFoundException {
 
     }
+
+    @Override
+    public AdditionalEquipmentDTO getEquipmentByID(int equipmentId) throws ResourceNotFoundException {
+        //query database and check if optional is present, if not throw a custom not found exception
+        AdditionalEquipment theEquipment = additionalEquipmentRepository.findById(equipmentId).orElseThrow(
+                () -> new ResourceNotFoundException("The Additional Equipment for the ID you passed does not exist")
+        );
+
+        //construct a return DTO
+        AdditionalEquipmentDTO theReturningDTO = new AdditionalEquipmentDTO();
+        theReturningDTO.setEquipmentId(theEquipment.getEquipmentId());
+        theReturningDTO.setEquipmentName(theEquipment.getEquipmentName());
+        theReturningDTO.setEquipmentQuantity(theEquipment.getEquipmentQuantity());
+
+        return theReturningDTO; //return the object to the controller that will return the object via serialization back to client
+    }
 }
