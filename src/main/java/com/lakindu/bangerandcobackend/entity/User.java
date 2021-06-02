@@ -32,7 +32,7 @@ public class User {
     private String contactNumber;
 
     @Lob //large object
-    @Column(name = "profile_picture", columnDefinition = "MEDIUMBLOB")
+    @Column(name = "profile_picture", columnDefinition = "MEDIUMBLOB", nullable = false)
     private byte[] profilePicture;
 
     @Column(name = "is_black_listed", nullable = false)

@@ -84,7 +84,7 @@ public class BangerCoSecurityConfiguration extends WebSecurityConfigurerAdapter 
                 .authenticated()
                 .and()
                 //add a filter before UsernamePasswordAuthenticationFilter
-                .addFilterAfter(theAuthFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(theAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement()
                 //set session handling to Stateless
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
