@@ -13,14 +13,14 @@ public class VehicleType {
     //meaning they are auto-incremented.
     private int vehicleTypeId;
 
-    @Column(name = "type_name", unique = true, length = 255, nullable = false)
+    @Column(name = "type_name", length = 255, nullable = false)
     private String typeName;
 
     @Column(name = "size", length = 75, nullable = false)
     private String size;
 
     @Column(name = "price_per_day", nullable = false)
-    private float pricePerDay;
+    private double pricePerDay; //double recommended by java doc to store floats of SQL type.
 
     //add a bi-directional relationship to get a list of vehicles for each type.
     //theVehicleType is the object name used to refer a type in the vehicle class.
@@ -54,11 +54,19 @@ public class VehicleType {
         this.size = size;
     }
 
-    public float getPricePerDay() {
+    public double getPricePerDay() {
         return pricePerDay;
     }
 
-    public void setPricePerDay(float pricePerDay) {
+    public void setPricePerDay(double pricePerDay) {
         this.pricePerDay = pricePerDay;
+    }
+
+    public List<Vehicle> getVehicleList() {
+        return vehicleList;
+    }
+
+    public void setVehicleList(List<Vehicle> vehicleList) {
+        this.vehicleList = vehicleList;
     }
 }

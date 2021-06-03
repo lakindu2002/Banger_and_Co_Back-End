@@ -99,12 +99,12 @@ public class UserServiceImpl implements UserService {
             theDTO.setLastName(theUser.getLastName());
             theDTO.setUsername(theUser.getUsername());
             theDTO.setEmailAddress(theUser.getEmailAddress());
-            theDTO.setProfilePicture(theUser.getProfilePicture());
+            //images are binary data (byte[])
+            theDTO.setProfilePicture(theUser.getProfilePicture()); //jackson will automatically convert byte[] to base64 via data binding
             theDTO.setUserRole(theUser.getUserRole().getRoleName());
             theDTO.setDateOfBirth(theUser.getDateOfBirth());
             theDTO.setBlackListed(theUser.isBlackListed());
             theDTO.setContactNumber(theUser.getContactNumber());
-
             return theDTO;
         }
     }

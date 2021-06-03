@@ -17,6 +17,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController //handle rest interactions (JSON Response)
+@PreAuthorize("isAuthenticated()")
 @RequestMapping(path = "/api/equipment")
 public class AdditionalEquipmentController {
     private final AdditionalEquipmentService additionalEquipmentService;
