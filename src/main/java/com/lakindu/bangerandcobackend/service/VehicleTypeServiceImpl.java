@@ -5,12 +5,14 @@ import com.lakindu.bangerandcobackend.entity.VehicleType;
 import com.lakindu.bangerandcobackend.repository.VehicleTypeRepository;
 import com.lakindu.bangerandcobackend.serviceinterface.VehicleTypeService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceAlreadyExistsException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class VehicleTypeServiceImpl implements VehicleTypeService {
@@ -63,5 +65,20 @@ public class VehicleTypeServiceImpl implements VehicleTypeService {
         }
 
         return returnList; //return the collection back to the controller that can be used to send back to client in ResponseBody.
+    }
+
+    @Override
+    public VehicleTypeDTO findVehicleTypeById(int id) throws ResourceNotFoundException {
+        final Optional<VehicleType> optionalType = vehicleTypeRepository.findById(id);
+        VehicleType theType = optionalType.orElseThrow(() -> new ResourceNotFoundException("The vehicle type you wish to access does not exist at Banger and Co."));
+
+        //construct the return DTO
+        VehicleTypeDTO theDTO = new VehicleTypeDTO();
+        theDTO.setVehicleTypeId(theType.getVehicleTypeId());
+        theDTO.setTypeName(theType.getTypeName());
+        theDTO.setSize(theType.getSize());
+        theDTO.showCurrencyOnReturn(theType.getPricePerDay());
+
+        return theDTO; //return the DTO back to the client.
     }
 }

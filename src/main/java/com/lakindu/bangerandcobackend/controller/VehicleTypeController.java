@@ -4,6 +4,7 @@ import com.lakindu.bangerandcobackend.dto.VehicleTypeDTO;
 import com.lakindu.bangerandcobackend.serviceinterface.VehicleTypeService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceAlreadyExistsException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -49,5 +50,13 @@ public class VehicleTypeController {
         //response entity = http response
         List<VehicleTypeDTO> theTypes = vehicleTypeService.getAllVehicleTypes();
         return new ResponseEntity<>(theTypes, HttpStatus.OK); //ok = 200 status code
+    }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @GetMapping(path = "/find/{id}")
+    public ResponseEntity<VehicleTypeDTO> findById(@PathVariable(name = "id", required = true) int id) throws ResourceNotFoundException {
+        //get the vehicle type dto via the ID
+        VehicleTypeDTO theType = vehicleTypeService.findVehicleTypeById(id);
+        return new ResponseEntity<>(theType, HttpStatus.OK); //ok = 200 status code
     }
 }

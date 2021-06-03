@@ -2,6 +2,7 @@ package com.lakindu.bangerandcobackend.serviceinterface;
 
 import com.lakindu.bangerandcobackend.dto.VehicleTypeDTO;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceAlreadyExistsException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceNotFoundException;
 
 import java.util.List;
 
@@ -20,4 +21,6 @@ public interface VehicleTypeService {
      * @return Returns all type records from the database.
      */
     List<VehicleTypeDTO> getAllVehicleTypes();
+
+    VehicleTypeDTO findVehicleTypeById(int id) throws ResourceNotFoundException;
 }
