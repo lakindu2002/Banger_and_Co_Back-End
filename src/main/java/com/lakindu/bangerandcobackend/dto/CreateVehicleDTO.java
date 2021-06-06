@@ -17,6 +17,7 @@ public class CreateVehicleDTO {
     private String fuelType;
 
     @NotBlank(message = "Please provide a license plate")
+    //" " between regex denote the SPACE in UK License Plate Format.
     @Pattern(regexp = "^[A-Z]{2}[0-9]{2} [A-Z]{3}$", message = "Please use the UK license plate format")
     @Size(min = 8, max = 8, message = "License plate should be of 8 characters")
     private String licensePlate;

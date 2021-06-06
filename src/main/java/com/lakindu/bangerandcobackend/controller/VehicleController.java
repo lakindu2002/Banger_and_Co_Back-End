@@ -4,9 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lakindu.bangerandcobackend.dto.CreateVehicleDTO;
 import com.lakindu.bangerandcobackend.serviceinterface.VehicleService;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.BadValuePassedException;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.InputValidNotValidatedException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.MethodParameter;
@@ -23,6 +21,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.ValidationException;
 import javax.validation.Validator;
+import java.io.IOException;
+import java.util.zip.DataFormatException;
 
 @RestController //enables controller and a response body
 @RequestMapping(path = "/api/vehicle")
@@ -43,7 +43,7 @@ public class VehicleController {
     public ResponseEntity<BangerAndCoResponse> createVehicle(
             @RequestParam(name = "vehicleInformation", required = true) String jsonInput,
             @RequestParam(name = "vehicleImage", required = true) MultipartFile vehicleImage
-    ) throws JsonProcessingException, InputValidNotValidatedException {
+    ) throws IOException, InputValidNotValidatedException, ResourceNotFoundException, ResourceAlreadyExistsException, DataFormatException {
 
         ObjectMapper theMapper = new ObjectMapper();
         CreateVehicleDTO theDTO = theMapper.readValue(jsonInput, CreateVehicleDTO.class);
@@ -59,6 +59,8 @@ public class VehicleController {
             //if there are errors.
             throw new InputValidNotValidatedException("Please provide valid inputs during vehicle creation.", errorList);
         }
+
+        vehicleService.createVehicle(theDTO, vehicleImage);
 
         return new ResponseEntity<>(
                 new BangerAndCoResponse("Vehicle created successfully", HttpStatus.OK.value()),

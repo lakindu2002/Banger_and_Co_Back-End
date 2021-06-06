@@ -1,6 +1,7 @@
 package com.lakindu.bangerandcobackend.serviceinterface;
 
 import com.lakindu.bangerandcobackend.dto.VehicleTypeDTO;
+import com.lakindu.bangerandcobackend.entity.VehicleType;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceAlreadyExistsException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceNotFoundException;
 
@@ -23,4 +24,6 @@ public interface VehicleTypeService {
     List<VehicleTypeDTO> getAllVehicleTypes();
 
     VehicleTypeDTO findVehicleTypeById(int id) throws ResourceNotFoundException;
+
+    VehicleType _getType(int id) throws ResourceNotFoundException;
 }

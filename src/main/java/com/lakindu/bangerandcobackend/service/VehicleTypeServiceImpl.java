@@ -81,4 +81,9 @@ public class VehicleTypeServiceImpl implements VehicleTypeService {
 
         return theDTO; //return the DTO back to the client.
     }
+
+    @Override
+    public VehicleType _getType(int id) throws ResourceNotFoundException {
+        return vehicleTypeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("The vehicle type provided does not exist at Banger and Co."));
+    }
 }
