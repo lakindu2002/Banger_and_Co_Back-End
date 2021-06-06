@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import java.util.ArrayList;
+import java.util.InvalidPropertiesFormatException;
 
 @RestControllerAdvice
 //combination of @ControllerAdvice and @ResponseBody (automatically uses JSON)
@@ -60,7 +61,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ResourceAlreadyExistsException.class)
-    public ResponseEntity<BangerAndCoExceptionHandler> userAlreadyExistsException(ResourceAlreadyExistsException ex) {
+    public ResponseEntity<BangerAndCoExceptionHandler> resourceAlreadyExistsException(ResourceAlreadyExistsException ex) {
         //custom exception handler for a resource already existing.
 
         //create an exception handler object
@@ -132,5 +133,25 @@ public class GlobalExceptionHandler {
                 new ArrayList<>());
 
         return new ResponseEntity<>(exceptionHandler, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(InputValidNotValidatedException.class)
+    public ResponseEntity<BangerAndCoExceptionHandler> handleInputValidNotValidatedException(InputValidNotValidatedException ex) {
+        //thrown when a manually triggered validation by the DataBinder fails.
+        ArrayList<MultipleErrorSupporter> errorList = new ArrayList<>();
+        for (ObjectError err : ex.getTheErrorList().getAllErrors()) {
+            //iterate the error map for the entity and retrieve field name and the error thrown.
+            errorList.add(new MultipleErrorSupporter(((FieldError) err).getField(), err.getDefaultMessage()));
+        }
+
+        //create an exception handler object
+        BangerAndCoExceptionHandler exceptionHandler = new BangerAndCoExceptionHandler(
+                "Please Provide Valid Inputs For the Fields",
+                "The data you sent was poorly formatted.",
+                HttpStatus.BAD_REQUEST.value(),
+                errorList
+        );
+        //return the response entity of type Bad Request back to the resource sending client
+        return new ResponseEntity<>(exceptionHandler, HttpStatus.BAD_REQUEST);
     }
 }
