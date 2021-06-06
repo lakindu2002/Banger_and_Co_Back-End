@@ -1,5 +1,8 @@
 package com.lakindu.bangerandcobackend.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lakindu.bangerandcobackend.dto.CreateVehicleDTO;
 import com.lakindu.bangerandcobackend.serviceinterface.VehicleService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,8 +31,12 @@ public class VehicleController {
     public ResponseEntity<BangerAndCoResponse> createVehicle(
             @RequestParam(name = "vehicleInformation", required = true) String jsonInput,
             @RequestParam(name = "vehicleImage", required = true) MultipartFile vehicleImage
-    ) {
-        System.out.println(jsonInput);
+    ) throws JsonProcessingException {
+
+        ObjectMapper theMapper = new ObjectMapper();
+        CreateVehicleDTO theDTO = theMapper.readValue(jsonInput, CreateVehicleDTO.class);
+
+        System.out.println(theDTO);
         System.out.println(vehicleImage);
         return new ResponseEntity<>(
                 new BangerAndCoResponse("Vehicle created successfully", HttpStatus.OK.value()),
