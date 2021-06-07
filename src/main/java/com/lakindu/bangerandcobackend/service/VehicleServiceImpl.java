@@ -1,6 +1,7 @@
 package com.lakindu.bangerandcobackend.service;
 
 import com.lakindu.bangerandcobackend.dto.CreateVehicleDTO;
+import com.lakindu.bangerandcobackend.dto.ShowVehicleDTO;
 import com.lakindu.bangerandcobackend.entity.Vehicle;
 import com.lakindu.bangerandcobackend.entity.VehicleType;
 import com.lakindu.bangerandcobackend.repository.VehicleRepository;
@@ -17,6 +18,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.DataFormatException;
 
 @Service
@@ -66,5 +69,11 @@ public class VehicleServiceImpl implements VehicleService {
             //exists with license plate provided, throw error.
             throw new ResourceAlreadyExistsException("There is already a vehicle at Banger and Co registered with the license plate - " + theDTO.getLicensePlate());
         }
+    }
+
+    @Override
+    public List<ShowVehicleDTO> getAllVehicles() {
+        //method will return a list of all the vehicles that can be viewed by the administrator.
+        return new ArrayList<>();
     }
 }
