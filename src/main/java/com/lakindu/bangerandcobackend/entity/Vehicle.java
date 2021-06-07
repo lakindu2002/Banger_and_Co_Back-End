@@ -1,6 +1,7 @@
 package com.lakindu.bangerandcobackend.entity;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "vehicle")
@@ -32,11 +33,27 @@ public class Vehicle {
     //detach - detach child entity from persistence context.
     //a vehicle cannot exist without belonging to a type.
     @ManyToOne(cascade = {CascadeType.DETACH}, optional = false, fetch = FetchType.EAGER)
-    @JoinColumn(
-            name = "vehicle_type_id",
-            nullable = false
-    )
+    @JoinColumn(name = "vehicle_type_id", nullable = false)
     private VehicleType theVehicleType;
+
+    //map the rentals for each vehicle.
+    @OneToMany(
+            cascade = {CascadeType.DETACH, CascadeType.REFRESH},
+            fetch = FetchType.LAZY,
+            mappedBy = "vehicleOnRental"
+    )
+    private List<Rental> rentalsForTheVehicle;
+
+    public Vehicle() {
+    }
+
+    public List<Rental> getRentalsForTheVehicle() {
+        return rentalsForTheVehicle;
+    }
+
+    public void setRentalsForTheVehicle(List<Rental> rentalsForTheVehicle) {
+        this.rentalsForTheVehicle = rentalsForTheVehicle;
+    }
 
     public int getVehicleId() {
         return vehicleId;

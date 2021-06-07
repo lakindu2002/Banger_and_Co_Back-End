@@ -1,6 +1,7 @@
 package com.lakindu.bangerandcobackend.entity;
 
 import javax.persistence.*;
+import java.util.List;
 
 /**
  * Entity class to provide ORM to Additional Equipment table in MySQL Database
@@ -21,7 +22,24 @@ public class AdditionalEquipment {
     @Column(name = "equipment_quantity", nullable = false)
     private int equipmentQuantity;
 
+    //many to many relationship between rental and this entity.
+    @ManyToMany()
+    @JoinTable(
+            name = "rental_customization",
+            joinColumns = @JoinColumn(name = "equipment_id", nullable = false),
+            inverseJoinColumns = @JoinColumn(name = "rental_id", nullable = false)
+    )
+    private List<Rental> rentalsThatHaveThisEquipment;
+
     public AdditionalEquipment() {
+    }
+
+    public List<Rental> getRentalsThatHaveThisEquipment() {
+        return rentalsThatHaveThisEquipment;
+    }
+
+    public void setRentalsThatHaveThisEquipment(List<Rental> rentalsThatHaveThisEquipment) {
+        this.rentalsThatHaveThisEquipment = rentalsThatHaveThisEquipment;
     }
 
     public int getEquipmentId() {

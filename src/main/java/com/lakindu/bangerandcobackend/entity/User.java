@@ -5,6 +5,7 @@ import com.lakindu.bangerandcobackend.dto.UserDTO;
 import javax.persistence.*;
 import java.sql.Date;
 import java.util.Arrays;
+import java.util.List;
 
 @Entity
 @Table(name = "user_info")
@@ -42,7 +43,19 @@ public class User {
     @JoinColumn(name = "role_id", nullable = false)
     private Role userRole;
 
+    //map the list of rentals for the customer.
+    @OneToMany(mappedBy = "theCustomerRenting", fetch = FetchType.LAZY, cascade = {CascadeType.DETACH, CascadeType.REFRESH})
+    private List<Rental> customerRentalList;
+
     public User() {
+    }
+
+    public List<Rental> getCustomerRentalList() {
+        return customerRentalList;
+    }
+
+    public void setCustomerRentalList(List<Rental> customerRentalList) {
+        this.customerRentalList = customerRentalList;
     }
 
     public String getUsername() {
