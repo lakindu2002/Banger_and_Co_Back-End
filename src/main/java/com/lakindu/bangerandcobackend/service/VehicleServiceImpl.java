@@ -8,6 +8,7 @@ import com.lakindu.bangerandcobackend.repository.VehicleRepository;
 import com.lakindu.bangerandcobackend.serviceinterface.VehicleService;
 import com.lakindu.bangerandcobackend.serviceinterface.VehicleTypeService;
 import com.lakindu.bangerandcobackend.util.FileHandler.CompressImage;
+import com.lakindu.bangerandcobackend.util.FileHandler.DecompressImage;
 import com.lakindu.bangerandcobackend.util.FileHandler.ImageHandler;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceAlreadyExistsException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceNotFoundException;
@@ -72,8 +73,30 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public List<ShowVehicleDTO> getAllVehicles() {
+    public List<ShowVehicleDTO> getAllVehicles() throws DataFormatException, IOException {
         //method will return a list of all the vehicles that can be viewed by the administrator.
-        return new ArrayList<>();
+        List<Vehicle> theVehiclesInDatabase = vehicleRepository.findAll();
+        List<ShowVehicleDTO> theReturnList = new ArrayList<>(); //array list holding DTO to return to the client.
+
+        for (Vehicle eachVehicle : theVehiclesInDatabase) {
+            //construct dto before returning back to client.
+            //decompress the vehicle image before showing it to construct the original uncompressed image, else wont be rendered properly.
+            ImageHandler theDecompressor = new DecompressImage();
+            byte[] decompressedImage = theDecompressor.processUnhandledImage(eachVehicle.getVehicleImage());
+
+            //construct a DTO and insert to theReturnList
+            ShowVehicleDTO theDTO = new ShowVehicleDTO();
+            theDTO.setVehicleId(eachVehicle.getVehicleId());
+            theDTO.setLicensePlate(eachVehicle.getLicensePlate());
+            theDTO.setVehicleName(eachVehicle.getVehicleName());
+            theDTO.setFuelType(eachVehicle.getFuelType());
+            theDTO.setTransmission(eachVehicle.getTransmission());
+            theDTO.setVehicleImage(decompressedImage);
+            theDTO.setTheType(vehicleTypeService.constructDTO(eachVehicle.getTheVehicleType()));
+
+            theReturnList.add(theDTO);
+        }
+
+        return theReturnList;
     }
 }

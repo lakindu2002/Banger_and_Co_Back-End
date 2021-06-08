@@ -54,14 +54,8 @@ public class VehicleTypeServiceImpl implements VehicleTypeService {
         List<VehicleTypeDTO> returnList = new ArrayList<>();
 
         for (VehicleType theType : allTypesInDB) {
-            VehicleTypeDTO theDTO = new VehicleTypeDTO();
             //construct a return to be sent to the client via DTO Pattern.
-            theDTO.setVehicleTypeId(theType.getVehicleTypeId());
-            theDTO.setTypeName(theType.getTypeName());
-            theDTO.showCurrencyOnReturn(theType.getPricePerDay());
-            theDTO.setSize(theType.getSize());
-
-            returnList.add(theDTO);
+            returnList.add(constructDTO(theType));
         }
 
         return returnList; //return the collection back to the controller that can be used to send back to client in ResponseBody.
@@ -71,7 +65,16 @@ public class VehicleTypeServiceImpl implements VehicleTypeService {
     public VehicleTypeDTO findVehicleTypeById(int id) throws ResourceNotFoundException {
         final Optional<VehicleType> optionalType = vehicleTypeRepository.findById(id);
         VehicleType theType = optionalType.orElseThrow(() -> new ResourceNotFoundException("The vehicle type you wish to access does not exist at Banger and Co."));
+        return constructDTO(theType);
+    }
 
+    @Override
+    public VehicleType _getType(int id) throws ResourceNotFoundException {
+        return vehicleTypeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("The vehicle type provided does not exist at Banger and Co."));
+    }
+
+    @Override
+    public VehicleTypeDTO constructDTO(VehicleType theType) {
         //construct the return DTO
         VehicleTypeDTO theDTO = new VehicleTypeDTO();
         theDTO.setVehicleTypeId(theType.getVehicleTypeId());
@@ -80,10 +83,5 @@ public class VehicleTypeServiceImpl implements VehicleTypeService {
         theDTO.showCurrencyOnReturn(theType.getPricePerDay());
 
         return theDTO; //return the DTO back to the client.
-    }
-
-    @Override
-    public VehicleType _getType(int id) throws ResourceNotFoundException {
-        return vehicleTypeRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("The vehicle type provided does not exist at Banger and Co."));
     }
 }

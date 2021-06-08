@@ -26,4 +26,6 @@ public interface VehicleTypeService {
     VehicleTypeDTO findVehicleTypeById(int id) throws ResourceNotFoundException;
 
     VehicleType _getType(int id) throws ResourceNotFoundException;
+
+    VehicleTypeDTO constructDTO(VehicleType theType);
 }

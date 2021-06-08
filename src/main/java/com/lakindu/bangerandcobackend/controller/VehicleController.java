@@ -73,7 +73,7 @@ public class VehicleController {
 
     @GetMapping(path = "/all")
     @PreAuthorize("hasAuthority('ADMINISTRATOR')")
-    public ResponseEntity<List<ShowVehicleDTO>> getAllVehicles() {
+    public ResponseEntity<List<ShowVehicleDTO>> getAllVehicles() throws DataFormatException, IOException {
         List<ShowVehicleDTO> allVehicles = vehicleService.getAllVehicles();
         return new ResponseEntity<>(allVehicles, HttpStatus.OK);
     }
