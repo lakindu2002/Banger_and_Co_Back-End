@@ -92,7 +92,7 @@ public class VehicleServiceImpl implements VehicleService {
             theDTO.setFuelType(eachVehicle.getFuelType());
             theDTO.setTransmission(eachVehicle.getTransmission());
             theDTO.setVehicleImage(decompressedImage);
-            theDTO.setTheType(vehicleTypeService.constructDTO(eachVehicle.getTheVehicleType()));
+            theDTO.setVehicleType(vehicleTypeService.constructDTO(eachVehicle.getTheVehicleType()));
 
             theReturnList.add(theDTO);
         }

@@ -9,7 +9,7 @@ public class ShowVehicleDTO {
     private String fuelType;
     private String transmission;
     private byte[] vehicleImage;
-    private VehicleTypeDTO theType;
+    private VehicleTypeDTO vehicleType;
     private List<ShowRentalDTO> theRentalsForVehicle; //will be null if users are generally viewing vehicle information
     //will only carry data when a rental related function is executed.
 
@@ -65,12 +65,12 @@ public class ShowVehicleDTO {
         this.vehicleImage = vehicleImage;
     }
 
-    public VehicleTypeDTO getTheType() {
-        return theType;
+    public VehicleTypeDTO getVehicleType() {
+        return vehicleType;
     }
 
-    public void setTheType(VehicleTypeDTO theType) {
-        this.theType = theType;
+    public void setVehicleType(VehicleTypeDTO vehicleType) {
+        this.vehicleType = vehicleType;
     }
 
     public List<ShowRentalDTO> getTheRentalsForVehicle() {
