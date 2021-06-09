@@ -1,7 +1,9 @@
 package com.lakindu.bangerandcobackend.service;
 
 import com.lakindu.bangerandcobackend.dto.CreateVehicleDTO;
+import com.lakindu.bangerandcobackend.dto.ShowRentalDTO;
 import com.lakindu.bangerandcobackend.dto.ShowVehicleDTO;
+import com.lakindu.bangerandcobackend.entity.Rental;
 import com.lakindu.bangerandcobackend.entity.Vehicle;
 import com.lakindu.bangerandcobackend.entity.VehicleType;
 import com.lakindu.bangerandcobackend.repository.VehicleRepository;
@@ -93,6 +95,16 @@ public class VehicleServiceImpl implements VehicleService {
             theDTO.setTransmission(eachVehicle.getTransmission());
             theDTO.setVehicleImage(decompressedImage);
             theDTO.setVehicleType(vehicleTypeService.constructDTO(eachVehicle.getTheVehicleType()));
+
+            //show the number of rentals for each vehicle as well.
+            List<ShowRentalDTO> rentalList = new ArrayList<>();
+            for (Rental eachRental : eachVehicle.getRentalsForTheVehicle()) {
+                //create a rental dto that can be shown back to the client.
+                ShowRentalDTO theRentalDTO = new ShowRentalDTO();
+                //ASSIGN RENTAL INFORMATION!!!!!!!!!!!!!!!!!!! TO DTO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+                rentalList.add(theRentalDTO);
+            }
+            theDTO.setTheRentalsForVehicle(rentalList); //assign the rental list to the vehicle dto.
 
             theReturnList.add(theDTO);
         }

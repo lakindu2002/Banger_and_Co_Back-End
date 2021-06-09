@@ -74,7 +74,7 @@ public class VehicleController {
     @GetMapping(path = "/all")
     @PreAuthorize("hasAuthority('ADMINISTRATOR')")
     public ResponseEntity<List<ShowVehicleDTO>> getAllVehicles() throws DataFormatException, IOException {
-        //method will return a list of ALL the vehicles available at Banger and Co. and can be viewedby admin.
+        //method will return a list of ALL the vehicles available at Banger and Co. and can be viewed by admin.
         List<ShowVehicleDTO> allVehicles = vehicleService.getAllVehicles();
         return new ResponseEntity<>(allVehicles, HttpStatus.OK);
     }

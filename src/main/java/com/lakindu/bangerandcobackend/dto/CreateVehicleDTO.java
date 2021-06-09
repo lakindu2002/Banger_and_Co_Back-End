@@ -9,7 +9,7 @@ import javax.validation.constraints.Size;
 
 public class CreateVehicleDTO {
     @NotBlank(message = "Please provide a vehicle name")
-    @Size(min = 1, max = 255, message = "Please keep vehicle name between 1 and 255 characters")
+    @Size(min = 1, max = 125, message = "Please keep vehicle name between 1 and 125 characters")
     private String vehicleName;
 
     @NotBlank(message = "Please provide a fuel type")
