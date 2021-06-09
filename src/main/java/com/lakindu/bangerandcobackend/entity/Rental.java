@@ -26,7 +26,7 @@ public class Rental {
     private LocalTime returnTime;
 
     @Column(name = "total_cost", nullable = false)
-    private float totalCost;
+    private double totalCost;
 
     @Column(name = "is_returned", nullable = true)
     private boolean isReturned;
@@ -122,11 +122,11 @@ public class Rental {
         this.returnTime = returnTime;
     }
 
-    public float getTotalCost() {
+    public double getTotalCost() {
         return totalCost;
     }
 
-    public void setTotalCost(float totalCost) {
+    public void setTotalCost(double totalCost) {
         this.totalCost = totalCost;
     }
 
