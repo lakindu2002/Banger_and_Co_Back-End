@@ -2,9 +2,8 @@ package com.lakindu.bangerandcobackend.serviceinterface;
 
 import com.lakindu.bangerandcobackend.dto.CreateVehicleDTO;
 import com.lakindu.bangerandcobackend.dto.ShowVehicleDTO;
-import com.lakindu.bangerandcobackend.entity.Vehicle;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceAlreadyExistsException;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceNotFoundException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceAlreadyExistsException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;

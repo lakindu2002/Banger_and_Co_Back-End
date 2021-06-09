@@ -2,10 +2,10 @@ package com.lakindu.bangerandcobackend.controller;
 
 import com.lakindu.bangerandcobackend.dto.AdditionalEquipmentDTO;
 import com.lakindu.bangerandcobackend.serviceinterface.AdditionalEquipmentService;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.BadValuePassedException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceAlreadyExistsException;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceNotFoundException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceAlreadyExistsException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;

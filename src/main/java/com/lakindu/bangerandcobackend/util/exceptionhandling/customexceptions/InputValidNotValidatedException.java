@@ -1,4 +1,4 @@
-package com.lakindu.bangerandcobackend.util.exceptionhandling;
+package com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions;
 
 import org.springframework.validation.BindingResult;
 

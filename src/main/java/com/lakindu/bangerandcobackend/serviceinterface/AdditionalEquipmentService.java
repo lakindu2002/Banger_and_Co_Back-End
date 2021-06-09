@@ -1,9 +1,9 @@
 package com.lakindu.bangerandcobackend.serviceinterface;
 
 import com.lakindu.bangerandcobackend.dto.AdditionalEquipmentDTO;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.BadValuePassedException;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceAlreadyExistsException;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceNotFoundException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceAlreadyExistsException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
 
 import java.util.List;
 

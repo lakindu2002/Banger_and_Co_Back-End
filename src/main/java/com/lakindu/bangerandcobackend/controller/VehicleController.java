@@ -1,14 +1,15 @@
 package com.lakindu.bangerandcobackend.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lakindu.bangerandcobackend.dto.CreateVehicleDTO;
 import com.lakindu.bangerandcobackend.dto.ShowVehicleDTO;
 import com.lakindu.bangerandcobackend.serviceinterface.VehicleService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.*;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.InputValidNotValidatedException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceAlreadyExistsException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.core.MethodParameter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;

@@ -3,7 +3,7 @@ package com.lakindu.bangerandcobackend.serviceinterface;
 import com.lakindu.bangerandcobackend.dto.InquiryDTO;
 import com.lakindu.bangerandcobackend.dto.InquiryReplyDTO;
 import com.lakindu.bangerandcobackend.entity.Inquiry;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceNotFoundException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
 import org.springframework.security.core.Authentication;
 
 import java.util.List;

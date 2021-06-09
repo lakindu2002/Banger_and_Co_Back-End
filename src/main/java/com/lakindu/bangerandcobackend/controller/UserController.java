@@ -2,11 +2,10 @@ package com.lakindu.bangerandcobackend.controller;
 
 import com.lakindu.bangerandcobackend.dto.UpdateUserDTO;
 import com.lakindu.bangerandcobackend.dto.UserDTO;
-import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.serviceinterface.UserService;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.BadValuePassedException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceNotFoundException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;

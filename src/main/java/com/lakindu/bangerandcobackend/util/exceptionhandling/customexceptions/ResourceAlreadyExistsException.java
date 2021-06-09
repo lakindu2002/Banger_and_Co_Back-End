@@ -1,4 +1,4 @@
-package com.lakindu.bangerandcobackend.util.exceptionhandling;
+package com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions;
 
 public class ResourceAlreadyExistsException extends Exception {
     public ResourceAlreadyExistsException(String s) {

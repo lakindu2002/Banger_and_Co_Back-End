@@ -1,5 +1,6 @@
 package com.lakindu.bangerandcobackend.util.exceptionhandling;
 
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
@@ -12,7 +13,6 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import java.util.ArrayList;
-import java.util.InvalidPropertiesFormatException;
 
 @RestControllerAdvice
 //combination of @ControllerAdvice and @ResponseBody (automatically uses JSON)
