@@ -51,6 +51,8 @@ public class AuthController {
             @RequestParam(name = "userProfile") String requestUser,
             @RequestParam(name = "profilePic", required = true) MultipartFile requestProfilePic
     ) throws Exception {
+        //method used for customers when they wish to sign up
+
         //requestUser is a Stringify of the JSON sent from the API
         //method used for the Sign Up endpoint
 
@@ -88,6 +90,8 @@ public class AuthController {
     @PostMapping(path = "/login")
     public ResponseEntity<HashMap<String, Object>> authenticate(@Valid @RequestBody AuthRequest theAuthRequest) throws
             Exception {
+        //method executed by guests that wish to login into their account.
+
         //execute body is request is valid.
         //use auth service to perform authentication
         theAuthRequest.setUsername(theAuthRequest.getUsername().trim());

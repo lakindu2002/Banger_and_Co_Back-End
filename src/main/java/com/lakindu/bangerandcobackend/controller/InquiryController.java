@@ -36,7 +36,7 @@ public class InquiryController {
     @PreAuthorize("permitAll()") //permit all requests to this endpoint
     @PostMapping(path = "/createInquiry")
     public ResponseEntity<BangerAndCoResponse> createInquiry(@Valid @RequestBody InquiryDTO requestInquiry) {
-
+        //method used to submit an inquiry by the guest.
         requestInquiry.setFirstName(requestInquiry.getFirstName().trim());
         requestInquiry.setLastName(requestInquiry.getLastName().trim());
         requestInquiry.setContactNumber(requestInquiry.getContactNumber().trim());
@@ -68,6 +68,7 @@ public class InquiryController {
     @PreAuthorize("hasAuthority('ADMINISTRATOR')")
     @DeleteMapping(path = "/remove/{id}")
     public ResponseEntity<BangerAndCoResponse> deleteInquiry(@PathVariable(name = "id", required = true) int id) throws ResourceNotFoundException {
+        //method used to remove an inquiry from the database of a given ID by the administrator.
         inquiryService.removeInquiry(id);
         return new ResponseEntity<>(
                 new BangerAndCoResponse("Inquiry Removed Successfully", HttpStatus.OK.value()),
@@ -78,6 +79,7 @@ public class InquiryController {
     @PreAuthorize("hasAuthority('ADMINISTRATOR')")
     @GetMapping(path = "/find/{id}")
     public ResponseEntity<InquiryDTO> getDetailedInquiry(@PathVariable(name = "id") int id) throws ResourceNotFoundException {
+        //method used to get detailed information of a single inquiry that can be viewed by the administrator.
         InquiryDTO theDTO = inquiryService.getDetailedInquiry(id);
         return new ResponseEntity<>(theDTO, HttpStatus.OK); //return a 200 to the client along with the inquiry DTO
     }
@@ -88,6 +90,7 @@ public class InquiryController {
             @Valid @RequestBody InquiryReplyDTO theDTO,
             Authentication theAuthentication
     ) throws Exception {
+        //method executed when the administrator clicks on "Reply" that will email the admin response to the client and mark the inquiry as resolved in the database.
         //if request body is validated, execute method, reply to the inquiry by calling service method
         inquiryService.replyToInquiry(theDTO, theDTO.getInquiryReply(), theAuthentication);
 

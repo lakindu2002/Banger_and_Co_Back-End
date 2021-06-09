@@ -45,8 +45,8 @@ public class VehicleController {
             @RequestParam(name = "vehicleInformation", required = true) String jsonInput,
             @RequestParam(name = "vehicleImage", required = true) MultipartFile vehicleImage
     ) throws IOException, InputValidNotValidatedException, ResourceNotFoundException, ResourceAlreadyExistsException,
-
             DataFormatException {
+        //method will create a vehicle at Banger and Co by the admin
 
         ObjectMapper theMapper = new ObjectMapper();
         CreateVehicleDTO theDTO = theMapper.readValue(jsonInput, CreateVehicleDTO.class);
@@ -74,6 +74,7 @@ public class VehicleController {
     @GetMapping(path = "/all")
     @PreAuthorize("hasAuthority('ADMINISTRATOR')")
     public ResponseEntity<List<ShowVehicleDTO>> getAllVehicles() throws DataFormatException, IOException {
+        //method will return a list of ALL the vehicles available at Banger and Co. and can be viewedby admin.
         List<ShowVehicleDTO> allVehicles = vehicleService.getAllVehicles();
         return new ResponseEntity<>(allVehicles, HttpStatus.OK);
     }

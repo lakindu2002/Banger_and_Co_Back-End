@@ -32,6 +32,7 @@ public class UserController {
     @GetMapping(path = "/userInformation/{username}")
     @PreAuthorize("hasAuthority('ADMINISTRATOR') or hasAuthority('CUSTOMER')")
     public ResponseEntity<UserDTO> getUserInformation(@PathVariable(name = "username", required = true) String username) throws Exception {
+        //method is used to retrieve the user information for the user that can be viewed by the angular front end which allows updation
         UserDTO theDTO = theUserService.getUserInformation(username);
         return new ResponseEntity<>(theDTO, HttpStatus.OK);
     }
@@ -39,6 +40,7 @@ public class UserController {
     @PreAuthorize("hasAuthority('ADMINISTRATOR') or hasAuthority('CUSTOMER')")
     @PutMapping(path = "/update")
     public ResponseEntity<BangerAndCoResponse> updateUser(@Valid @RequestBody UpdateUserDTO theDTO) throws ResourceNotFoundException, BadValuePassedException {
+        //method executed whenever the customer or the administrator wishes to update their profile.
         //if the request body is valid
         theUserService.updateUserInformation(theDTO); //call the update method
         return new ResponseEntity<>(new BangerAndCoResponse("User Updated Successfully", HttpStatus.OK.value()), HttpStatus.OK);

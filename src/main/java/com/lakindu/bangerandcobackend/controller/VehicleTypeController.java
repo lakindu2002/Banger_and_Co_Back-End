@@ -32,6 +32,8 @@ public class VehicleTypeController {
     @PreAuthorize("hasAuthority('ADMINISTRATOR')")
     @PostMapping(path = "/create")
     public ResponseEntity<BangerAndCoResponse> createVehicleType(@Valid @RequestBody VehicleTypeDTO theDTO) throws ResourceAlreadyExistsException {
+        //method will create a vehicle type by the information passed by the administrator.
+
         //@Valid triggers bean validation and will execute method if the request body has been validated successfully
         //@RequestBody will automatically bind the json object into the VehicleTypeDTO via jackson (de-serialize)
         //maps  JSON object properties to fields and calls the setters.
@@ -47,6 +49,7 @@ public class VehicleTypeController {
     @PreAuthorize("hasAuthority('ADMINISTRATOR')")
     @GetMapping(path = "/findAll")
     public ResponseEntity<List<VehicleTypeDTO>> getAllVehicleTypes() {
+        //method will return a list of all the available vehicle types available at banger and co.
         //response entity = http response
         List<VehicleTypeDTO> theTypes = vehicleTypeService.getAllVehicleTypes();
         return new ResponseEntity<>(theTypes, HttpStatus.OK); //ok = 200 status code
@@ -55,6 +58,7 @@ public class VehicleTypeController {
     @PreAuthorize("hasAuthority('ADMINISTRATOR')")
     @GetMapping(path = "/find/{id}")
     public ResponseEntity<VehicleTypeDTO> findById(@PathVariable(name = "id", required = true) int id) throws ResourceNotFoundException {
+        //method will be used to find a vehicle type of a given id.
         //get the vehicle type dto via the ID
         VehicleTypeDTO theType = vehicleTypeService.findVehicleTypeById(id);
         return new ResponseEntity<>(theType, HttpStatus.OK); //ok = 200 status code

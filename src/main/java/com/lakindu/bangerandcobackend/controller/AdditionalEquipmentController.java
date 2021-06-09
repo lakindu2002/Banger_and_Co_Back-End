@@ -33,6 +33,7 @@ public class AdditionalEquipmentController {
     public ResponseEntity<BangerAndCoResponse> createAdditionalEquipment(
             @Valid @RequestBody AdditionalEquipmentDTO theDTO
     ) throws ResourceAlreadyExistsException, BadValuePassedException {
+        //method used to create additional equipment by the administrator.
         //@RequestBody will automatically de-serialize the HTTP Request Body for the AdditionalEquipmentDTO object.
 
         //call service method to create the additional equipment.
@@ -49,6 +50,8 @@ public class AdditionalEquipmentController {
     public ResponseEntity<BangerAndCoResponse> updateAdditionalEquipment(
             @Valid @RequestBody AdditionalEquipmentDTO theUpdateDTO
     ) throws ResourceNotFoundException, BadValuePassedException, ResourceAlreadyExistsException {
+        //method used to update the additional equipment information by the administrator.
+        //allows updating of the equipment name and quantity.
 
         //call the service method
         additionalEquipmentService.updateEquipment(theUpdateDTO);
@@ -76,7 +79,7 @@ public class AdditionalEquipmentController {
     @PreAuthorize("hasAuthority('ADMINISTRATOR')")
     @GetMapping(path = "/get/{id}")
     public ResponseEntity<AdditionalEquipmentDTO> getEquipmentById(@PathVariable(name = "id", required = true) int equipmentId) throws ResourceNotFoundException {
-        //method used to retrieve additional equipment by the id to display on update.
+        //method used to retrieve additional equipment by the id to display on update for the administrator.
         AdditionalEquipmentDTO theViewingDTO = additionalEquipmentService.getEquipmentByID(equipmentId);
         //if successfully retrieved.
         return new ResponseEntity<>(theViewingDTO, HttpStatus.OK);
