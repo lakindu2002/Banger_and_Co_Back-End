@@ -8,6 +8,7 @@ public class ShowVehicleDTO {
     private String vehicleName;
     private String fuelType;
     private String transmission;
+    private int seatingCapacity;
     private byte[] vehicleImage;
     private VehicleTypeDTO vehicleType;
     private List<ShowRentalDTO> theRentalsForVehicle; //will be null if users are generally viewing vehicle information
@@ -15,6 +16,14 @@ public class ShowVehicleDTO {
 
 
     public ShowVehicleDTO() {
+    }
+
+    public int getSeatingCapacity() {
+        return seatingCapacity;
+    }
+
+    public void setSeatingCapacity(int seatingCapacity) {
+        this.seatingCapacity = seatingCapacity;
     }
 
     public int getVehicleId() {

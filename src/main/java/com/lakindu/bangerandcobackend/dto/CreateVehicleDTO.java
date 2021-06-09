@@ -2,10 +2,7 @@ package com.lakindu.bangerandcobackend.dto;
 
 import com.lakindu.bangerandcobackend.util.validators.ConstraintChecker;
 
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 
 public class CreateVehicleDTO {
     @NotBlank(message = "Please provide a vehicle name")
@@ -26,10 +23,21 @@ public class CreateVehicleDTO {
     @ConstraintChecker(allowedConstants = "manual,automatic,triptonic", message = "The transmission type you passed is not acceptable by Banger and Co.")
     private String transmission;
 
+    @Digits(integer = 3, fraction = 0, message = "Please keep seating capacity to 3 integers")
+    private int seatingCapacity;
+
     @NotNull(message = "Please provide a valid vehicle type to assign vehicle to")
     private int vehicleTypeId;
 
     public CreateVehicleDTO() {
+    }
+
+    public int getSeatingCapacity() {
+        return seatingCapacity;
+    }
+
+    public void setSeatingCapacity(int seatingCapacity) {
+        this.seatingCapacity = seatingCapacity;
     }
 
     public String getVehicleName() {

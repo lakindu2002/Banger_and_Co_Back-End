@@ -66,6 +66,7 @@ public class VehicleServiceImpl implements VehicleService {
             thePersistingEntity.setVehicleImage(compressedImage);
             thePersistingEntity.setTransmission(theDTO.getTransmission());
             thePersistingEntity.setLicensePlate(theDTO.getLicensePlate());
+            thePersistingEntity.setSeatingCapacity(theDTO.getSeatingCapacity());
 
             vehicleRepository.save(thePersistingEntity); //save object in database.
         } else {
@@ -93,6 +94,7 @@ public class VehicleServiceImpl implements VehicleService {
             theDTO.setVehicleName(eachVehicle.getVehicleName());
             theDTO.setFuelType(eachVehicle.getFuelType());
             theDTO.setTransmission(eachVehicle.getTransmission());
+            theDTO.setSeatingCapacity(eachVehicle.getSeatingCapacity());
             theDTO.setVehicleImage(decompressedImage);
             theDTO.setVehicleType(vehicleTypeService.constructDTO(eachVehicle.getTheVehicleType()));
 

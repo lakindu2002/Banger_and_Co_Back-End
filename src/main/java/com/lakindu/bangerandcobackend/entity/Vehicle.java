@@ -23,6 +23,9 @@ public class Vehicle {
     @Column(name = "transmission", length = 255, nullable = false)
     private String transmission;
 
+    @Column(name = "seating_capacity", nullable = false)
+    private int seatingCapacity;
+
     @Lob
     //column definition defines the SQL Fragment to be used when creating the Column of MediumBlob
     //like when this column is being created, strictly place creating "MediumBlob" type.
@@ -45,6 +48,14 @@ public class Vehicle {
     private List<Rental> rentalsForTheVehicle;
 
     public Vehicle() {
+    }
+
+    public int getSeatingCapacity() {
+        return seatingCapacity;
+    }
+
+    public void setSeatingCapacity(int seatingCapacity) {
+        this.seatingCapacity = seatingCapacity;
     }
 
     public List<Rental> getRentalsForTheVehicle() {
