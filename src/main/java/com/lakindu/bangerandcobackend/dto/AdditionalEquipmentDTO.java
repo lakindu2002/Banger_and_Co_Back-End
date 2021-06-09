@@ -4,6 +4,8 @@ import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 /**
  * DTO Object for Additional Equipment
@@ -21,7 +23,25 @@ public class AdditionalEquipmentDTO {
     @Digits(integer = 4, fraction = 0, message = "Please keep quantity to 4 digits maximum (eg:9999)")
     private int equipmentQuantity;
 
+    @NotBlank(message = "Please provide a valid price")
+    @Digits(integer = 5, fraction = 3, message = "Please provide a maximum of 5 numerics and 3 decimals for the price per day.")
+    private String pricePerDay;
+
     public AdditionalEquipmentDTO() {
+    }
+
+    public void showCurrencyOnReturn(double pricePerDay) {
+        //when setting price to return to the view, use a currency formatter
+        NumberFormat theCurrencyFormatter = NumberFormat.getCurrencyInstance(Locale.UK); //get pound currency
+        this.pricePerDay = theCurrencyFormatter.format(pricePerDay);
+    }
+
+    public String getPricePerDay() {
+        return pricePerDay;
+    }
+
+    public void setPricePerDay(String pricePerDay) {
+        this.pricePerDay = pricePerDay;
     }
 
     public int getEquipmentId() {

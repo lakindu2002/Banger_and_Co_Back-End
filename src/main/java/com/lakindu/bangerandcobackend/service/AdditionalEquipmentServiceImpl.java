@@ -40,6 +40,7 @@ public class AdditionalEquipmentServiceImpl implements AdditionalEquipmentServic
             theDTO.setEquipmentName(theEquipment.getEquipmentName());
             theDTO.setEquipmentQuantity(theEquipment.getEquipmentQuantity());
             theDTO.setEquipmentId(theEquipment.getEquipmentId());
+            theDTO.showCurrencyOnReturn(theEquipment.getPricePerDay());
 
             theReturnList.add(theDTO);
         }
@@ -58,6 +59,7 @@ public class AdditionalEquipmentServiceImpl implements AdditionalEquipmentServic
         AdditionalEquipment theDomainEntity = new AdditionalEquipment();
         theDomainEntity.setEquipmentName(theDTO.getEquipmentName().trim().toUpperCase());
         theDomainEntity.setEquipmentQuantity(theDTO.getEquipmentQuantity());
+        theDomainEntity.setPricePerDay(Double.parseDouble(theDTO.getPricePerDay()));
 
         if (theDomainEntity.getEquipmentQuantity() == 0) {
             //if the quantity being added while creating a new item is at 0, it cannot be added
@@ -128,6 +130,7 @@ public class AdditionalEquipmentServiceImpl implements AdditionalEquipmentServic
         theReturningDTO.setEquipmentId(theEquipment.getEquipmentId());
         theReturningDTO.setEquipmentName(theEquipment.getEquipmentName());
         theReturningDTO.setEquipmentQuantity(theEquipment.getEquipmentQuantity());
+        theReturningDTO.setPricePerDay(String.valueOf(theEquipment.getPricePerDay()));
 
         return theReturningDTO; //return the object to the controller that will return the object via serialization back to client
     }

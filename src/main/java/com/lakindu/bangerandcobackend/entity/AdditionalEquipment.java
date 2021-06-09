@@ -22,6 +22,9 @@ public class AdditionalEquipment {
     @Column(name = "equipment_quantity", nullable = false)
     private int equipmentQuantity;
 
+    @Column(name = "price_per_day", nullable = false)
+    private double pricePerDay;
+
     //many to many relationship between rental and this entity.
     @ManyToMany()
     @JoinTable(
@@ -32,6 +35,14 @@ public class AdditionalEquipment {
     private List<Rental> rentalsThatHaveThisEquipment;
 
     public AdditionalEquipment() {
+    }
+
+    public double getPricePerDay() {
+        return pricePerDay;
+    }
+
+    public void setPricePerDay(double pricePerDay) {
+        this.pricePerDay = pricePerDay;
     }
 
     public List<Rental> getRentalsThatHaveThisEquipment() {
