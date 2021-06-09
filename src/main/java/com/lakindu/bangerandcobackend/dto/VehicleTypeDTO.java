@@ -23,6 +23,19 @@ public class VehicleTypeDTO {
     @Digits(integer = 5, fraction = 3, message = "Please provide a maximum of 5 numerics and 3 decimals for the price per day.")
     private String pricePerDay;
 
+    private int vehicleCountInType;
+
+    public VehicleTypeDTO() {
+    }
+
+    public int getVehicleCountInType() {
+        return vehicleCountInType;
+    }
+
+    public void setVehicleCountInType(int vehicleCountInType) {
+        this.vehicleCountInType = vehicleCountInType;
+    }
+
     public int getVehicleTypeId() {
         return vehicleTypeId;
     }
