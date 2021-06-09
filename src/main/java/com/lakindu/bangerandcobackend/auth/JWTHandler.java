@@ -51,6 +51,7 @@ public class JWTHandler {
                 .withIssuedAt(new Date(System.currentTimeMillis()))
                 .withExpiresAt(new Date(System.currentTimeMillis() + theConstants.getEXPIRATION_TIME()))
                 .withArrayClaim(theConstants.getAUTHORITIES(), claimsForUser)
+                //Creates a new Algorithm instance using HmacSHA256. Tokens specify this as "HS256".
                 .sign(Algorithm.HMAC256(signingKey.getBytes(StandardCharsets.UTF_8)));
     }
 
