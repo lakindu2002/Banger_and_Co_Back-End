@@ -101,7 +101,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<BangerAndCoExceptionHandler> handleResourceNotFound(ResourceNotFoundException ex) {
-        //handle exceptions thrown when required Part Parameters are not provided
+        //handle exceptions thrown when the resource cannot be found in the database.
         BangerAndCoExceptionHandler exceptionHandler = new BangerAndCoExceptionHandler(
                 "The Resource Could Not Be Found",
                 ex.getLocalizedMessage(),
@@ -109,6 +109,19 @@ public class GlobalExceptionHandler {
                 new ArrayList<>());
 
         return new ResponseEntity<>(exceptionHandler, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(ResourceCannotBeDeletedException.class)
+    public ResponseEntity<BangerAndCoExceptionHandler> handleResourceCannotBeDeleted(ResourceCannotBeDeletedException ex) {
+        //handle exceptions thrown when the resource cannot be deleted.
+        BangerAndCoExceptionHandler theHandler = new BangerAndCoExceptionHandler(
+                "Resource Failed To Delete",
+                ex.getLocalizedMessage(),
+                HttpStatus.CONFLICT.value(),
+                new ArrayList<>()
+        );
+        //conflict is used in cases where user is able to fix data and send to avoid conflict.
+        return new ResponseEntity<>(theHandler, HttpStatus.CONFLICT); //return a conflict as operation could not be completed due to a conflict in logic.
     }
 
     @ExceptionHandler(BadValuePassedException.class)

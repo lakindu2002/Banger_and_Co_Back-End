@@ -5,6 +5,7 @@ import com.lakindu.bangerandcobackend.entity.VehicleType;
 import com.lakindu.bangerandcobackend.repository.VehicleTypeRepository;
 import com.lakindu.bangerandcobackend.serviceinterface.VehicleTypeService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceAlreadyExistsException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceCannotBeDeletedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -84,5 +85,25 @@ public class VehicleTypeServiceImpl implements VehicleTypeService {
         theDTO.setVehicleCountInType(theType.getVehicleList().size());
 
         return theDTO; //return the DTO back to the client.
+    }
+
+    @Override
+    public void removeVehicleType(int id) throws ResourceNotFoundException, ResourceCannotBeDeletedException {
+        Optional<VehicleType> optionalVehicleType = vehicleTypeRepository.findById(id);
+        if (optionalVehicleType.isPresent()) {
+            //the vehicle type is present in the database
+            //check if the vehicle type has any vehicles associated to it.
+            VehicleType theType = optionalVehicleType.get();
+            if (theType.getVehicleList().size() > 0) {
+                //there are vehicles associated to the type, therefore it cannot be removed
+                throw new ResourceCannotBeDeletedException("There are vehicles associated to the type - " + theType.getSize() + " " + theType.getTypeName() + ". Please assign the vehicles to a new type or remove the vehicles before deleting this vehicle type.");
+            } else {
+                //no vehicles, can remove
+                vehicleTypeRepository.delete(theType); //delete vehicle type from database.
+            }
+        } else {
+            //the vehicle type is not in database.
+            throw new ResourceNotFoundException("The Vehicle Type that you are trying to remove does not exist at Banger and Co.");
+        }
     }
 }

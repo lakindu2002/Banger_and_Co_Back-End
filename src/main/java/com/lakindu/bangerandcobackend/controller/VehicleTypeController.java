@@ -4,6 +4,7 @@ import com.lakindu.bangerandcobackend.dto.VehicleTypeDTO;
 import com.lakindu.bangerandcobackend.serviceinterface.VehicleTypeService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceAlreadyExistsException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceCannotBeDeletedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -62,5 +63,16 @@ public class VehicleTypeController {
         //get the vehicle type dto via the ID
         VehicleTypeDTO theType = vehicleTypeService.findVehicleTypeById(id);
         return new ResponseEntity<>(theType, HttpStatus.OK); //ok = 200 status code
+    }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @DeleteMapping(path = "/remove/{id}")
+    public ResponseEntity<BangerAndCoResponse> removeById(@PathVariable(name = "id", required = true) int id) throws ResourceNotFoundException, ResourceCannotBeDeletedException {
+        //allows the vehicle type to be removed from the database only when there are no vehicles associated to the type.
+        vehicleTypeService.removeVehicleType(id);
+        return new ResponseEntity<>(
+                new BangerAndCoResponse("Vehicle Type Removed Successfully", HttpStatus.OK.value()),
+                HttpStatus.OK
+        );
     }
 }
