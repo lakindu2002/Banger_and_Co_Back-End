@@ -1,7 +1,7 @@
 package com.lakindu.bangerandcobackend.service;
 
 import com.lakindu.bangerandcobackend.auth.CustomUserPrincipal;
-import com.lakindu.bangerandcobackend.dto.UpdateUserDTO;
+import com.lakindu.bangerandcobackend.dto.UserUpdateDTO;
 import com.lakindu.bangerandcobackend.dto.UserDTO;
 import com.lakindu.bangerandcobackend.entity.Role;
 import com.lakindu.bangerandcobackend.entity.User;
@@ -27,6 +27,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.zip.DataFormatException;
 
 
@@ -147,7 +149,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateUserInformation(UpdateUserDTO userInfo) throws ResourceNotFoundException, BadValuePassedException {
+    public void updateUserInformation(UserUpdateDTO userInfo) throws ResourceNotFoundException, BadValuePassedException {
         //updated the user information and send an email.
         if (theUserRepository.existsById(userInfo.getUsername())) {
             final User updatingUser = _getUserWithoutDecompression(userInfo.getUsername()); //retrieve the user information
@@ -171,6 +173,32 @@ public class UserServiceImpl implements UserService {
         } else {
             throw new ResourceNotFoundException("The username that you are trying to update does not exist in the system");
         }
+    }
+
+    @Override
+    public List<UserDTO> getAllCustomers() throws DataFormatException, IOException {
+        //method will return all the customers that can be viewed by the administrator.
+        List<User> theCustomersInDb = theUserRepository.getAllUsersExceptAdministrator("administrator"); //return all users in database except administrator.
+        List<UserDTO> theCustomerList = new ArrayList<>();
+
+        for (User eachCustomer : theCustomersInDb) {
+            //construct a DTO for each user and add to the return list that can be viewed by the admin.
+            UserDTO theCustomerDTO = new UserDTO();
+
+            theCustomerDTO.setUsername(eachCustomer.getUsername());
+            theCustomerDTO.setEmailAddress(eachCustomer.getEmailAddress());
+            theCustomerDTO.setFirstName(eachCustomer.getFirstName());
+            theCustomerDTO.setLastName(eachCustomer.getLastName());
+            theCustomerDTO.setDateOfBirth(eachCustomer.getDateOfBirth());
+            theCustomerDTO.setUserPassword(null);
+            theCustomerDTO.setContactNumber(eachCustomer.getContactNumber());
+            theCustomerDTO.setUserRole(null);
+            theCustomerDTO.setProfilePicture(new DecompressImage().processUnhandledImage(eachCustomer.getProfilePicture()));
+            theCustomerDTO.setBlackListed(eachCustomer.isBlackListed());
+
+            theCustomerList.add(theCustomerDTO); //attach the entitys DTO to the DTO List.
+        }
+        return theCustomerList;
     }
 
     @Override

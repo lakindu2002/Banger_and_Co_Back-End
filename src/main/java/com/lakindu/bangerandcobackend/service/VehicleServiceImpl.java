@@ -1,8 +1,8 @@
 package com.lakindu.bangerandcobackend.service;
 
-import com.lakindu.bangerandcobackend.dto.CreateVehicleDTO;
-import com.lakindu.bangerandcobackend.dto.ShowRentalDTO;
-import com.lakindu.bangerandcobackend.dto.ShowVehicleDTO;
+import com.lakindu.bangerandcobackend.dto.VehicleCreateDTO;
+import com.lakindu.bangerandcobackend.dto.RentalShowDTO;
+import com.lakindu.bangerandcobackend.dto.VehicleShowDTO;
 import com.lakindu.bangerandcobackend.entity.Rental;
 import com.lakindu.bangerandcobackend.entity.Vehicle;
 import com.lakindu.bangerandcobackend.entity.VehicleType;
@@ -42,7 +42,7 @@ public class VehicleServiceImpl implements VehicleService {
 
     @Override
     @Transactional
-    public void createVehicle(CreateVehicleDTO theDTO, MultipartFile vehicleImage) throws ResourceNotFoundException, ResourceAlreadyExistsException, IOException, DataFormatException {
+    public void createVehicle(VehicleCreateDTO theDTO, MultipartFile vehicleImage) throws ResourceNotFoundException, ResourceAlreadyExistsException, IOException, DataFormatException {
         //method executed to insert a vehicle into the database.
 
         //retrieve the vehicle type to assign to the vehicle.
@@ -76,10 +76,10 @@ public class VehicleServiceImpl implements VehicleService {
     }
 
     @Override
-    public List<ShowVehicleDTO> getAllVehicles() throws DataFormatException, IOException {
+    public List<VehicleShowDTO> getAllVehicles() throws DataFormatException, IOException {
         //method will return a list of all the vehicles that can be viewed by the administrator.
         List<Vehicle> theVehiclesInDatabase = vehicleRepository.findAll();
-        List<ShowVehicleDTO> theReturnList = new ArrayList<>(); //array list holding DTO to return to the client.
+        List<VehicleShowDTO> theReturnList = new ArrayList<>(); //array list holding DTO to return to the client.
 
         for (Vehicle eachVehicle : theVehiclesInDatabase) {
             //construct dto before returning back to client.
@@ -88,7 +88,7 @@ public class VehicleServiceImpl implements VehicleService {
             byte[] decompressedImage = theDecompressor.processUnhandledImage(eachVehicle.getVehicleImage());
 
             //construct a DTO and insert to theReturnList
-            ShowVehicleDTO theDTO = new ShowVehicleDTO();
+            VehicleShowDTO theDTO = new VehicleShowDTO();
             theDTO.setVehicleId(eachVehicle.getVehicleId());
             theDTO.setLicensePlate(eachVehicle.getLicensePlate());
             theDTO.setVehicleName(eachVehicle.getVehicleName());
@@ -99,10 +99,10 @@ public class VehicleServiceImpl implements VehicleService {
             theDTO.setVehicleType(vehicleTypeService.constructDTO(eachVehicle.getTheVehicleType()));
 
             //show the number of rentals for each vehicle as well.
-            List<ShowRentalDTO> rentalList = new ArrayList<>();
+            List<RentalShowDTO> rentalList = new ArrayList<>();
             for (Rental eachRental : eachVehicle.getRentalsForTheVehicle()) {
                 //create a rental dto that can be shown back to the client.
-                ShowRentalDTO theRentalDTO = new ShowRentalDTO();
+                RentalShowDTO theRentalDTO = new RentalShowDTO();
                 //ASSIGN RENTAL INFORMATION!!!!!!!!!!!!!!!!!!! TO DTO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
                 rentalList.add(theRentalDTO);
             }

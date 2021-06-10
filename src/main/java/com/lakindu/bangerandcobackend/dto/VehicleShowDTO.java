@@ -2,7 +2,7 @@ package com.lakindu.bangerandcobackend.dto;
 
 import java.util.List;
 
-public class ShowVehicleDTO {
+public class VehicleShowDTO {
     private int vehicleId;
     private String licensePlate;
     private String vehicleName;
@@ -11,11 +11,11 @@ public class ShowVehicleDTO {
     private int seatingCapacity;
     private byte[] vehicleImage;
     private VehicleTypeDTO vehicleType;
-    private List<ShowRentalDTO> theRentalsForVehicle; //will be null if users are generally viewing vehicle information
+    private List<RentalShowDTO> theRentalsForVehicle; //will be null if users are generally viewing vehicle information
     //will only carry data when a rental related function is executed.
 
 
-    public ShowVehicleDTO() {
+    public VehicleShowDTO() {
     }
 
     public int getSeatingCapacity() {
@@ -82,11 +82,11 @@ public class ShowVehicleDTO {
         this.vehicleType = vehicleType;
     }
 
-    public List<ShowRentalDTO> getTheRentalsForVehicle() {
+    public List<RentalShowDTO> getTheRentalsForVehicle() {
         return theRentalsForVehicle;
     }
 
-    public void setTheRentalsForVehicle(List<ShowRentalDTO> theRentalsForVehicle) {
+    public void setTheRentalsForVehicle(List<RentalShowDTO> theRentalsForVehicle) {
         this.theRentalsForVehicle = theRentalsForVehicle;
     }
 }

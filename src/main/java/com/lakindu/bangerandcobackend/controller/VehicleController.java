@@ -1,8 +1,8 @@
 package com.lakindu.bangerandcobackend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lakindu.bangerandcobackend.dto.CreateVehicleDTO;
-import com.lakindu.bangerandcobackend.dto.ShowVehicleDTO;
+import com.lakindu.bangerandcobackend.dto.VehicleCreateDTO;
+import com.lakindu.bangerandcobackend.dto.VehicleShowDTO;
 import com.lakindu.bangerandcobackend.serviceinterface.VehicleService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.*;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.InputValidNotValidatedException;
@@ -50,7 +50,7 @@ public class VehicleController {
         //method will create a vehicle at Banger and Co by the admin
 
         ObjectMapper theMapper = new ObjectMapper();
-        CreateVehicleDTO theDTO = theMapper.readValue(jsonInput, CreateVehicleDTO.class);
+        VehicleCreateDTO theDTO = theMapper.readValue(jsonInput, VehicleCreateDTO.class);
 
         DataBinder theBinder = new DataBinder(theDTO); //bind a CreateVehicleDTO
         theBinder.setValidator((org.springframework.validation.Validator) validator); //assign the Java default validator
@@ -74,9 +74,9 @@ public class VehicleController {
 
     @GetMapping(path = "/all")
     @PreAuthorize("hasAuthority('ADMINISTRATOR')")
-    public ResponseEntity<List<ShowVehicleDTO>> getAllVehicles() throws DataFormatException, IOException {
+    public ResponseEntity<List<VehicleShowDTO>> getAllVehicles() throws DataFormatException, IOException {
         //method will return a list of ALL the vehicles available at Banger and Co. and can be viewed by admin.
-        List<ShowVehicleDTO> allVehicles = vehicleService.getAllVehicles();
+        List<VehicleShowDTO> allVehicles = vehicleService.getAllVehicles();
         return new ResponseEntity<>(allVehicles, HttpStatus.OK);
     }
 }

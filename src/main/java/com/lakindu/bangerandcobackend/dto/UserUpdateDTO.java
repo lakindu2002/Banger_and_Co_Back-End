@@ -4,7 +4,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 
-public class UpdateUserDTO {
+public class UserUpdateDTO {
     @NotBlank(message = "Please Provide a Valid Username")
     private String username;
     @NotBlank(message = "Please Provide a Valid Contact Number of 10 Digits")
@@ -13,7 +13,7 @@ public class UpdateUserDTO {
     private String contactNumber;
     private String userPassword;
 
-    public UpdateUserDTO() {
+    public UserUpdateDTO() {
     }
 
     public String getUsername() {

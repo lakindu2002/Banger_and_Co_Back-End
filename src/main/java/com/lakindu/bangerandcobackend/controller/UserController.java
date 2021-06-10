@@ -1,6 +1,6 @@
 package com.lakindu.bangerandcobackend.controller;
 
-import com.lakindu.bangerandcobackend.dto.UpdateUserDTO;
+import com.lakindu.bangerandcobackend.dto.UserUpdateDTO;
 import com.lakindu.bangerandcobackend.dto.UserDTO;
 import com.lakindu.bangerandcobackend.serviceinterface.UserService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
@@ -14,6 +14,9 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.IOException;
+import java.util.List;
+import java.util.zip.DataFormatException;
 
 @RestController
 @PreAuthorize("isAuthenticated()")
@@ -38,10 +41,20 @@ public class UserController {
 
     @PreAuthorize("hasAuthority('ADMINISTRATOR') or hasAuthority('CUSTOMER')")
     @PutMapping(path = "/update")
-    public ResponseEntity<BangerAndCoResponse> updateUser(@Valid @RequestBody UpdateUserDTO theDTO) throws ResourceNotFoundException, BadValuePassedException {
+    public ResponseEntity<BangerAndCoResponse> updateUser(@Valid @RequestBody UserUpdateDTO theDTO) throws ResourceNotFoundException, BadValuePassedException {
         //method executed whenever the customer or the administrator wishes to update their profile.
         //if the request body is valid
         theUserService.updateUserInformation(theDTO); //call the update method
         return new ResponseEntity<>(new BangerAndCoResponse("User Updated Successfully", HttpStatus.OK.value()), HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @GetMapping(path = "/customers/all")
+    public ResponseEntity<List<UserDTO>> getAllCustomers() throws DataFormatException, IOException {
+        //method called by an administrator to view all the customers registered in the system.
+        List<UserDTO> customerList = theUserService.getAllCustomers(); //call service method to get customer list.
+        return new ResponseEntity<>(
+                customerList, HttpStatus.OK
+        ); //return the response entity back to the administrator with OK (200) code to show it was a success.
     }
 }

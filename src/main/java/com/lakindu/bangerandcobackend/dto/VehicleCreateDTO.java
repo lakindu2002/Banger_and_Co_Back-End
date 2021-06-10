@@ -4,7 +4,7 @@ import com.lakindu.bangerandcobackend.util.validators.ConstraintChecker;
 
 import javax.validation.constraints.*;
 
-public class CreateVehicleDTO {
+public class VehicleCreateDTO {
     @NotBlank(message = "Please provide a vehicle name")
     @Size(min = 1, max = 125, message = "Please keep vehicle name between 1 and 125 characters")
     private String vehicleName;
@@ -29,7 +29,7 @@ public class CreateVehicleDTO {
     @NotNull(message = "Please provide a valid vehicle type to assign vehicle to")
     private int vehicleTypeId;
 
-    public CreateVehicleDTO() {
+    public VehicleCreateDTO() {
     }
 
     public int getSeatingCapacity() {

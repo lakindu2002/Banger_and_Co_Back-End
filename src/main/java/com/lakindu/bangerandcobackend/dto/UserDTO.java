@@ -2,6 +2,7 @@ package com.lakindu.bangerandcobackend.dto;
 
 import javax.validation.constraints.*;
 import java.sql.Date;
+import java.util.List;
 
 public class UserDTO {
 
@@ -39,6 +40,8 @@ public class UserDTO {
     private boolean isBlackListed;
 
     private String userRole;
+
+    private List<RentalShowDTO> rentalListForCustomer;
 
     public UserDTO() {
     }
