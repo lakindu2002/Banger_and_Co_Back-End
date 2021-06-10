@@ -2,15 +2,18 @@ package com.lakindu.bangerandcobackend.controller;
 
 import com.lakindu.bangerandcobackend.dto.UserUpdateDTO;
 import com.lakindu.bangerandcobackend.dto.UserDTO;
+import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.serviceinterface.UserService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotUpdatedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -56,5 +59,17 @@ public class UserController {
         return new ResponseEntity<>(
                 customerList, HttpStatus.OK
         ); //return the response entity back to the administrator with OK (200) code to show it was a success.
+    }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @PutMapping(path = "/customer/whitelist/{username}")
+    public ResponseEntity<BangerAndCoResponse> whiteListCustomer(@PathVariable(name = "username", required = true) String username) throws ResourceNotFoundException, ResourceNotUpdatedException {
+        //method executed by the administrator to white list the customer so that they can make rentals again.
+        //user gets blacklisted by the system automatically when they fail to collect their made rental.
+        User whiteListedCustomer = theUserService.whitelistCustomer(username);
+        return new ResponseEntity<>(
+                new BangerAndCoResponse(String.format("%s %s Has Been Whitelisted Successfully", whiteListedCustomer.getFirstName(), whiteListedCustomer.getLastName()), HttpStatus.OK.value()),
+                HttpStatus.OK
+        );
     }
 }

@@ -14,6 +14,7 @@ import com.lakindu.bangerandcobackend.util.FileHandler.ImageHandler;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceAlreadyExistsException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotUpdatedException;
 import com.lakindu.bangerandcobackend.util.mailsender.MailSender;
 import com.lakindu.bangerandcobackend.util.mailsender.MailSenderHelper;
 import com.lakindu.bangerandcobackend.util.mailsender.MailTemplateType;
@@ -199,6 +200,40 @@ public class UserServiceImpl implements UserService {
             theCustomerList.add(theCustomerDTO); //attach the entitys DTO to the DTO List.
         }
         return theCustomerList;
+    }
+
+    @Override
+    @Transactional
+    public User whitelistCustomer(String username) throws ResourceNotFoundException, ResourceNotUpdatedException {
+        //first load the user information.
+        User theCustomer = theUserRepository.findUserByUsername(username); //load customer.
+        if (theCustomer == null) {
+            //customer does not exist
+            throw new ResourceNotFoundException("A customer with the username provided does not exist at Banger and Co.");
+        } else {
+            //first check if the user is indeed a customer.
+            if (theCustomer.getUserRole().getRoleName().toLowerCase().equalsIgnoreCase("customer")) {
+                //user is indeed a customer.
+                //check if the user is BLACKLISTED. if user is blacklisted
+                if (theCustomer.isBlackListed()) {
+                    //user is blacklisted, go ahead and whitelist the customer.
+                    theCustomer.setBlackListed(false); //whitelist the customer to allow them to make rentals.
+                    User whiteListedCustomer = theUserRepository.save(theCustomer);//update the user information in the database.
+
+                    //send an email to the whitelisted customer to denote they have access to make a rental.
+                    theSender.sendMail(new MailSenderHelper(
+                            whiteListedCustomer, "Account Whitelisted Successfully", MailTemplateType.WHITELIST)
+                    );
+
+                    return whiteListedCustomer;
+                } else {
+                    //user is not blacklisted, no point proceeding.
+                    throw new ResourceNotUpdatedException("The customer is already whitelisted.");
+                }
+            } else {
+                throw new ResourceNotFoundException("A customer with the username provided does not exist at Banger and Co");
+            }
+        }
     }
 
     @Override

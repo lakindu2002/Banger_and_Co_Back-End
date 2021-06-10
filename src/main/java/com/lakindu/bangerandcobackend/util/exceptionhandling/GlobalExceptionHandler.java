@@ -124,6 +124,19 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(theHandler, HttpStatus.CONFLICT); //return a conflict as operation could not be completed due to a conflict in logic.
     }
 
+    @ExceptionHandler(ResourceNotUpdatedException.class)
+    public ResponseEntity<BangerAndCoExceptionHandler> handleResourceCannotBeUpdated(ResourceNotUpdatedException ex) {
+        //handle exceptions thrown when the resource cannot be updated.
+        BangerAndCoExceptionHandler theHandler = new BangerAndCoExceptionHandler(
+                "Resource Failed To Update",
+                ex.getLocalizedMessage(),
+                HttpStatus.CONFLICT.value(),
+                new ArrayList<>()
+        );
+        //conflict is used in cases where user is able to fix data and send to avoid conflict.
+        return new ResponseEntity<>(theHandler, HttpStatus.CONFLICT); //return a conflict as operation could not be completed due to a conflict in logic.
+    }
+
     @ExceptionHandler(BadValuePassedException.class)
     public ResponseEntity<BangerAndCoExceptionHandler> handleBadValueException(BadValuePassedException ex) {
         //handle exceptions thrown when required Bad values are detected are not provided

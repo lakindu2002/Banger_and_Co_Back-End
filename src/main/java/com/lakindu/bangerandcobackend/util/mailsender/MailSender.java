@@ -71,6 +71,7 @@ public class MailSender {
     public void sendMail(MailSenderHelper theHelper) {
         Message theMessage = new MimeMessage(theMailSession); //create a MimeMessage to send via Email
         try {
+            //format a template according to the mail sending type.
             String contentToEmail = setTemplate(theHelper.getTemplateName(), theHelper); //retrieve formatted template
 
             theMessage.setSentDate(new Date()); //set current date is sent date
@@ -79,8 +80,10 @@ public class MailSender {
 
             //set receiver
             if (theHelper.getTemplateName() == MailTemplateType.INQUIRY_REPLY) {
+                //if email is an inquiry reply.
                 theMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(theHelper.getTheInquiry().getEmailAddress()));
             } else {
+                //if normal email
                 theMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(theHelper.getUserToBeInformed().getEmailAddress()));
             }
             theMessage.setFlag(Flags.Flag.FLAGGED, true); //mark the email as an important email
@@ -138,6 +141,19 @@ public class MailSender {
 
                 dynamicData.clear(); //clear hashmap contents after formatting template
 
+                return formattedTemplate;
+            }
+            case WHITELIST: {
+                dynamicData.put("firstName", theHelper.getUserToBeInformed().getFirstName());
+                dynamicData.put("lastName", theHelper.getUserToBeInformed().getLastName());
+                dynamicData.put("whitelistedDate", new Date().toString());
+
+                Template theTemplate = handlebars.compile("WhiteListEmail"); //retrieve the template based on required type
+                //the template will be searched for {{}} and the relevant data will be assigned by the apply method.
+                //library provided by jknack.
+
+                final String formattedTemplate = theTemplate.apply(dynamicData);//return formatted template to the caller
+                dynamicData.clear(); //clear hashmap contents after formatting template
                 return formattedTemplate;
             }
             default: {
