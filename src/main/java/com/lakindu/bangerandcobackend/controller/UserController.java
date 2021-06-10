@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.zip.DataFormatException;
 
@@ -62,11 +63,11 @@ public class UserController {
     }
 
     @PreAuthorize("hasAuthority('ADMINISTRATOR')")
-    @PutMapping(path = "/customer/whitelist/{username}")
-    public ResponseEntity<BangerAndCoResponse> whiteListCustomer(@PathVariable(name = "username", required = true) String username) throws ResourceNotFoundException, ResourceNotUpdatedException {
+    @PutMapping(path = "/customer/whitelist")
+    public ResponseEntity<BangerAndCoResponse> whiteListCustomer(@RequestBody(required = true) HashMap<String, String> theCustomer) throws ResourceNotFoundException, ResourceNotUpdatedException {
         //method executed by the administrator to white list the customer so that they can make rentals again.
         //user gets blacklisted by the system automatically when they fail to collect their made rental.
-        User whiteListedCustomer = theUserService.whitelistCustomer(username);
+        User whiteListedCustomer = theUserService.whitelistCustomer(theCustomer.get("username"));
         return new ResponseEntity<>(
                 new BangerAndCoResponse(String.format("%s %s Has Been Whitelisted Successfully", whiteListedCustomer.getFirstName(), whiteListedCustomer.getLastName()), HttpStatus.OK.value()),
                 HttpStatus.OK
