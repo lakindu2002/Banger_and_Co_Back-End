@@ -193,7 +193,7 @@ public class UserServiceImpl implements UserService {
             theCustomerDTO.setDateOfBirth(eachCustomer.getDateOfBirth());
             theCustomerDTO.setUserPassword(null);
             theCustomerDTO.setContactNumber(eachCustomer.getContactNumber());
-            theCustomerDTO.setUserRole(null);
+            theCustomerDTO.setUserRole(eachCustomer.getUserRole().getRoleName());
             theCustomerDTO.setProfilePicture(new DecompressImage().processUnhandledImage(eachCustomer.getProfilePicture()));
             theCustomerDTO.setBlackListed(eachCustomer.isBlackListed());
 
