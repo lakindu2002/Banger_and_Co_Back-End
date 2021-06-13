@@ -118,8 +118,9 @@ public class VehicleServiceImpl implements VehicleService {
      * Check is done to see if filtering Pickup DATE_TIME is between RENTAL Pickup DATE_TIME and Return DATE_TIME
      * OR
      * Check is done to see if filtering Return DATE_TIME is between RENTAL Pickup DATE_TIME and Return DATE_TIME
-     * IF FILTERING IS IN BETWEEN:
-     * Check is done to see if the rental is returned, if it is returned, it can be added to view. Else NOT ALLOWED
+     * IF the Passed PICKUP or RETURN Date_Time is between a RENTAL PICKUP or RETURN DATE_TIME, check if each vehicle for rental is returned, if so vehicle can be rented again
+     * IF not, there may be rentals that fall between the PASSED Pickup and Return DATE_TIME, check those rentals.
+     * IF rentals fall between Passed PICKUP/RETURN Date_Time, check if they're returned, if so, can be rented again.
      *
      * @param theFilterDTO The object containing the REQUESTING Pickup DATE_TIME and Return DATE_TIME
      * @return The list of vehicles that can be rented between time period.
@@ -152,16 +153,9 @@ public class VehicleServiceImpl implements VehicleService {
             } else {
                 //if vehicles have rentals present in DB
                 for (Rental eachRental : rentalsForEachVehicle) {
-                    //get the rental pickup and return date.
-                    Date eachRentalPickupDate = eachRental.getPickupDate();
-                    Date eachRentalReturnDate = eachRental.getReturnDate();
-                    //get the rental pickup and return time.
-                    LocalTime eachRentalPickupTime = eachRental.getPickupTime();
-                    LocalTime eachRentalReturnTime = eachRental.getReturnTime();
-
                     //retrieve LocalDateTime of the Rental Pickup - Date, Time and Return - Date, Time.
-                    LocalDateTime eachRentalPickupDateTime = LocalDateTime.of(eachRentalPickupDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), eachRentalPickupTime);
-                    LocalDateTime eachRentalReturnDateTime = LocalDateTime.of(eachRentalReturnDate.toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), eachRentalReturnTime);
+                    LocalDateTime eachRentalPickupDateTime = LocalDateTime.of(eachRental.getPickupDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), eachRental.getPickupTime());
+                    LocalDateTime eachRentalReturnDateTime = LocalDateTime.of(eachRental.getReturnDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), eachRental.getReturnTime());
 
                     if (
                             ((filterPickUpDateTime.isAfter(eachRentalPickupDateTime)) && (filterPickUpDateTime.isBefore(eachRentalReturnDateTime)))
@@ -175,11 +169,18 @@ public class VehicleServiceImpl implements VehicleService {
                             canBeAddedToReturn = true;
                         }
                     } else {
-                        //there is no rental present between the passed PICKUP Date_Time OR RETURN Date_Time
+                        //there are no rentals present between the passed PICKUP Date_Time OR RETURN Date_Time
 
                         //there may be rentals present between passed PICKUP Date_Time AND RETURN Date_Time
-                        if (eachRental.getReturned() != null && eachRental.getReturned()) {
-                            //if the vehicle for those rentals are returned, vehicle can be rented again.
+                        if (eachRentalPickupDateTime.isAfter(filterPickUpDateTime) && eachRentalReturnDateTime.isBefore(filterReturnDateTime)) {
+                            //the rental in database is between the passed Pickup-Date_Time and Return Date_Time
+                            if (eachRental.getReturned() != null && eachRental.getReturned()) {
+                                //if the vehicle for those rentals are returned, vehicle can be rented again.
+                                canBeAddedToReturn = true;
+                            }
+                        } else {
+                            //the rental in database is not between passed Pickup-Date_Time and Return Date_Time
+                            //therefore it is not conflicting, can be rented.
                             canBeAddedToReturn = true;
                         }
                     }
