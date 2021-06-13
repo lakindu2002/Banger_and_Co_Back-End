@@ -2,6 +2,7 @@ package com.lakindu.bangerandcobackend.service;
 
 import com.lakindu.bangerandcobackend.dto.VehicleCreateDTO;
 import com.lakindu.bangerandcobackend.dto.RentalShowDTO;
+import com.lakindu.bangerandcobackend.dto.VehicleRentalFilterDTO;
 import com.lakindu.bangerandcobackend.dto.VehicleShowDTO;
 import com.lakindu.bangerandcobackend.entity.Rental;
 import com.lakindu.bangerandcobackend.entity.Vehicle;
@@ -112,5 +113,10 @@ public class VehicleServiceImpl implements VehicleService {
         }
 
         return theReturnList;
+    }
+
+    @Override
+    public List<VehicleShowDTO> getAllVehiclesThatCanBeRentedForGivenPeriod(VehicleRentalFilterDTO theFilterDTO) {
+        return null;
     }
 }

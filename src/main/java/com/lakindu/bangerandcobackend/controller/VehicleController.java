@@ -2,6 +2,7 @@ package com.lakindu.bangerandcobackend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lakindu.bangerandcobackend.dto.VehicleCreateDTO;
+import com.lakindu.bangerandcobackend.dto.VehicleRentalFilterDTO;
 import com.lakindu.bangerandcobackend.dto.VehicleShowDTO;
 import com.lakindu.bangerandcobackend.serviceinterface.VehicleService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.*;
@@ -22,12 +23,18 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Validator;
 import java.io.IOException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalTime;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.zip.DataFormatException;
 
 @RestController //enables controller and a response body
-@RequestMapping(path = "/api/vehicle")
 @PreAuthorize("isAuthenticated()")
+@RequestMapping(path = "/api/vehicle")
 public class VehicleController {
     private final VehicleService vehicleService;
     private final Validator validator;
@@ -78,5 +85,37 @@ public class VehicleController {
         //method will return a list of ALL the vehicles available at Banger and Co. and can be viewed by admin.
         List<VehicleShowDTO> allVehicles = vehicleService.getAllVehicles();
         return new ResponseEntity<>(allVehicles, HttpStatus.OK);
+    }
+
+    //get all vehicles that can be rented for the specified pickup/return date and pickup/return time.
+    @GetMapping(path = "/getRentableVehicles")
+    @PreAuthorize("permitAll()")
+    //do not need authorization to access this endpoint.
+    public ResponseEntity<List<VehicleShowDTO>> getAllVehiclesThatCanBeRentedForGivenPeriod(
+            @RequestParam(value = "pickupDate", required = true) String pickupDate,
+            @RequestParam(value = "returnDate", required = true) String returnDate,
+            @RequestParam(value = "pickupTime", required = true) String pickupTime,
+            @RequestParam(value = "returnTime", required = true) String returnTime
+    ) throws InputValidNotValidatedException, ParseException {
+        //construct a DTO to validate the passed data in the request parameter
+        VehicleRentalFilterDTO theFilterDTO = new VehicleRentalFilterDTO();
+        theFilterDTO.setPickupDate(new SimpleDateFormat("yyyy-MM-dd").parse(pickupDate));
+        theFilterDTO.setReturnDate(new SimpleDateFormat("yyyy-MM-dd").parse(returnDate));
+        theFilterDTO.setPickupTime(LocalTime.parse(pickupTime));
+        theFilterDTO.setReturnTime(LocalTime.parse(returnTime));
+
+        DataBinder theBinder = new DataBinder(theFilterDTO); //bind the VehicleFilterDTO to the DataBinder and validate its data.
+        theBinder.setValidator((org.springframework.validation.Validator) validator);
+        theBinder.validate();
+
+        BindingResult theValidatedResult = theBinder.getBindingResult();
+        if (theValidatedResult.hasErrors()) {
+            //if the passed inputs have any validation errors
+            throw new InputValidNotValidatedException("Please provide valid inputs for the filter", theValidatedResult);
+        }
+
+        //validated successfully, retrieve data from database.
+        List<VehicleShowDTO> availableVehicles = vehicleService.getAllVehiclesThatCanBeRentedForGivenPeriod(theFilterDTO);
+        return new ResponseEntity<>(availableVehicles, HttpStatus.OK);
     }
 }

@@ -78,7 +78,7 @@ public class BangerCoSecurityConfiguration extends WebSecurityConfigurerAdapter 
                 .authorizeRequests() //authorize requests
                 .antMatchers("/api/auth/**") //for the Auth Endpoint
                 .permitAll() //allow all request
-                .antMatchers("/api/inquiry/createInquiry")
+                .antMatchers("/api/inquiry/createInquiry", "/api/vehicle/getRentableVehicles")
                 .permitAll()
                 .anyRequest()
                 .authenticated()
