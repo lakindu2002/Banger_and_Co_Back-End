@@ -157,20 +157,23 @@ public class VehicleServiceImpl implements VehicleService {
                     LocalDateTime eachRentalPickupDateTime = LocalDateTime.of(eachRental.getPickupDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), eachRental.getPickupTime());
                     LocalDateTime eachRentalReturnDateTime = LocalDateTime.of(eachRental.getReturnDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), eachRental.getReturnTime());
 
+                    //if filtering Pickup DATE_TIME is between RENTAL Pickup DATE_TIME and Return DATE_TIME
+                    //OR
+                    //if filtering Return DATE_TIME is between RENTAL Pickup DATE_TIME and Return DATE_TIME
                     if (
                             ((filterPickUpDateTime.isAfter(eachRentalPickupDateTime)) && (filterPickUpDateTime.isBefore(eachRentalReturnDateTime)))
                                     ||
                                     ((filterReturnDateTime.isAfter(eachRentalPickupDateTime)) && (filterReturnDateTime.isBefore(eachRentalReturnDateTime)))
 
                     ) {
-                        //there is a rental present between the passed PICKUP Date_Time OR RETURN Date_Time
+                        //The filtering Pickup DATE_TIME or Return DATE_TIME is between a rental.
                         //check if that rental has been returned, if returned, can rent again.
                         if (eachRental.getReturned() != null && eachRental.getReturned()) {
                             canBeAddedToReturn = true;
                         }
                     } else {
-                        //there are no rentals present between the passed PICKUP Date_Time OR RETURN Date_Time
-
+                        //The filtering Pickup DATE_TIME or Return DATE_TIME is not between a rental.
+                        //BUT
                         //there may be rentals present between passed PICKUP Date_Time AND RETURN Date_Time
                         if (eachRentalPickupDateTime.isAfter(filterPickUpDateTime) && eachRentalReturnDateTime.isBefore(filterReturnDateTime)) {
                             //the rental in database is between the passed Pickup-Date_Time and Return Date_Time

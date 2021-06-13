@@ -32,8 +32,9 @@ public interface VehicleService {
      * Check is done to see if filtering Pickup DATE_TIME is between RENTAL Pickup DATE_TIME and Return DATE_TIME
      * OR
      * Check is done to see if filtering Return DATE_TIME is between RENTAL Pickup DATE_TIME and Return DATE_TIME
-     * IF EITHER FILTER PICKUP OR RETURN  IS PRESENT BETWEEN DB PICKUP-DATE_TIME OR RETURN-DATE_TIME:
-     * Check is done to see if the rental is returned, if it is returned, it can be added to view. Else NOT ALLOWED
+     * IF the Passed PICKUP or RETURN Date_Time is between a RENTAL PICKUP or RETURN DATE_TIME, check if each vehicle for rental is returned, if so vehicle can be rented again
+     * IF not, there may be rentals that fall between the PASSED Pickup and Return DATE_TIME, check those rentals.
+     * IF rentals fall between Passed PICKUP/RETURN Date_Time, check if they're returned, if so, can be rented again.
      *
      * @param theFilterDTO The object containing the REQUESTING Pickup DATE_TIME and Return DATE_TIME
      * @return The list of vehicles that can be rented between time period.
