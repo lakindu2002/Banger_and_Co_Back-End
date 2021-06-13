@@ -29,22 +29,22 @@ public class Rental {
     private double totalCost;
 
     @Column(name = "is_returned", nullable = true)
-    private boolean isReturned;
+    private Boolean isReturned;
 
-    @Column(name = "is_approved", nullable = true)
-    private boolean isApproved;
+    @Column(name = "is_approved", nullable = false)
+    private Boolean isApproved;
 
     @Column(name = "is_collected", nullable = true)
-    private boolean isCollected;
+    private Boolean isCollected;
 
     @Column(name = "can_be_collected", nullable = true)
-    private boolean canBeCollected;
+    private Boolean canBeCollected;
 
     @Column(name = "is_late_return_requested", nullable = true)
-    private boolean isLateReturnRequested;
+    private Boolean isLateReturnRequested;
 
     @Column(name = "is_late_return_approved", nullable = true)
-    private boolean isLateReturnApproved;
+    private Boolean isLateReturnApproved;
 
     @Lob()
     @Column(name = "driving_license", nullable = false, columnDefinition = "MEDIUMBLOB")
@@ -72,14 +72,6 @@ public class Rental {
     private List<AdditionalEquipment> equipmentsAddedToRental;
 
     public Rental() {
-    }
-
-    public List<AdditionalEquipment> getEquipmentsAddedToRental() {
-        return equipmentsAddedToRental;
-    }
-
-    public void setEquipmentsAddedToRental(List<AdditionalEquipment> equipmentsAddedToRental) {
-        this.equipmentsAddedToRental = equipmentsAddedToRental;
     }
 
     public int getRentalId() {
@@ -130,51 +122,51 @@ public class Rental {
         this.totalCost = totalCost;
     }
 
-    public boolean isReturned() {
+    public Boolean getReturned() {
         return isReturned;
     }
 
-    public void setReturned(boolean returned) {
+    public void setReturned(Boolean returned) {
         isReturned = returned;
     }
 
-    public boolean isApproved() {
+    public Boolean getApproved() {
         return isApproved;
     }
 
-    public void setApproved(boolean approved) {
+    public void setApproved(Boolean approved) {
         isApproved = approved;
     }
 
-    public boolean isCollected() {
+    public Boolean getCollected() {
         return isCollected;
     }
 
-    public void setCollected(boolean collected) {
+    public void setCollected(Boolean collected) {
         isCollected = collected;
     }
 
-    public boolean isCanBeCollected() {
+    public Boolean getCanBeCollected() {
         return canBeCollected;
     }
 
-    public void setCanBeCollected(boolean canBeCollected) {
+    public void setCanBeCollected(Boolean canBeCollected) {
         this.canBeCollected = canBeCollected;
     }
 
-    public boolean isLateReturnRequested() {
+    public Boolean getLateReturnRequested() {
         return isLateReturnRequested;
     }
 
-    public void setLateReturnRequested(boolean lateReturnRequested) {
+    public void setLateReturnRequested(Boolean lateReturnRequested) {
         isLateReturnRequested = lateReturnRequested;
     }
 
-    public boolean isLateReturnApproved() {
+    public Boolean getLateReturnApproved() {
         return isLateReturnApproved;
     }
 
-    public void setLateReturnApproved(boolean lateReturnApproved) {
+    public void setLateReturnApproved(Boolean lateReturnApproved) {
         isLateReturnApproved = lateReturnApproved;
     }
 
@@ -208,5 +200,13 @@ public class Rental {
 
     public void setVehicleOnRental(Vehicle vehicleOnRental) {
         this.vehicleOnRental = vehicleOnRental;
+    }
+
+    public List<AdditionalEquipment> getEquipmentsAddedToRental() {
+        return equipmentsAddedToRental;
+    }
+
+    public void setEquipmentsAddedToRental(List<AdditionalEquipment> equipmentsAddedToRental) {
+        this.equipmentsAddedToRental = equipmentsAddedToRental;
     }
 }

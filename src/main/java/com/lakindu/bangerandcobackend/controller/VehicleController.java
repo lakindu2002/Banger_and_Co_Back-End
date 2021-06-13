@@ -96,7 +96,9 @@ public class VehicleController {
             @RequestParam(value = "returnDate", required = true) String returnDate,
             @RequestParam(value = "pickupTime", required = true) String pickupTime,
             @RequestParam(value = "returnTime", required = true) String returnTime
-    ) throws InputValidNotValidatedException, ParseException {
+    ) throws InputValidNotValidatedException, ParseException, DataFormatException, IOException {
+        //method executed by GUESTS and CUSTOMERS to view a list of all available vehicles for the given Pickup DATE_TIME and Return DATE_TIME
+
         //construct a DTO to validate the passed data in the request parameter
         VehicleRentalFilterDTO theFilterDTO = new VehicleRentalFilterDTO();
         theFilterDTO.setPickupDate(new SimpleDateFormat("yyyy-MM-dd").parse(pickupDate));
