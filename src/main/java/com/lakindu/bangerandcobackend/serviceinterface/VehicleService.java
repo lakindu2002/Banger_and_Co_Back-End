@@ -32,7 +32,7 @@ public interface VehicleService {
      * Check is done to see if filtering Pickup DATE_TIME is between RENTAL Pickup DATE_TIME and Return DATE_TIME
      * OR
      * Check is done to see if filtering Return DATE_TIME is between RENTAL Pickup DATE_TIME and Return DATE_TIME
-     * IF FILTERING IS IN BETWEEN:
+     * IF EITHER FILTER PICKUP OR RETURN  IS PRESENT BETWEEN DB PICKUP-DATE_TIME OR RETURN-DATE_TIME:
      * Check is done to see if the rental is returned, if it is returned, it can be added to view. Else NOT ALLOWED
      *
      * @param theFilterDTO The object containing the REQUESTING Pickup DATE_TIME and Return DATE_TIME

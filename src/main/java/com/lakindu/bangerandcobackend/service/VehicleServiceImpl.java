@@ -169,14 +169,19 @@ public class VehicleServiceImpl implements VehicleService {
                                     ((filterReturnDateTime.isAfter(eachRentalPickupDateTime)) && (filterReturnDateTime.isBefore(eachRentalReturnDateTime)))
 
                     ) {
-                        //there is a rental present between the passed PICKUP Date_Time and RETURN Date_Time
+                        //there is a rental present between the passed PICKUP Date_Time OR RETURN Date_Time
                         //check if that rental has been returned, if returned, can rent again.
                         if (eachRental.getReturned() != null && eachRental.getReturned()) {
                             canBeAddedToReturn = true;
                         }
                     } else {
-                        //there is no rental present between the passed PICKUP Date_Time and RETURN Date_Time
-                        canBeAddedToReturn = true;
+                        //there is no rental present between the passed PICKUP Date_Time OR RETURN Date_Time
+
+                        //there may be rentals present between passed PICKUP Date_Time AND RETURN Date_Time
+                        if (eachRental.getReturned() != null && eachRental.getReturned()) {
+                            //if the vehicle for those rentals are returned, vehicle can be rented again.
+                            canBeAddedToReturn = true;
+                        }
                     }
                 }
             }
