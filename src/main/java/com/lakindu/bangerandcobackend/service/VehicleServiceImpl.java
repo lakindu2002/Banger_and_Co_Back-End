@@ -101,7 +101,7 @@ public class VehicleServiceImpl implements VehicleService {
                 //create a rental dto that can be shown back to the client.
                 RentalShowDTO theRentalDTO = new RentalShowDTO();
                 //ASSIGN RENTAL INFORMATION!!!!!!!!!!!!!!!!!!! TO DTO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                rentalList.add(theRentalDTO);
+//                rentalList.add(theRentalDTO);
             }
             theDTO.setTheRentalsForVehicle(rentalList); //assign the rental list to the vehicle dto.
             theReturnList.add(theDTO);

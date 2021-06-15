@@ -4,8 +4,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lakindu.bangerandcobackend.dto.VehicleCreateDTO;
 import com.lakindu.bangerandcobackend.dto.VehicleRentalFilterDTO;
 import com.lakindu.bangerandcobackend.dto.VehicleShowDTO;
+import com.lakindu.bangerandcobackend.serviceinterface.RentalService;
 import com.lakindu.bangerandcobackend.serviceinterface.VehicleService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.*;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.InputValidNotValidatedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceAlreadyExistsException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
@@ -25,10 +27,7 @@ import javax.validation.Validator;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.time.LocalTime;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 import java.util.zip.DataFormatException;
 
@@ -38,13 +37,16 @@ import java.util.zip.DataFormatException;
 public class VehicleController {
     private final VehicleService vehicleService;
     private final Validator validator;
+    private final RentalService rentalService;
 
     @Autowired
     public VehicleController(
             @Qualifier("vehicleServiceImpl") VehicleService vehicleService,
-            @Qualifier("defaultValidator") Validator validator) {
+            @Qualifier("defaultValidator") Validator validator,
+            @Qualifier("rentalServiceImpl") RentalService rentalService) {
         this.vehicleService = vehicleService;
         this.validator = validator;
+        this.rentalService = rentalService;
     }
 
     @PostMapping(path = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -96,7 +98,7 @@ public class VehicleController {
             @RequestParam(value = "returnDate", required = true) String returnDate,
             @RequestParam(value = "pickupTime", required = true) String pickupTime,
             @RequestParam(value = "returnTime", required = true) String returnTime
-    ) throws InputValidNotValidatedException, ParseException, DataFormatException, IOException {
+    ) throws InputValidNotValidatedException, ParseException, DataFormatException, IOException, BadValuePassedException {
         //method executed by GUESTS and CUSTOMERS to view a list of all available vehicles for the given Pickup DATE_TIME and Return DATE_TIME
 
         //construct a DTO to validate the passed data in the request parameter
@@ -115,6 +117,8 @@ public class VehicleController {
             //if the passed inputs have any validation errors
             throw new InputValidNotValidatedException("Please provide valid inputs for the filter", theValidatedResult);
         }
+
+        rentalService.validateRentalFilters(theFilterDTO); //validate the business logic for rental date time duration
 
         //validated successfully, retrieve data from database.
         List<VehicleShowDTO> availableVehicles = vehicleService.getAllVehiclesThatCanBeRentedForGivenPeriod(theFilterDTO);
