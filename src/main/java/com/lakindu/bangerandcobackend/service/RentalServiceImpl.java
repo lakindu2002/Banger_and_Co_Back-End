@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import javax.validation.constraints.NotNull;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -29,20 +30,13 @@ public class RentalServiceImpl implements RentalService {
 
     @Override
     public void validateRentalFilters(VehicleRentalFilterDTO theFilterDTO) throws BadValuePassedException {
-        //convert both to date time to ensure accurate validations.
-        LocalDateTime pickupDateTime = LocalDateTime.of(
-                theFilterDTO.getPickupDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
-                theFilterDTO.getPickupTime()
-        );
-
-        LocalDateTime returnDateTime = LocalDateTime.of(
-                theFilterDTO.getReturnDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
-                theFilterDTO.getReturnTime()
-        );
+        LocalDate pickupDate = theFilterDTO.getPickupDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        LocalDate returnDate = theFilterDTO.getReturnDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
         //validations required on filter logic to ensure business rules are met
 
         //1. Pickup and return dates must fall between 8:00am to 6:00pm - Done.
+        //2. Check if return date is before pickup date - Done.
         //2. Maximum Rental Duration is 14 days - Done.
         //3. If the rental day is one day, minimum duration is 5 hours - Done.
 
@@ -70,11 +64,17 @@ public class RentalServiceImpl implements RentalService {
             throw new BadValuePassedException("The return time cannot be after 6:00 PM");
         }
 
-        //until method calculates amount of time from the pickupDateTime to returnDateTime
-        if ((pickupDateTime.until(returnDateTime, ChronoUnit.DAYS) > 14)) {
-            //if the return date is greater than 14
+        if (returnDate.isBefore(pickupDate)) {
+            //if return date is before pickup time
+            throw new BadValuePassedException("Return date cannot be before Pickup Date");
+        }
+
+        //until method calculates amount of time from the pickupDate to returnDate
+        if ((pickupDate.until(returnDate, ChronoUnit.DAYS) > 14)) {
+            //if the return date is greater than 14 days.
             throw new BadValuePassedException("The maximum rental duration cannot exceed 14 days");
         }
+
         //if the rental day is one day, check if the minimum duration is 5 hours
         if (theFilterDTO.getPickupDate().equals(theFilterDTO.getReturnDate())) {
             //if rental duration is one day, check if minimum duration is 5 hours
