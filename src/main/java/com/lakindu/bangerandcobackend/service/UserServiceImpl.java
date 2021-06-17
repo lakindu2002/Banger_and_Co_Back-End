@@ -61,8 +61,9 @@ public class UserServiceImpl implements UserService {
         if (theUser != null) {
             return new CustomUserPrincipal(theUser); //this class implements UserDetails therefore it can be returned
         } else {
+            //spring returns a BadCredentialException that is of 500 error code, so in angular dealing as 500 error code.
             //user does not exist
-            throw new UsernameNotFoundException("Invalid Email Address or Password");
+            throw new UsernameNotFoundException("Invalid Username or Password");
         }
 
     }

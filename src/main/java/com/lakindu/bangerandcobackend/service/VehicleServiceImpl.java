@@ -170,6 +170,8 @@ public class VehicleServiceImpl implements VehicleService {
                         //check if that rental has been returned, if returned, can rent again.
                         if (eachRental.getReturned() != null && eachRental.getReturned()) {
                             canBeAddedToReturn = true;
+                        } else {
+                            canBeAddedToReturn = false;
                         }
                     } else {
                         //The filtering Pickup DATE_TIME or Return DATE_TIME is not between a rental.
@@ -180,6 +182,8 @@ public class VehicleServiceImpl implements VehicleService {
                             if (eachRental.getReturned() != null && eachRental.getReturned()) {
                                 //if the vehicle for those rentals are returned, vehicle can be rented again.
                                 canBeAddedToReturn = true;
+                            } else {
+                                canBeAddedToReturn = false;
                             }
                         } else {
                             //the rental in database is not between passed Pickup-Date_Time and Return Date_Time
