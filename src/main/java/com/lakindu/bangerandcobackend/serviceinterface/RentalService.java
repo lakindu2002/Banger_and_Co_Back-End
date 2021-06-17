@@ -1,7 +1,9 @@
 package com.lakindu.bangerandcobackend.serviceinterface;
 
 import com.lakindu.bangerandcobackend.dto.VehicleRentalFilterDTO;
+import com.lakindu.bangerandcobackend.entity.AdditionalEquipment;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceCannotBeDeletedException;
 
 public interface RentalService {
     /**
@@ -15,4 +17,6 @@ public interface RentalService {
      * @author Lakindu Hewawasam
      */
     void validateRentalFilters(VehicleRentalFilterDTO theFilterDTO) throws BadValuePassedException;
+
+    void checkIfEquipmentHasPendingOrOngoingRentals(AdditionalEquipment theEquipment) throws ResourceCannotBeDeletedException;
 }

@@ -5,6 +5,7 @@ import com.lakindu.bangerandcobackend.serviceinterface.AdditionalEquipmentServic
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceAlreadyExistsException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceCannotBeDeletedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -83,5 +84,16 @@ public class AdditionalEquipmentController {
         AdditionalEquipmentDTO theViewingDTO = additionalEquipmentService.getEquipmentByID(equipmentId);
         //if successfully retrieved.
         return new ResponseEntity<>(theViewingDTO, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @DeleteMapping(path = "/remove/{id}")
+    public ResponseEntity<BangerAndCoResponse> removeEquipmentById(@PathVariable(name = "id", required = true) int id) throws ResourceNotFoundException, ResourceCannotBeDeletedException {
+        //method executed by the administrator of Banger and Co to remove the additional equipment from the system.
+        additionalEquipmentService.removeEquipment(id);
+        return new ResponseEntity<>(
+                new BangerAndCoResponse("The additional equipment has been removed from Banger and Co successfully", HttpStatus.OK.value()),
+                HttpStatus.OK
+        );
     }
 }

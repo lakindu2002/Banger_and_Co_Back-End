@@ -1,9 +1,12 @@
 package com.lakindu.bangerandcobackend.service;
 
 import com.lakindu.bangerandcobackend.dto.VehicleRentalFilterDTO;
+import com.lakindu.bangerandcobackend.entity.AdditionalEquipment;
+import com.lakindu.bangerandcobackend.entity.Rental;
 import com.lakindu.bangerandcobackend.repository.RentalRepository;
 import com.lakindu.bangerandcobackend.serviceinterface.RentalService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceCannotBeDeletedException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +18,7 @@ import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class RentalServiceImpl implements RentalService {
@@ -82,6 +86,31 @@ public class RentalServiceImpl implements RentalService {
                 //minimum duration is less than 5 hours
                 throw new BadValuePassedException("The minimum rental duration must be 5 hours");
             }
+        }
+    }
+
+    @Override
+    public void checkIfEquipmentHasPendingOrOngoingRentals(AdditionalEquipment theEquipment) throws ResourceCannotBeDeletedException {
+        List<Rental> rentalHavingThisEquipment = rentalRepository.findRentalsByEquipmentsAddedToRentalEquals(theEquipment);
+
+        for (Rental eachRental : rentalHavingThisEquipment) {
+            //check if the rental is pending
+            if (!eachRental.getApproved()) {
+                throw new ResourceCannotBeDeletedException("There are pending rentals that have this equipment added to it");
+            }
+            //check if the rental is approved but not collected
+            //in the null check, they won't process past the null check
+            //first expression is evaluated first
+            //The && operator will stop evaluating (from left to right) as soon as it encounters a false.
+            if (eachRental.getApproved() && (eachRental.getCollected() != null && !eachRental.getCollected())) {
+                throw new ResourceCannotBeDeletedException("There are vehicles having this equipment added to it in rentals that are not yet collected");
+            }
+            //check if collected, but not returned
+            if ((eachRental.getCollected() != null && eachRental.getCollected()) && !eachRental.getReturned()) {
+                throw new ResourceCannotBeDeletedException("There are vehicles that are currently on rental that are having this equipment added to it.");
+            }
+
+            //if all these pass, it means rental has been returned.
         }
     }
 }

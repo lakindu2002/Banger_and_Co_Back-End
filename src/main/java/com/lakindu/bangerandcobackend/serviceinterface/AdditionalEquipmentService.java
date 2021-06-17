@@ -3,6 +3,7 @@ package com.lakindu.bangerandcobackend.serviceinterface;
 import com.lakindu.bangerandcobackend.dto.AdditionalEquipmentDTO;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceAlreadyExistsException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceCannotBeDeletedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
 
 import java.util.List;
@@ -46,7 +47,7 @@ public interface AdditionalEquipmentService {
      * @param equipmentId The ID to delete the equipment from
      * @throws ResourceNotFoundException Thrown when the ID passed does not exist in the database.
      */
-    void removeEquipment(int equipmentId) throws ResourceNotFoundException;
+    void removeEquipment(int equipmentId) throws ResourceNotFoundException, ResourceCannotBeDeletedException;
 
     /**
      * Method used to retrieve equipment information by the ID.

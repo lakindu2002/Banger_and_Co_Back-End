@@ -4,8 +4,10 @@ import com.lakindu.bangerandcobackend.dto.AdditionalEquipmentDTO;
 import com.lakindu.bangerandcobackend.entity.AdditionalEquipment;
 import com.lakindu.bangerandcobackend.repository.AdditionalEquipmentRepository;
 import com.lakindu.bangerandcobackend.serviceinterface.AdditionalEquipmentService;
+import com.lakindu.bangerandcobackend.serviceinterface.RentalService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceAlreadyExistsException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceCannotBeDeletedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -20,12 +22,15 @@ import java.util.Optional;
 public class AdditionalEquipmentServiceImpl implements AdditionalEquipmentService {
 
     private final AdditionalEquipmentRepository additionalEquipmentRepository;
+    private final RentalService rentalService;
 
     @Autowired
     public AdditionalEquipmentServiceImpl(
-            @Qualifier("additionalEquipmentRepository") AdditionalEquipmentRepository additionalEquipmentRepository
+            @Qualifier("additionalEquipmentRepository") AdditionalEquipmentRepository additionalEquipmentRepository,
+            @Qualifier("rentalServiceImpl") RentalService rentalService
     ) {
         this.additionalEquipmentRepository = additionalEquipmentRepository;
+        this.rentalService = rentalService;
     }
 
     @Override
@@ -114,8 +119,21 @@ public class AdditionalEquipmentServiceImpl implements AdditionalEquipmentServic
     }
 
     @Override
-    public void removeEquipment(int equipmentId) throws ResourceNotFoundException {
+    public void removeEquipment(int equipmentId) throws ResourceNotFoundException, ResourceCannotBeDeletedException {
+        //retrieve the equipment to be removed.
+        AdditionalEquipment theEquipment = additionalEquipmentRepository.findById(equipmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("The additional equipment that you are trying to delete is not present at Banger and Co"));
 
+        //2 validations must be done before it can be removed.
+        //check if there are pending rentals that have this equipment added to it
+        //check if there are on-going rentals that have this equipment added to it
+
+        //if it can be deleted, first remove the additional equipment that is going to be removed from the rentals.
+        //this will be removed by hibernate automatically.
+
+        rentalService.checkIfEquipmentHasPendingOrOngoingRentals(theEquipment); //two checks to be done.
+        //no exceptions thrown, proceed with deletion
+        additionalEquipmentRepository.delete(theEquipment);
     }
 
     @Override
