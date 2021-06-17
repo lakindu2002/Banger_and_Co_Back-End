@@ -37,9 +37,6 @@ public class Rental {
     @Column(name = "is_collected", nullable = true)
     private Boolean isCollected;
 
-    @Column(name = "can_be_collected", nullable = true)
-    private Boolean canBeCollected;
-
     @Column(name = "is_late_return_requested", nullable = true)
     private Boolean isLateReturnRequested;
 
@@ -144,14 +141,6 @@ public class Rental {
 
     public void setCollected(Boolean collected) {
         isCollected = collected;
-    }
-
-    public Boolean getCanBeCollected() {
-        return canBeCollected;
-    }
-
-    public void setCanBeCollected(Boolean canBeCollected) {
-        this.canBeCollected = canBeCollected;
     }
 
     public Boolean getLateReturnRequested() {

@@ -1,12 +1,15 @@
 package com.lakindu.bangerandcobackend.service;
 
 import com.lakindu.bangerandcobackend.dto.VehicleTypeDTO;
+import com.lakindu.bangerandcobackend.entity.Rental;
+import com.lakindu.bangerandcobackend.entity.Vehicle;
 import com.lakindu.bangerandcobackend.entity.VehicleType;
 import com.lakindu.bangerandcobackend.repository.VehicleTypeRepository;
 import com.lakindu.bangerandcobackend.serviceinterface.VehicleTypeService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceAlreadyExistsException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceCannotBeDeletedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotUpdatedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -105,5 +108,22 @@ public class VehicleTypeServiceImpl implements VehicleTypeService {
             //the vehicle type is not in database.
             throw new ResourceNotFoundException("The Vehicle Type that you are trying to remove does not exist at Banger and Co.");
         }
+    }
+
+    @Override
+    public void updateVehicleTypeInformation(VehicleTypeDTO theUpdateDTO) throws ResourceNotFoundException {
+        //update the vehicle type information in the database.
+
+        //retrieve the type from the database for the ID passed, if not existing thrown the exception.
+        VehicleType theTypeInDatabase = vehicleTypeRepository.findById(theUpdateDTO.getVehicleTypeId())
+                .orElseThrow(
+                        () -> new ResourceNotFoundException("The vehicle type that you wish to update does not exist at Banger and Co.")
+                );
+
+        //allows the PRICE PER DAY to be updated ONLY when no PENDING or ON-GOING rentals are present.
+
+        //if exception has not been thrown, update the price.
+        theTypeInDatabase.setPricePerDay(Double.parseDouble(theUpdateDTO.getPricePerDay()));
+        vehicleTypeRepository.save(theTypeInDatabase); //update the vehicle.
     }
 }

@@ -5,6 +5,7 @@ import com.lakindu.bangerandcobackend.entity.VehicleType;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceAlreadyExistsException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceCannotBeDeletedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotUpdatedException;
 
 import java.util.List;
 
@@ -34,4 +35,6 @@ public interface VehicleTypeService {
      * Allows the vehicle type to be removed from banger and co only when there are no vehicles associated to the type.
      */
     void removeVehicleType(int id) throws ResourceNotFoundException, ResourceCannotBeDeletedException;
+
+    void updateVehicleTypeInformation(VehicleTypeDTO theUpdateDTO) throws ResourceNotFoundException;
 }

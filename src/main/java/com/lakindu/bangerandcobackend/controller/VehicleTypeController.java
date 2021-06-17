@@ -6,6 +6,7 @@ import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceAlreadyExistsException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceCannotBeDeletedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotUpdatedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -72,6 +73,17 @@ public class VehicleTypeController {
         vehicleTypeService.removeVehicleType(id);
         return new ResponseEntity<>(
                 new BangerAndCoResponse("Vehicle Type Removed Successfully", HttpStatus.OK.value()),
+                HttpStatus.OK
+        );
+    }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @PutMapping(path = "/update")
+    public ResponseEntity<BangerAndCoResponse> updateVehicleType(@Valid @RequestBody VehicleTypeDTO theUpdateDTO) throws ResourceNotFoundException {
+        //method called by the administrator of Banger and Co to update the vehicle type information in the database.
+        vehicleTypeService.updateVehicleTypeInformation(theUpdateDTO);
+        return new ResponseEntity<>(
+                new BangerAndCoResponse("The vehicle type has been updated successfully", HttpStatus.OK.value()),
                 HttpStatus.OK
         );
     }
