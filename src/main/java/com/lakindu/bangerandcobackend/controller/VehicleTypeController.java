@@ -48,7 +48,7 @@ public class VehicleTypeController {
         );
     }
 
-    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @PreAuthorize("permitAll()") //permit all since guest views without authentication.
     @GetMapping(path = "/findAll")
     public ResponseEntity<List<VehicleTypeDTO>> getAllVehicleTypes() {
         //method will return a list of all the available vehicle types available at banger and co.
