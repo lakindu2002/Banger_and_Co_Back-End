@@ -121,4 +121,10 @@ public class Vehicle {
     public void setTheVehicleType(VehicleType theVehicleType) {
         this.theVehicleType = theVehicleType;
     }
+
+    public void clearRentals() {
+        this.rentalsForTheVehicle.forEach((eachRental) -> {
+            eachRental.setVehicleOnRental(null);
+        });
+    }
 }

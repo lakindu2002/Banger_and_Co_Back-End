@@ -4,6 +4,7 @@ import com.lakindu.bangerandcobackend.dto.VehicleCreateDTO;
 import com.lakindu.bangerandcobackend.dto.VehicleRentalFilterDTO;
 import com.lakindu.bangerandcobackend.dto.VehicleShowDTO;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceAlreadyExistsException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceCannotBeDeletedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -44,4 +45,6 @@ public interface VehicleService {
      * @since 13th June 2021
      */
     List<VehicleShowDTO> getAllVehiclesThatCanBeRentedForGivenPeriod(VehicleRentalFilterDTO theFilterDTO) throws DataFormatException, IOException;
+
+    void removeVehicleById(int vehicleId) throws ResourceNotFoundException, ResourceCannotBeDeletedException;
 }

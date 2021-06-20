@@ -55,8 +55,8 @@ public class Rental {
     @JoinColumn(name = "customer_username", nullable = false) //map foreign key.
     private User theCustomerRenting;
 
-    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH}, optional = false, fetch = FetchType.EAGER)
-    @JoinColumn(name = "vehicle_id", nullable = false) //map the foreign key.
+    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH}, optional = true, fetch = FetchType.EAGER)
+    @JoinColumn(name = "vehicle_id", nullable = true) //map the foreign key.
     private Vehicle vehicleOnRental;
 
     //map many to many

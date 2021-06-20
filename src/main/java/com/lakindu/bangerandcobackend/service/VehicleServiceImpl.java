@@ -8,14 +8,15 @@ import com.lakindu.bangerandcobackend.entity.Rental;
 import com.lakindu.bangerandcobackend.entity.Vehicle;
 import com.lakindu.bangerandcobackend.entity.VehicleType;
 import com.lakindu.bangerandcobackend.repository.VehicleRepository;
+import com.lakindu.bangerandcobackend.serviceinterface.RentalService;
 import com.lakindu.bangerandcobackend.serviceinterface.VehicleService;
 import com.lakindu.bangerandcobackend.serviceinterface.VehicleTypeService;
 import com.lakindu.bangerandcobackend.util.FileHandler.CompressImage;
 import com.lakindu.bangerandcobackend.util.FileHandler.DecompressImage;
 import com.lakindu.bangerandcobackend.util.FileHandler.ImageHandler;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceAlreadyExistsException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceCannotBeDeletedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
-import org.apache.tomcat.jni.Local;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -23,13 +24,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.ZoneId;
-import java.time.temporal.TemporalAccessor;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.zip.DataFormatException;
 
@@ -38,14 +35,16 @@ public class VehicleServiceImpl implements VehicleService {
 
     private final VehicleRepository vehicleRepository;
     private final VehicleTypeService vehicleTypeService;
+    private final RentalService rentalService;
 
     @Autowired
     public VehicleServiceImpl(
             @Qualifier("vehicleRepository") VehicleRepository vehicleRepository,
-            @Qualifier("vehicleTypeServiceImpl") VehicleTypeService vehicleTypeService
-    ) {
+            @Qualifier("vehicleTypeServiceImpl") VehicleTypeService vehicleTypeService,
+            @Qualifier("rentalServiceImpl") RentalService rentalService) {
         this.vehicleRepository = vehicleRepository;
         this.vehicleTypeService = vehicleTypeService;
+        this.rentalService = rentalService;
     }
 
     @Override
@@ -199,6 +198,18 @@ public class VehicleServiceImpl implements VehicleService {
             }
         }
         return vehiclesThatCanBeRentedForPeriod;
+    }
+
+    @Override
+    @Transactional
+    public void removeVehicleById(int vehicleId) throws ResourceNotFoundException, ResourceCannotBeDeletedException {
+        //first check if vehicle actually exists for the ID.
+        Vehicle theVehicleToBeRemoved = vehicleRepository.findById(vehicleId).orElseThrow(() -> new ResourceNotFoundException("The vehicle that you are trying to remove does not exist at Banger and Co."));
+        //check if vehicle to be removed has any pending/on-going rentals
+        rentalService.checkIfVehicleHasPendingOrOnGoingRentals(theVehicleToBeRemoved);
+        //if there are any rentals or vehicles pending, rental service will throw the relevant exceptions.
+        theVehicleToBeRemoved.clearRentals();
+        vehicleRepository.delete(theVehicleToBeRemoved); //remove the vehicle from the database,
     }
 
     private VehicleShowDTO convertToPartialDTO(Vehicle theVehicle) throws DataFormatException, IOException {

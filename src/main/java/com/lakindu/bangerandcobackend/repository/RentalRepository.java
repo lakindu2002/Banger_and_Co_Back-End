@@ -2,6 +2,7 @@ package com.lakindu.bangerandcobackend.repository;
 
 import com.lakindu.bangerandcobackend.entity.AdditionalEquipment;
 import com.lakindu.bangerandcobackend.entity.Rental;
+import com.lakindu.bangerandcobackend.entity.Vehicle;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -18,4 +19,12 @@ public interface RentalRepository extends JpaRepository<Rental, Integer> {
      * @return The list of rentals containing this equipment added to it.
      */
     List<Rental> findRentalsByEquipmentsAddedToRentalEquals(AdditionalEquipment theEquipment);
+
+    /**
+     * Method will return a list of rentals for a given vehicle
+     *
+     * @param theVehicle The vehicle to get the rentals for
+     * @return The list of rentals for the vehicle.
+     */
+    List<Rental> findRentalsByVehicleOnRentalEquals(Vehicle theVehicle);
 }

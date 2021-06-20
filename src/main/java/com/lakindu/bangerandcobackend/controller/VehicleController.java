@@ -7,10 +7,7 @@ import com.lakindu.bangerandcobackend.dto.VehicleShowDTO;
 import com.lakindu.bangerandcobackend.serviceinterface.RentalService;
 import com.lakindu.bangerandcobackend.serviceinterface.VehicleService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.*;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.InputValidNotValidatedException;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceAlreadyExistsException;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -123,5 +120,18 @@ public class VehicleController {
         //validated successfully, retrieve data from database.
         List<VehicleShowDTO> availableVehicles = vehicleService.getAllVehiclesThatCanBeRentedForGivenPeriod(theFilterDTO);
         return new ResponseEntity<>(availableVehicles, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @DeleteMapping(path = "/remove/{id}")
+    public ResponseEntity<BangerAndCoResponse> deleteVehicleById(@PathVariable(name = "id", required = true) int vehicleId) throws ResourceNotFoundException, ResourceCannotBeDeletedException {
+        //method executed by administrator to remove a vehicle only when there are no pending or on going rentals for it.
+        //on delete, past rental references will have vehicle ID as null.
+        vehicleService.removeVehicleById(vehicleId);
+
+        return new ResponseEntity<>(
+                new BangerAndCoResponse("The vehicle has been removed from Banger and Co successfully", HttpStatus.OK.value()),
+                HttpStatus.OK
+        );
     }
 }

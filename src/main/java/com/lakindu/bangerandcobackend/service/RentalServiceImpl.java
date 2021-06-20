@@ -3,6 +3,7 @@ package com.lakindu.bangerandcobackend.service;
 import com.lakindu.bangerandcobackend.dto.VehicleRentalFilterDTO;
 import com.lakindu.bangerandcobackend.entity.AdditionalEquipment;
 import com.lakindu.bangerandcobackend.entity.Rental;
+import com.lakindu.bangerandcobackend.entity.Vehicle;
 import com.lakindu.bangerandcobackend.repository.RentalRepository;
 import com.lakindu.bangerandcobackend.serviceinterface.RentalService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
@@ -99,7 +100,7 @@ public class RentalServiceImpl implements RentalService {
                 throw new ResourceCannotBeDeletedException("There are pending rentals that have this equipment added to it");
             }
             //check if the rental is approved but not collected
-            //in the null check, they won't process past the null check
+            //in the null check, "if" won't process past the null check
             //first expression is evaluated first
             //The && operator will stop evaluating (from left to right) as soon as it encounters a false.
             if (eachRental.getApproved() && (eachRental.getCollected() != null && !eachRental.getCollected())) {
@@ -111,6 +112,36 @@ public class RentalServiceImpl implements RentalService {
             }
 
             //if all these pass, it means rental has been returned.
+        }
+    }
+
+    @Override
+    public void checkIfVehicleHasPendingOrOnGoingRentals(Vehicle theVehicleToBeRemoved) throws ResourceCannotBeDeletedException {
+        List<Rental> rentalsForVehicle = rentalRepository.findRentalsByVehicleOnRentalEquals(theVehicleToBeRemoved);
+        //3 checks to be done
+        //check if any rentals are pending for the vehicle
+        //check if any rentals are approved but not yet collected
+        //check if any rentals are collected but not yet returned
+
+        for (Rental eachRental : rentalsForVehicle) {
+            if (!eachRental.getApproved()) {
+                //rentals are pending for the vehicle
+                throw new ResourceCannotBeDeletedException(
+                        "There are pending rentals for this vehicle. " +
+                                "Therefore it cannot be removed. " +
+                                "Either reject the rentals or wait till they have been completed to remove the vehicle from Banger and Co"
+                );
+            }
+
+            if ((eachRental.getApproved()) && (eachRental.getCollected() != null && !eachRental.getCollected())) {
+//                rentals are approved but not yet collected
+                throw new ResourceCannotBeDeletedException("There are rentals for this vehicle that the customers have not yet collected. Wait until the customer collects and returns the vehicle before removing");
+            }
+
+            if ((eachRental.getCollected() != null && eachRental.getCollected()) && (eachRental.getReturned() != null && !eachRental.getReturned())) {
+//                rentals are collected but not yet returned
+                throw new ResourceCannotBeDeletedException("Customers are already renting this vehicle and have not yet returned this. Wait until they return the vehicle before removing it.");
+            }
         }
     }
 }
