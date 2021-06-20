@@ -123,6 +123,7 @@ public class Vehicle {
     }
 
     public void clearRentals() {
+        //set the vehicle for null for each rental having this vehicle
         this.rentalsForTheVehicle.forEach((eachRental) -> {
             eachRental.setVehicleOnRental(null);
         });

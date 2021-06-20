@@ -208,6 +208,8 @@ public class VehicleServiceImpl implements VehicleService {
         //check if vehicle to be removed has any pending/on-going rentals
         rentalService.checkIfVehicleHasPendingOrOnGoingRentals(theVehicleToBeRemoved);
         //if there are any rentals or vehicles pending, rental service will throw the relevant exceptions.
+
+        //set the vehicle for null for each rental having this vehicle
         theVehicleToBeRemoved.clearRentals();
         vehicleRepository.delete(theVehicleToBeRemoved); //remove the vehicle from the database,
     }
