@@ -4,6 +4,7 @@ import com.lakindu.bangerandcobackend.util.validators.SizeCheck;
 
 import javax.validation.constraints.Digits;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Size;
 import java.text.NumberFormat;
 import java.util.Locale;
@@ -12,6 +13,7 @@ public class VehicleTypeDTO {
     private int vehicleTypeId;
 
     @NotBlank(message = "Please provide a type name")
+    @Pattern(regexp = "^[A-Za-z]+", message = "Please ensure that the type name has only alphabetical characters and no numerics or spaces")
     @Size(min = 1, max = 50, message = "Please keep type name between 1 and 50 characters")
     private String typeName;
 

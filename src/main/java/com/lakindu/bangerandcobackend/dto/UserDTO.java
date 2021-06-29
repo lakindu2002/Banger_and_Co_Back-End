@@ -16,10 +16,12 @@ public class UserDTO {
     private String emailAddress;
 
     @NotBlank(message = "Please Provide a Valid First Name")
+    @Pattern(message = "Please ensure that your first name has only alphabetical characters and no numerics or spaces", regexp = "^[A-Za-z]+")
     @Size(max = 100, message = "Please keep first name less than 100 characters")
     private String firstName;
 
     @NotBlank(message = "Please Provide a Valid Last Name")
+    @Pattern(message = "Please ensure that your last name has only alphabetical characters and no numerics or spaces", regexp = "^[A-Za-z]+")
     @Size(max = 100, message = "Please keep last name less than 100 characters")
     private String lastName;
 

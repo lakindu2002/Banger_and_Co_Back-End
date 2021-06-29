@@ -1,9 +1,6 @@
 package com.lakindu.bangerandcobackend.dto;
 
-import javax.validation.constraints.Digits;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.text.NumberFormat;
 import java.util.Locale;
 
@@ -17,6 +14,7 @@ public class AdditionalEquipmentDTO {
 
     @NotBlank(message = "Please provide an equipment name")
     @Size(min = 1, max = 255, message = "Please keep equipment size between 1 and 255 characters")
+    @Pattern(regexp = "^[A-Za-z]+", message = "Please ensure that the equipment name only has alphabetical characters and no numerics and spaces.")
     private String equipmentName;
 
     @NotNull(message = "Please provide an equipment quantity")
