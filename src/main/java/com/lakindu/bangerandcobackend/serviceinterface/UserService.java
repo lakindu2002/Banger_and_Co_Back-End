@@ -22,7 +22,7 @@ public interface UserService extends UserDetailsService {
 
     UserDTO getUserInformation(String username) throws Exception;
 
-    void createUser(UserDTO theNewUser, MultipartFile profilePicture) throws Exception;
+    void createUser(UserDTO theNewUser, MultipartFile profilePicture, MultipartFile licensePicture, MultipartFile otherIdentity) throws Exception;
 
     String encodePassword(String password);
 

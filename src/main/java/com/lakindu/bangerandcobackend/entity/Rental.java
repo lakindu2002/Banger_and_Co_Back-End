@@ -43,14 +43,6 @@ public class Rental {
     @Column(name = "is_late_return_approved", nullable = true)
     private Boolean isLateReturnApproved;
 
-    @Lob()
-    @Column(name = "driving_license", nullable = false, columnDefinition = "MEDIUMBLOB")
-    private byte[] drivingLicense;
-
-    @Lob()
-    @Column(name = "other_identity", nullable = false, columnDefinition = "MEDIUMBLOB")
-    private byte[] otherIdentity;
-
     @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH}, optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "customer_username", nullable = false) //map foreign key.
     private User theCustomerRenting;
@@ -157,22 +149,6 @@ public class Rental {
 
     public void setLateReturnApproved(Boolean lateReturnApproved) {
         isLateReturnApproved = lateReturnApproved;
-    }
-
-    public byte[] getDrivingLicense() {
-        return drivingLicense;
-    }
-
-    public void setDrivingLicense(byte[] drivingLicense) {
-        this.drivingLicense = drivingLicense;
-    }
-
-    public byte[] getOtherIdentity() {
-        return otherIdentity;
-    }
-
-    public void setOtherIdentity(byte[] otherIdentity) {
-        this.otherIdentity = otherIdentity;
     }
 
     public User getTheCustomerRenting() {

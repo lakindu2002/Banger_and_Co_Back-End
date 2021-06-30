@@ -39,6 +39,10 @@ public class UserDTO {
 
     private byte[] profilePicture;
 
+    private byte[] licensePic;
+
+    private byte[] otherIdentity;
+
     private boolean isBlackListed;
 
     private String userRole;
@@ -46,6 +50,30 @@ public class UserDTO {
     private List<RentalShowDTO> rentalListForCustomer;
 
     public UserDTO() {
+    }
+
+    public byte[] getLicensePic() {
+        return licensePic;
+    }
+
+    public void setLicensePic(byte[] licensePic) {
+        this.licensePic = licensePic;
+    }
+
+    public byte[] getOtherIdentity() {
+        return otherIdentity;
+    }
+
+    public void setOtherIdentity(byte[] otherIdentity) {
+        this.otherIdentity = otherIdentity;
+    }
+
+    public List<RentalShowDTO> getRentalListForCustomer() {
+        return rentalListForCustomer;
+    }
+
+    public void setRentalListForCustomer(List<RentalShowDTO> rentalListForCustomer) {
+        this.rentalListForCustomer = rentalListForCustomer;
     }
 
     public String getUsername() {

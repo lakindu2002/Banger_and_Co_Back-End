@@ -115,12 +115,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void createUser(UserDTO theNewUser, MultipartFile profilePicture) throws IOException, ResourceNotFoundException, DataFormatException, ResourceAlreadyExistsException {
+    public void createUser(UserDTO theNewUser, MultipartFile profilePicture, MultipartFile licensePic, MultipartFile otherIdentity) throws IOException, ResourceNotFoundException, DataFormatException, ResourceAlreadyExistsException {
         theNewUser.setUsername(theNewUser.getUsername());
         theNewUser.setEmailAddress(theNewUser.getEmailAddress().toLowerCase());
         theNewUser.setBlackListed(false);
         theNewUser.setUserPassword(encodePassword(theNewUser.getUserPassword()));
         theNewUser.setProfilePicture(profilePicture.getBytes());
+        theNewUser.setLicensePic(licensePic.getBytes());
+        theNewUser.setOtherIdentity(otherIdentity.getBytes());
 
         Role theRole = theRoleService._getRoleInformation("customer");
 
@@ -129,15 +131,17 @@ public class UserServiceImpl implements UserService {
 
         User entityToBeSaved = User.convertDTOToEntity(theNewUser, theRole); //convert DTO to entity.
 
-        ImageHandler theCompressor = new CompressImage(); //creating template method pattern
-        final byte[] compressImage = theCompressor.processUnhandledImage(entityToBeSaved.getProfilePicture());//calling the template method
-        entityToBeSaved.setProfilePicture(compressImage);
-
         if (userNameExists == null) {
             //does email exist
             User emailExists = theUserRepository.findUserByEmailAddress(theNewUser.getEmailAddress());
             if (emailExists == null) {
                 //email valid
+
+                //compress the images before saving.
+                entityToBeSaved.setProfilePicture(new CompressImage().processUnhandledImage(theNewUser.getProfilePicture()));
+                entityToBeSaved.setDrivingLicense(new CompressImage().processUnhandledImage(theNewUser.getLicensePic()));
+                entityToBeSaved.setOtherIdentity(new CompressImage().processUnhandledImage(theNewUser.getOtherIdentity()));
+
                 User registeredUser = theUserRepository.save(entityToBeSaved);
                 //save user and send welcome email
                 theSender.sendMail(new MailSenderHelper(registeredUser, "Welcome To Banger and Co!", MailTemplateType.SIGNUP));
@@ -213,7 +217,7 @@ public class UserServiceImpl implements UserService {
             throw new ResourceNotFoundException("A customer with the username provided does not exist at Banger and Co.");
         } else {
             //first check if the user is indeed a customer.
-            if (theCustomer.getUserRole().getRoleName().toLowerCase().equalsIgnoreCase("customer")) {
+            if (theCustomer.getUserRole().getRoleName().equalsIgnoreCase("customer")) {
                 //user is indeed a customer.
                 //check if the user is BLACKLISTED. if user is blacklisted
                 if (theCustomer.isBlackListed()) {
