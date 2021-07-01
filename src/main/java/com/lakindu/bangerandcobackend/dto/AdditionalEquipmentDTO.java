@@ -28,11 +28,6 @@ public class AdditionalEquipmentDTO {
     public AdditionalEquipmentDTO() {
     }
 
-    public void showCurrencyOnReturn(double pricePerDay) {
-        //when setting price to return to the view, use a currency formatter
-        NumberFormat theCurrencyFormatter = NumberFormat.getCurrencyInstance(Locale.UK); //get pound currency
-        this.pricePerDay = theCurrencyFormatter.format(pricePerDay);
-    }
 
     public String getPricePerDay() {
         return pricePerDay;
@@ -40,6 +35,11 @@ public class AdditionalEquipmentDTO {
 
     public void setPricePerDay(String pricePerDay) {
         this.pricePerDay = pricePerDay;
+    }
+
+    public void setLKR(double pricePerDay) {
+        //%s - any time
+        this.pricePerDay = String.format("LKR - %s", pricePerDay);
     }
 
     public int getEquipmentId() {
