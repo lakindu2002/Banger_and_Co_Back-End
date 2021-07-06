@@ -30,6 +30,10 @@ public class CustomUserPrincipal implements UserDetails {
         );
     }
 
+    public User getTheUserEntity() {
+        return theUserEntity;
+    }
+
     @Override
     public String getPassword() {
         return theUserEntity.getUserPassword();

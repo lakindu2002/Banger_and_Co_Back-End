@@ -5,10 +5,12 @@ import com.lakindu.bangerandcobackend.dto.RentalShowDTO;
 import com.lakindu.bangerandcobackend.dto.VehicleRentalFilterDTO;
 import com.lakindu.bangerandcobackend.dto.VehicleShowDTO;
 import com.lakindu.bangerandcobackend.entity.Rental;
+import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.entity.Vehicle;
 import com.lakindu.bangerandcobackend.entity.VehicleType;
 import com.lakindu.bangerandcobackend.repository.VehicleRepository;
 import com.lakindu.bangerandcobackend.serviceinterface.RentalService;
+import com.lakindu.bangerandcobackend.serviceinterface.UserService;
 import com.lakindu.bangerandcobackend.serviceinterface.VehicleService;
 import com.lakindu.bangerandcobackend.serviceinterface.VehicleTypeService;
 import com.lakindu.bangerandcobackend.util.FileHandler.CompressImage;
@@ -19,12 +21,16 @@ import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.Re
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
 import java.io.IOException;
+import java.sql.Date;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
@@ -36,15 +42,18 @@ public class VehicleServiceImpl implements VehicleService {
     private final VehicleRepository vehicleRepository;
     private final VehicleTypeService vehicleTypeService;
     private final RentalService rentalService;
+    private final UserService userService;
 
     @Autowired
     public VehicleServiceImpl(
             @Qualifier("vehicleRepository") VehicleRepository vehicleRepository,
             @Qualifier("vehicleTypeServiceImpl") VehicleTypeService vehicleTypeService,
-            @Qualifier("rentalServiceImpl") RentalService rentalService) {
+            @Qualifier("rentalServiceImpl") RentalService rentalService,
+            @Qualifier("userServiceImpl") UserService userService) {
         this.vehicleRepository = vehicleRepository;
         this.vehicleTypeService = vehicleTypeService;
         this.rentalService = rentalService;
+        this.userService = userService;
     }
 
     @Override
@@ -120,8 +129,11 @@ public class VehicleServiceImpl implements VehicleService {
      * IF the Passed PICKUP or RETURN Date_Time is between a RENTAL PICKUP or RETURN DATE_TIME, check if each vehicle for rental is returned, if so vehicle can be rented again
      * IF not, there may be rentals that fall between the PASSED Pickup and Return DATE_TIME, check those rentals.
      * IF rentals fall between Passed PICKUP/RETURN Date_Time, check if they're returned, if so, can be rented again.
+     * <p>
+     * <b>if customer is less than 25 years old, they can rent only SMALL TOWN CARS as the banger only insured for that age</b>
      *
      * @param theFilterDTO The object containing the REQUESTING Pickup DATE_TIME and Return DATE_TIME
+     * @param loggedInUser
      * @return The list of vehicles that can be rented between time period.
      * @throws DataFormatException Thrown when dates passed from client is invalid.
      * @throws IOException         Thrown due to image decompression issues.
@@ -130,9 +142,10 @@ public class VehicleServiceImpl implements VehicleService {
      */
     @Override
     @Transactional
-    public List<VehicleShowDTO> getAllVehiclesThatCanBeRentedForGivenPeriod(VehicleRentalFilterDTO theFilterDTO) throws DataFormatException, IOException {
+    public List<VehicleShowDTO> getAllVehiclesThatCanBeRentedForGivenPeriod(VehicleRentalFilterDTO theFilterDTO, Authentication loggedInUser) throws DataFormatException, IOException {
         List<VehicleShowDTO> vehiclesThatCanBeRentedForPeriod = new ArrayList<>();
         List<Vehicle> allVehiclesInDb = vehicleRepository.findAll();
+        boolean getOnlySmallTownCars = checkIfUserLessThan25(loggedInUser);
 
         //retrieve the LocalDateTime of the passed start - date, time & return - date, time.
         LocalDateTime filterPickUpDateTime = LocalDateTime.of(theFilterDTO.getPickupDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), theFilterDTO.getPickupTime());
@@ -140,6 +153,10 @@ public class VehicleServiceImpl implements VehicleService {
 
         for (Vehicle eachVehicle : allVehiclesInDb) {
             //iterate over each vehicle.
+
+            //if user is a customer and is less than 25 years old, show only small town cars.
+
+            VehicleType theType = eachVehicle.getTheVehicleType();
             List<Rental> rentalsForEachVehicle = eachVehicle.getRentalsForTheVehicle();
             //boolean to check if the vehicle in loop can be added to the return of the available vehicles.
             boolean canBeAddedToReturn = false;
@@ -194,10 +211,44 @@ public class VehicleServiceImpl implements VehicleService {
             }
             if (canBeAddedToReturn) {
                 //if all the business validation for availability of vehicle passes, insert it to return list.
-                vehiclesThatCanBeRentedForPeriod.add(vehicleReturnDTO);
+                if (getOnlySmallTownCars) {
+                    //the user can only rent small town cars, so add to return only if its small town car.
+                    if (theType.getSize().equalsIgnoreCase("small") && theType.getTypeName().equalsIgnoreCase("town car")) {
+                        vehiclesThatCanBeRentedForPeriod.add(vehicleReturnDTO);
+                    }
+                } else {
+                    //user can rent anything.
+                    vehiclesThatCanBeRentedForPeriod.add(vehicleReturnDTO);
+                }
             }
         }
         return vehiclesThatCanBeRentedForPeriod;
+    }
+
+    private boolean checkIfUserLessThan25(Authentication loggedInUser) {
+        if (loggedInUser == null) {
+            //not logged in, guest
+            return false;
+        } else {
+            //login present.
+            User theUserEntity = userService._getUserWithoutDecompression(loggedInUser.getName());
+
+            if (theUserEntity.getUserRole().getRoleName().equalsIgnoreCase("customer")) {
+                LocalDate dateOfBirth = theUserEntity.getDateOfBirth().toLocalDate();
+                LocalDate currentDate = new Date(System.currentTimeMillis()).toLocalDate();
+
+                if (Period.between(dateOfBirth, currentDate).getYears() < 25) {
+                    //if age is less than 25, allow only rental of Small town cars
+                    return true;
+                } else {
+                    //older or equal to 25, can rent anything.
+                    return false;
+                }
+            } else {
+                //user is an admin
+                return false;
+            }
+        }
     }
 
     @Override
