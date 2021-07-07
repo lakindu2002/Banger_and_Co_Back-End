@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 @RestControllerAdvice
 //combination of @ControllerAdvice and @ResponseBody (automatically uses JSON)
@@ -20,6 +22,13 @@ public class GlobalExceptionHandler {
     //this class will handle all the global exceptions thrown throughout the spring application.
     //the annotation @RestControllerAdvice enables this
     //this is the best practise for handling exceptions in Spring Boot Rest
+
+    private Logger LOGGER;
+
+    @PostConstruct
+    public void init() {
+        this.LOGGER = Logger.getLogger(GlobalExceptionHandler.class.getName());
+    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<BangerAndCoExceptionHandler> handlerDefaultException(Exception ex) {
@@ -37,6 +46,7 @@ public class GlobalExceptionHandler {
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
                 new ArrayList<>());
 
+        LOGGER.warning("ERROR: " + ex.getMessage());
         return new ResponseEntity<>(exceptionHandler, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
@@ -57,6 +67,7 @@ public class GlobalExceptionHandler {
                 errorList
         );
         //return the response entity of type Bad Request back to the resource sending client
+        LOGGER.warning("ERROR: " + ex.getMessage());
         return new ResponseEntity<>(exceptionHandler, HttpStatus.BAD_REQUEST);
     }
 
@@ -72,6 +83,7 @@ public class GlobalExceptionHandler {
                 new ArrayList<>()
         );
         //return the response entity of type Conflict back to the resource sending client
+        LOGGER.warning("ERROR: " + ex.getMessage());
         return new ResponseEntity<>(exceptionHandler, HttpStatus.CONFLICT);
     }
 
@@ -84,6 +96,7 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST.value(),
                 new ArrayList<>());
 
+        LOGGER.warning("ERROR: " + ex.getMessage());
         return new ResponseEntity<>(exceptionHandler, HttpStatus.BAD_REQUEST);
     }
 
@@ -96,6 +109,7 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST.value(),
                 new ArrayList<>());
 
+        LOGGER.warning("ERROR: " + ex.getMessage());
         return new ResponseEntity<>(exceptionHandler, HttpStatus.BAD_REQUEST);
     }
 
@@ -108,6 +122,7 @@ public class GlobalExceptionHandler {
                 HttpStatus.NOT_FOUND.value(),
                 new ArrayList<>());
 
+        LOGGER.warning("ERROR: " + ex.getMessage());
         return new ResponseEntity<>(exceptionHandler, HttpStatus.NOT_FOUND);
     }
 
@@ -134,6 +149,7 @@ public class GlobalExceptionHandler {
                 new ArrayList<>()
         );
         //conflict is used in cases where user is able to fix data and send to avoid conflict.
+        LOGGER.warning("ERROR: " + ex.getMessage());
         return new ResponseEntity<>(theHandler, HttpStatus.CONFLICT); //return a conflict as operation could not be completed due to a conflict in logic.
     }
 
@@ -146,6 +162,7 @@ public class GlobalExceptionHandler {
                 HttpStatus.BAD_REQUEST.value(),
                 new ArrayList<>());
 
+        LOGGER.warning("ERROR: " + ex.getMessage());
         return new ResponseEntity<>(exceptionHandler, HttpStatus.BAD_REQUEST);
     }
 
@@ -178,6 +195,7 @@ public class GlobalExceptionHandler {
                 errorList
         );
         //return the response entity of type Bad Request back to the resource sending client
+        LOGGER.warning("ERROR: " + ex.getMessage());
         return new ResponseEntity<>(exceptionHandler, HttpStatus.BAD_REQUEST);
     }
 }

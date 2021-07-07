@@ -16,4 +16,6 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     @Query("SELECT theUser FROM User theUser WHERE theUser.userRole.roleName<>:roleName")
     List<User> getAllUsersExceptAdministrator(String roleName);
+
+    User getUserByUsername(String username);
 }

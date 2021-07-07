@@ -4,5 +4,5 @@ public enum MailTemplateType {
     SIGNUP,
     UPDATEACCOUNT,
     INQUIRY_REPLY,
-    WHITELIST
+    WHITELIST,
 }

@@ -37,11 +37,11 @@ public class User {
     private byte[] profilePicture;
 
     @Lob()
-    @Column(name = "driving_license", nullable = false, columnDefinition = "MEDIUMBLOB")
+    @Column(name = "driving_license", nullable = true, columnDefinition = "MEDIUMBLOB")
     private byte[] drivingLicense;
 
     @Lob()
-    @Column(name = "other_identity", nullable = false, columnDefinition = "MEDIUMBLOB")
+    @Column(name = "other_identity", nullable = true, columnDefinition = "MEDIUMBLOB")
     private byte[] otherIdentity;
 
     @Column(name = "is_black_listed", nullable = false)

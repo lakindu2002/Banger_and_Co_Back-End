@@ -20,16 +20,19 @@ import com.lakindu.bangerandcobackend.util.mailsender.MailSenderHelper;
 import com.lakindu.bangerandcobackend.util.mailsender.MailTemplateType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.PostConstruct;
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 import java.util.zip.DataFormatException;
 
 
@@ -39,6 +42,7 @@ public class UserServiceImpl implements UserService {
     private final RoleService theRoleService;
     private final MailSender theSender;
     private final PasswordEncoder passwordEncoder;
+    private Logger LOGGER;
 
     @Autowired
     public UserServiceImpl(
@@ -50,6 +54,11 @@ public class UserServiceImpl implements UserService {
         this.theRoleService = theRoleService;
         this.theSender = theSender;
         this.passwordEncoder = passwordEncoder;
+    }
+
+    @PostConstruct
+    public void init() {
+        LOGGER = Logger.getLogger(UserServiceImpl.class.getName());
     }
 
     @Override
@@ -238,6 +247,68 @@ public class UserServiceImpl implements UserService {
             } else {
                 throw new ResourceNotFoundException("A customer with the username provided does not exist at Banger and Co");
             }
+        }
+    }
+
+    @Override
+    public void updateCustomerLicenseImage(String customerUsername, MultipartFile licenseImage, Authentication loggedInUser) throws ResourceNotUpdatedException, IOException, DataFormatException {
+        //check if passed username is username attached in token.
+        if (loggedInUser.getName().equals(customerUsername)) {
+            //usernames are same
+
+            //retrieve the user information
+            User updatingUser = _getUserWithoutDecompression(customerUsername);
+            updatingUser.setDrivingLicense(new CompressImage().processUnhandledImage(licenseImage.getBytes()));
+            theUserRepository.save(updatingUser); //update the license image.
+
+            //send email
+            try {
+                theSender.sendMail(new MailSenderHelper(
+                        updatingUser,
+                        "License Image Updated Successfully",
+                        MailTemplateType.UPDATEACCOUNT
+                ));
+            } catch (Exception ex) {
+                LOGGER.warning("EMAIL NOT SENT WHILE LICENSE UPDATE: " + ex.getMessage());
+            }
+        } else {
+            throw new ResourceNotUpdatedException("The account that you are trying to update does not belong to you");
+        }
+    }
+
+    @Override
+    public byte[] getCustomerLicenseImage(String username) throws DataFormatException, IOException {
+        return new DecompressImage().processUnhandledImage(theUserRepository.getUserByUsername(username).getDrivingLicense());
+    }
+
+    @Override
+    public byte[] getCustomerOtherImage(String username) throws DataFormatException, IOException {
+        return new DecompressImage().processUnhandledImage(theUserRepository.getUserByUsername(username).getOtherIdentity());
+    }
+
+    @Override
+    public void updateCustomerOtherImage(String customerUsername, MultipartFile otherIdentity, Authentication loggedInUser) throws ResourceNotUpdatedException, IOException, DataFormatException {
+        //check if passed username is username attached in token.
+        if (loggedInUser.getName().equals(customerUsername)) {
+            //usernames are same
+
+            //retrieve the user information
+            User updatingUser = _getUserWithoutDecompression(customerUsername);
+            updatingUser.setOtherIdentity(new CompressImage().processUnhandledImage(otherIdentity.getBytes()));
+            theUserRepository.save(updatingUser); //update the license image.
+
+            //send email
+            try {
+                theSender.sendMail(new MailSenderHelper(
+                        updatingUser,
+                        "Other Identity Image Updated Successfully",
+                        MailTemplateType.UPDATEACCOUNT
+                ));
+            } catch (Exception ex) {
+                LOGGER.warning("EMAIL NOT SENT WHILE OTHER IMAGE UPDATE: " + ex.getMessage());
+            }
+        } else {
+            throw new ResourceNotUpdatedException("The account that you are trying to update does not belong to you");
         }
     }
 
