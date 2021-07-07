@@ -16,10 +16,12 @@ public class UserDTO {
     private String emailAddress;
 
     @NotBlank(message = "Please Provide a Valid First Name")
+    @Pattern(message = "Please ensure that your first name has only alphabetical characters and no numerics or spaces", regexp = "^[A-Za-z]+")
     @Size(max = 100, message = "Please keep first name less than 100 characters")
     private String firstName;
 
     @NotBlank(message = "Please Provide a Valid Last Name")
+    @Pattern(message = "Please ensure that your last name has only alphabetical characters and no numerics or spaces", regexp = "^[A-Za-z]+")
     @Size(max = 100, message = "Please keep last name less than 100 characters")
     private String lastName;
 
@@ -37,6 +39,10 @@ public class UserDTO {
 
     private byte[] profilePicture;
 
+    private byte[] licensePic;
+
+    private byte[] otherIdentity;
+
     private boolean isBlackListed;
 
     private String userRole;
@@ -44,6 +50,30 @@ public class UserDTO {
     private List<RentalShowDTO> rentalListForCustomer;
 
     public UserDTO() {
+    }
+
+    public byte[] getLicensePic() {
+        return licensePic;
+    }
+
+    public void setLicensePic(byte[] licensePic) {
+        this.licensePic = licensePic;
+    }
+
+    public byte[] getOtherIdentity() {
+        return otherIdentity;
+    }
+
+    public void setOtherIdentity(byte[] otherIdentity) {
+        this.otherIdentity = otherIdentity;
+    }
+
+    public List<RentalShowDTO> getRentalListForCustomer() {
+        return rentalListForCustomer;
+    }
+
+    public void setRentalListForCustomer(List<RentalShowDTO> rentalListForCustomer) {
+        this.rentalListForCustomer = rentalListForCustomer;
     }
 
     public String getUsername() {

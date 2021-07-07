@@ -84,7 +84,7 @@ public class VehicleTypeServiceImpl implements VehicleTypeService {
         theDTO.setVehicleTypeId(theType.getVehicleTypeId());
         theDTO.setTypeName(theType.getTypeName());
         theDTO.setSize(theType.getSize());
-        theDTO.showCurrencyOnReturn(theType.getPricePerDay());
+        theDTO.setLKR(theType.getPricePerDay());
         theDTO.setVehicleCountInType(theType.getVehicleList().size());
 
         return theDTO; //return the DTO back to the client.

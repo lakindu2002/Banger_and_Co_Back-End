@@ -45,7 +45,7 @@ public class AdditionalEquipmentServiceImpl implements AdditionalEquipmentServic
             theDTO.setEquipmentName(theEquipment.getEquipmentName());
             theDTO.setEquipmentQuantity(theEquipment.getEquipmentQuantity());
             theDTO.setEquipmentId(theEquipment.getEquipmentId());
-            theDTO.showCurrencyOnReturn(theEquipment.getPricePerDay());
+            theDTO.setLKR(theEquipment.getPricePerDay());
 
             theReturnList.add(theDTO);
         }

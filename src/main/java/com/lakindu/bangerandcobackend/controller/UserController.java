@@ -11,10 +11,13 @@ import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.Re
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.io.IOException;
@@ -70,6 +73,46 @@ public class UserController {
         User whiteListedCustomer = theUserService.whitelistCustomer(theCustomer.get("username"));
         return new ResponseEntity<>(
                 new BangerAndCoResponse(String.format("%s %s Has Been Whitelisted Successfully", whiteListedCustomer.getFirstName(), whiteListedCustomer.getLastName()), HttpStatus.OK.value()),
+                HttpStatus.OK
+        );
+    }
+
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @GetMapping(path = "/getLicense/{username}", produces = MediaType.IMAGE_JPEG_VALUE)
+    public ResponseEntity<byte[]> getLicenseImage(@PathVariable(name = "username") String username) throws DataFormatException, IOException {
+        return new ResponseEntity<>(theUserService.getCustomerLicenseImage(username), HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @GetMapping(path = "/getOther/{username}", produces = MediaType.IMAGE_JPEG_VALUE)
+    public ResponseEntity<byte[]> getOtherIdentity(@PathVariable(name = "username") String username) throws DataFormatException, IOException {
+        return new ResponseEntity<>(theUserService.getCustomerOtherImage(username), HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @PutMapping(path = "/update/license/{customerUserName}")
+    public ResponseEntity<BangerAndCoResponse> updateLicenseImage(@RequestParam(name = "licenseImage") MultipartFile licenseImage,
+                                                                  @PathVariable(name = "customerUserName") String customerUsername,
+                                                                  Authentication loggedInUser) throws DataFormatException, IOException, ResourceNotUpdatedException {
+        //method executed by the customer when they update their license image.
+        //use the authentication object in the security context to check usernames
+        theUserService.updateCustomerLicenseImage(customerUsername, licenseImage, loggedInUser);
+        return new ResponseEntity<>(
+                new BangerAndCoResponse("The license image has been updated successfully", HttpStatus.OK.value()),
+                HttpStatus.OK
+        );
+    }
+
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @PutMapping(path = "/update/otherIdentity/{customerUserName}")
+    public ResponseEntity<BangerAndCoResponse> updateOtherIdentity(@RequestParam(name = "otherImage") MultipartFile licenseImage,
+                                                                   @PathVariable(name = "customerUserName") String customerUsername,
+                                                                   Authentication loggedInUser) throws DataFormatException, IOException, ResourceNotUpdatedException {
+        //method executed by the customer when they update their license image.
+        //use the authentication object in the security context to check usernames
+        theUserService.updateCustomerOtherImage(customerUsername, licenseImage, loggedInUser);
+        return new ResponseEntity<>(
+                new BangerAndCoResponse("The other identity image has been updated successfully", HttpStatus.OK.value()),
                 HttpStatus.OK
         );
     }

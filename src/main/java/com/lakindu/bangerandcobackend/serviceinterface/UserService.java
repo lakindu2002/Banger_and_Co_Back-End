@@ -6,6 +6,7 @@ import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotUpdatedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,7 +23,7 @@ public interface UserService extends UserDetailsService {
 
     UserDTO getUserInformation(String username) throws Exception;
 
-    void createUser(UserDTO theNewUser, MultipartFile profilePicture) throws Exception;
+    void createUser(UserDTO theNewUser, MultipartFile profilePicture, MultipartFile licensePicture, MultipartFile otherIdentity) throws Exception;
 
     String encodePassword(String password);
 
@@ -43,4 +44,44 @@ public interface UserService extends UserDetailsService {
      * @author Lakindu Hewawasam
      */
     User whitelistCustomer(String username) throws ResourceNotFoundException, ResourceNotUpdatedException;
+
+    /**
+     * Method will update the customer license image in the database
+     *
+     * @param customerUsername The customer to update the license image for
+     * @param licenseImage     The new license image for the customer
+     * @param loggedInUser     Information of logged in user.
+     * @author Lakindu Hewawasam
+     */
+    void updateCustomerLicenseImage(String customerUsername, MultipartFile licenseImage, Authentication loggedInUser) throws ResourceNotUpdatedException, IOException, DataFormatException;
+
+    /**
+     * Method will decompress the license image and return it back to the client.
+     *
+     * @param username The customer to get the license image for
+     * @return The decompressed image
+     * @throws DataFormatException Thrown when failure in Decompression
+     * @throws IOException         Thrown during buffer handling
+     */
+    byte[] getCustomerLicenseImage(String username) throws DataFormatException, IOException;
+
+    /**
+     * Method will decompress the other identity image and return it back to the client.
+     *
+     * @param username The customer to get the other identity for
+     * @return The decompressed image
+     * @throws DataFormatException Thrown when failure in Decompression
+     * @throws IOException         Thrown during buffer handling
+     */
+    byte[] getCustomerOtherImage(String username) throws DataFormatException, IOException;
+
+    /**
+     * Method will update the customer license image in the database
+     *
+     * @param customerUsername The customer to update the license image for
+     * @param additionalImage  The new additional identity image for the customer
+     * @param loggedInUser     The information of logged in user
+     * @author Lakindu Hewawasam
+     */
+    void updateCustomerOtherImage(String customerUsername, MultipartFile additionalImage, Authentication loggedInUser) throws ResourceNotUpdatedException, IOException, DataFormatException;
 }

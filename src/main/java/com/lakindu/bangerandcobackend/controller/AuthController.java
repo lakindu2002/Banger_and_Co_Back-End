@@ -49,7 +49,9 @@ public class AuthController {
     )
     public ResponseEntity<BangerAndCoResponse> createAccount(
             @RequestParam(name = "userProfile") String requestUser,
-            @RequestParam(name = "profilePic", required = true) MultipartFile requestProfilePic
+            @RequestParam(name = "profilePic", required = true) MultipartFile requestProfilePic,
+            @RequestParam(name = "licensePic", required = true) MultipartFile requestLicensePic,
+            @RequestParam(name = "otherIdentity", required = true) MultipartFile requestOtherIdentity
     ) throws Exception {
         //method used for customers when they wish to sign up
 
@@ -76,7 +78,7 @@ public class AuthController {
             theUserDTO.setLastName(theUserDTO.getLastName().trim());
             theUserDTO.setFirstName(theUserDTO.getFirstName().trim());
 
-            userService.createUser(theUserDTO, requestProfilePic);
+            userService.createUser(theUserDTO, requestProfilePic, requestLicensePic, requestOtherIdentity);
 
             BangerAndCoResponse response = new BangerAndCoResponse(
                     "account created successfully",

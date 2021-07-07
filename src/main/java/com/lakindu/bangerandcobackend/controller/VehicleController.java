@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.DataBinder;
 import org.springframework.validation.ObjectError;
@@ -94,7 +95,8 @@ public class VehicleController {
             @RequestParam(value = "pickupDate", required = true) String pickupDate,
             @RequestParam(value = "returnDate", required = true) String returnDate,
             @RequestParam(value = "pickupTime", required = true) String pickupTime,
-            @RequestParam(value = "returnTime", required = true) String returnTime
+            @RequestParam(value = "returnTime", required = true) String returnTime,
+            Authentication loggedInUser
     ) throws InputValidNotValidatedException, ParseException, DataFormatException, IOException, BadValuePassedException {
         //method executed by GUESTS and CUSTOMERS to view a list of all available vehicles for the given Pickup DATE_TIME and Return DATE_TIME
 
@@ -118,7 +120,7 @@ public class VehicleController {
         rentalService.validateRentalFilters(theFilterDTO); //validate the business logic for rental date time duration
 
         //validated successfully, retrieve data from database.
-        List<VehicleShowDTO> availableVehicles = vehicleService.getAllVehiclesThatCanBeRentedForGivenPeriod(theFilterDTO);
+        List<VehicleShowDTO> availableVehicles = vehicleService.getAllVehiclesThatCanBeRentedForGivenPeriod(theFilterDTO, loggedInUser);
         return new ResponseEntity<>(availableVehicles, HttpStatus.OK);
     }
 
