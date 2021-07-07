@@ -60,4 +60,13 @@ public interface VehicleService {
     List<VehicleShowDTO> getAllVehiclesThatCanBeRentedForGivenPeriod(VehicleRentalFilterDTO theFilterDTO, Authentication loggedInUser) throws DataFormatException, IOException;
 
     void removeVehicleById(int vehicleId) throws ResourceNotFoundException, ResourceCannotBeDeletedException;
+
+    /**
+     * Method returns a vehicle object for the given ID.
+     *
+     * @param vehicleId The id to get the vehicle for
+     * @return The vehicle information for the given ID queried from the database.
+     * @author Lakindu Hewawasam
+     */
+    VehicleShowDTO getVehicleById(int vehicleId) throws DataFormatException, IOException, ResourceNotFoundException;
 }

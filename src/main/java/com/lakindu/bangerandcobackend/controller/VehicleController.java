@@ -136,4 +136,11 @@ public class VehicleController {
                 HttpStatus.OK
         );
     }
+
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @GetMapping(path = "/get/{vehicleId}")
+    public ResponseEntity<VehicleShowDTO> getVehicleByLicensePlate(@PathVariable(name = "vehicleId") int vehicleId) throws ResourceNotFoundException, IOException, DataFormatException {
+        VehicleShowDTO theVehicle = vehicleService.getVehicleById(vehicleId);
+        return new ResponseEntity<>(theVehicle, HttpStatus.OK);
+    }
 }

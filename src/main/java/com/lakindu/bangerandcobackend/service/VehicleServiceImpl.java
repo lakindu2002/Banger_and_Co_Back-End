@@ -34,6 +34,7 @@ import java.time.Period;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.zip.DataFormatException;
 
 @Service
@@ -253,6 +254,16 @@ public class VehicleServiceImpl implements VehicleService {
         //set the vehicle for null for each rental having this vehicle
         theVehicleToBeRemoved.clearRentals();
         vehicleRepository.delete(theVehicleToBeRemoved); //remove the vehicle from the database,
+    }
+
+    @Override
+    public VehicleShowDTO getVehicleById(int vehicleId) throws DataFormatException, IOException, ResourceNotFoundException {
+        Optional<Vehicle> optionalVehicle = vehicleRepository.findById(vehicleId);
+        if (optionalVehicle.isPresent()) {
+            return convertToPartialDTO(optionalVehicle.get());
+        } else {
+            throw new ResourceNotFoundException("The vehicle that you are trying to access does not access at Banger and Co.");
+        }
     }
 
     private VehicleShowDTO convertToPartialDTO(Vehicle theVehicle) throws DataFormatException, IOException {
