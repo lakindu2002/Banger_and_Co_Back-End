@@ -102,16 +102,6 @@ public class VehicleServiceImpl implements VehicleService {
             //decompress the vehicle image before showing it to construct the original uncompressed image, else wont be rendered properly.
             //construct a DTO and insert to theReturnList
             VehicleShowDTO theDTO = convertToPartialDTO(eachVehicle);
-
-            //show the number of rentals for each vehicle as well.
-            List<RentalShowDTO> rentalList = new ArrayList<>();
-            for (Rental eachRental : eachVehicle.getRentalsForTheVehicle()) {
-                //create a rental dto that can be shown back to the client.
-                RentalShowDTO theRentalDTO = new RentalShowDTO();
-                //ASSIGN RENTAL INFORMATION!!!!!!!!!!!!!!!!!!! TO DTO!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//                rentalList.add(theRentalDTO);
-            }
-            theDTO.setTheRentalsForVehicle(rentalList); //assign the rental list to the vehicle dto.
             theReturnList.add(theDTO);
         }
         return theReturnList;
