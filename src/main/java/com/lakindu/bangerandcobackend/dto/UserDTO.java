@@ -37,6 +37,11 @@ public class UserDTO {
     @Size(min = 6, max = 15, message = "Please keep password between 6 and 15 characters")
     private String userPassword;
 
+    @NotBlank(message = "Please Provide a Valid Driving License Number")
+    @Size(message = "Driving License Must Be Of 8 Characters (X0000000)", min = 8, max = 8)
+    @Pattern(regexp = "^[A-Z]{1}[0-9]{7}$", message = "Please provide driving license with format - X0000000")
+    private String drivingLicenseNumber;
+
     private byte[] profilePicture;
 
     private byte[] licensePic;
@@ -50,6 +55,14 @@ public class UserDTO {
     private List<RentalShowDTO> rentalListForCustomer;
 
     public UserDTO() {
+    }
+
+    public String getDrivingLicenseNumber() {
+        return drivingLicenseNumber;
+    }
+
+    public void setDrivingLicenseNumber(String drivingLicenseNumber) {
+        this.drivingLicenseNumber = drivingLicenseNumber;
     }
 
     public byte[] getLicensePic() {

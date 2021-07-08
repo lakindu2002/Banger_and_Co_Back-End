@@ -44,6 +44,9 @@ public class User {
     @Column(name = "other_identity", nullable = true, columnDefinition = "MEDIUMBLOB")
     private byte[] otherIdentity;
 
+    @Column(name = "driving_license_number", nullable = true, length = 255)
+    private String drivingLicenseNumber;
+
     @Column(name = "is_black_listed", nullable = false)
     private boolean isBlackListed;
 
@@ -56,6 +59,14 @@ public class User {
     private List<Rental> customerRentalList;
 
     public User() {
+    }
+
+    public String getDrivingLicenseNumber() {
+        return drivingLicenseNumber;
+    }
+
+    public void setDrivingLicenseNumber(String drivingLicenseNumber) {
+        this.drivingLicenseNumber = drivingLicenseNumber;
     }
 
     public byte[] getDrivingLicense() {

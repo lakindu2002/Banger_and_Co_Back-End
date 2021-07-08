@@ -118,6 +118,10 @@ public class UserServiceImpl implements UserService {
             theDTO.setDateOfBirth(theUser.getDateOfBirth());
             theDTO.setBlackListed(theUser.isBlackListed());
             theDTO.setContactNumber(theUser.getContactNumber());
+
+            if (theUser.getUserRole().getRoleName().equalsIgnoreCase("customer")) {
+                theDTO.setDrivingLicenseNumber(theUser.getDrivingLicenseNumber());
+            }
             return theDTO;
         }
     }
@@ -139,6 +143,7 @@ public class UserServiceImpl implements UserService {
         User userNameExists = theUserRepository.findUserByUsername(theNewUser.getUsername());
 
         User entityToBeSaved = User.convertDTOToEntity(theNewUser, theRole); //convert DTO to entity.
+        entityToBeSaved.setDrivingLicenseNumber(theNewUser.getDrivingLicenseNumber());
 
         if (userNameExists == null) {
             //does email exist
@@ -146,14 +151,23 @@ public class UserServiceImpl implements UserService {
             if (emailExists == null) {
                 //email valid
 
-                //compress the images before saving.
-                entityToBeSaved.setProfilePicture(new CompressImage().processUnhandledImage(theNewUser.getProfilePicture()));
-                entityToBeSaved.setDrivingLicense(new CompressImage().processUnhandledImage(theNewUser.getLicensePic()));
-                entityToBeSaved.setOtherIdentity(new CompressImage().processUnhandledImage(theNewUser.getOtherIdentity()));
+                if (theUserRepository.findUserByDrivingLicenseNumberEquals(entityToBeSaved.getDrivingLicenseNumber()) == null) {
+                    //license number does not exist in DB
+                    //compress the images before saving.
+                    entityToBeSaved.setProfilePicture(new CompressImage().processUnhandledImage(theNewUser.getProfilePicture()));
+                    entityToBeSaved.setDrivingLicense(new CompressImage().processUnhandledImage(theNewUser.getLicensePic()));
+                    entityToBeSaved.setOtherIdentity(new CompressImage().processUnhandledImage(theNewUser.getOtherIdentity()));
 
-                User registeredUser = theUserRepository.save(entityToBeSaved);
-                //save user and send welcome email
-                theSender.sendMail(new MailSenderHelper(registeredUser, "Welcome To Banger and Co!", MailTemplateType.SIGNUP));
+                    User registeredUser = theUserRepository.save(entityToBeSaved);
+                    //save user and send welcome email
+                    try {
+                        theSender.sendMail(new MailSenderHelper(registeredUser, "Welcome To Banger and Co!", MailTemplateType.SIGNUP));
+                    } catch (Exception ex) {
+                        System.out.println("ERROR SENDING EMAIL");
+                    }
+                } else {
+                    throw new ResourceAlreadyExistsException("An account already exists that has the same driving license number that you provided");
+                }
             } else {
                 throw new ResourceAlreadyExistsException("This email address is already associated to an account.");
             }

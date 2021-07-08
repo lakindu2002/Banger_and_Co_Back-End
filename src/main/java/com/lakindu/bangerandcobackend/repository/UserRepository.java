@@ -14,6 +14,8 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     User findUserByUsername(String username);
 
+    User findUserByDrivingLicenseNumberEquals(String licenseNumber);
+
     @Query("SELECT theUser FROM User theUser WHERE theUser.userRole.roleName<>:roleName")
     List<User> getAllUsersExceptAdministrator(String roleName);
 
