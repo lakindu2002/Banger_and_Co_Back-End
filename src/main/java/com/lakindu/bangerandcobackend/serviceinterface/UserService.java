@@ -4,6 +4,7 @@ import com.lakindu.bangerandcobackend.dto.UserUpdateDTO;
 import com.lakindu.bangerandcobackend.dto.UserDTO;
 import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceAlreadyExistsException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotUpdatedException;
 import org.springframework.security.core.Authentication;
@@ -27,7 +28,7 @@ public interface UserService extends UserDetailsService {
 
     String encodePassword(String password);
 
-    void updateUserInformation(UserUpdateDTO userInfo) throws ResourceNotFoundException, BadValuePassedException;
+    void updateUserInformation(UserUpdateDTO userInfo) throws ResourceNotFoundException, BadValuePassedException, ResourceAlreadyExistsException;
 
     @Override
     UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;

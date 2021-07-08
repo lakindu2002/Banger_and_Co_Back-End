@@ -20,4 +20,7 @@ public interface UserRepository extends JpaRepository<User, String> {
     List<User> getAllUsersExceptAdministrator(String roleName);
 
     User getUserByUsername(String username);
+
+    @Query("SELECT theUser FROM User theUser WHERE theUser.username<>:username AND theUser.drivingLicenseNumber=:licenseNumber")
+    User getUserByLicenseNumberForOther(String username, String licenseNumber);
 }

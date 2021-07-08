@@ -6,6 +6,7 @@ import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.serviceinterface.UserService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceAlreadyExistsException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotUpdatedException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +49,7 @@ public class UserController {
 
     @PreAuthorize("hasAuthority('ADMINISTRATOR') or hasAuthority('CUSTOMER')")
     @PutMapping(path = "/update")
-    public ResponseEntity<BangerAndCoResponse> updateUser(@Valid @RequestBody UserUpdateDTO theDTO) throws ResourceNotFoundException, BadValuePassedException {
+    public ResponseEntity<BangerAndCoResponse> updateUser(@Valid @RequestBody UserUpdateDTO theDTO) throws ResourceNotFoundException, BadValuePassedException, ResourceAlreadyExistsException {
         //method executed whenever the customer or the administrator wishes to update their profile.
         //if the request body is valid
         theUserService.updateUserInformation(theDTO); //call the update method

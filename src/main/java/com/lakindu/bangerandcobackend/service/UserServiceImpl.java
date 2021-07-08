@@ -178,7 +178,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void updateUserInformation(UserUpdateDTO userInfo) throws ResourceNotFoundException, BadValuePassedException {
+    public void updateUserInformation(UserUpdateDTO userInfo) throws ResourceNotFoundException, BadValuePassedException, ResourceAlreadyExistsException {
         //updated the user information and send an email.
         if (theUserRepository.existsById(userInfo.getUsername())) {
             final User updatingUser = _getUserWithoutDecompression(userInfo.getUsername()); //retrieve the user information
@@ -190,6 +190,14 @@ public class UserServiceImpl implements UserService {
                 } else {
                     //do not allow password updating
                     throw new BadValuePassedException("The password is not between 6 and 15 characters. Please make sure password is between 6 and 15 characters");
+                }
+            }
+            if (userInfo.getDrivingLicenseNumber() != null) {
+                //if the client has sent a license number to be updated, save if after checking if any other account has the number
+                if (theUserRepository.getUserByLicenseNumberForOther(userInfo.getUsername(), userInfo.getDrivingLicenseNumber()) == null) {
+                    updatingUser.setDrivingLicenseNumber(userInfo.getDrivingLicenseNumber());
+                } else {
+                    throw new ResourceAlreadyExistsException("The new driving license number already belongs to another customer at Banger and Co.");
                 }
             }
             updatingUser.setContactNumber(userInfo.getContactNumber().trim()); //set the new contact number
