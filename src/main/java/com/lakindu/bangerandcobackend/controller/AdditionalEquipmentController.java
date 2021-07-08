@@ -96,4 +96,12 @@ public class AdditionalEquipmentController {
                 HttpStatus.OK
         );
     }
+
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @GetMapping(path = "/find/available")
+    public ResponseEntity<List<AdditionalEquipmentDTO>> getAllAvailableAdditionalEquipment() {
+        //method executed by the customer to view all available additional equipment to add to their rental.
+        List<AdditionalEquipmentDTO> availableEquipment = additionalEquipmentService.getAllAvailableAdditionalEquipment();
+        return new ResponseEntity<>(availableEquipment, HttpStatus.OK);
+    }
 }

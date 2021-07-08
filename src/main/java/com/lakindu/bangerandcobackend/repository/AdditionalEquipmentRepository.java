@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -19,4 +20,7 @@ public interface AdditionalEquipmentRepository extends JpaRepository<AdditionalE
 
     @Query("FROM AdditionalEquipment theItem WHERE theItem.equipmentName=:name AND theItem.equipmentId<>:id")
     AdditionalEquipment getItemWithSameNameButAsASeperateEntry(String name, int id);
+
+    @Query("FROM AdditionalEquipment  theItem WHERE theItem.equipmentQuantity > 0")
+    List<AdditionalEquipment> getAllAvailableEquipments();
 }

@@ -17,6 +17,7 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class AdditionalEquipmentServiceImpl implements AdditionalEquipmentService {
@@ -36,11 +37,21 @@ public class AdditionalEquipmentServiceImpl implements AdditionalEquipmentServic
     @Override
     public List<AdditionalEquipmentDTO> getAllAdditionalEquipment() {
         //retrieve all data from database
-        List<AdditionalEquipment> theDatabaseList = additionalEquipmentRepository.findAll();
+        //insert every record in to a DTO Array and return the array back to the client
+        return convertToDTOList(additionalEquipmentRepository.findAll());
+    }
+
+    /**
+     * Method will convert the data retrieved from the Database into a DTO List
+     *
+     * @param dbList The list obtained from Database
+     * @return The list of DTO that the user can view.
+     */
+    private List<AdditionalEquipmentDTO> convertToDTOList(List<AdditionalEquipment> dbList) {
         List<AdditionalEquipmentDTO> theReturnList = new ArrayList<>();
 
         //insert every record in to a DTO Array and return the array back to the client
-        for (AdditionalEquipment theEquipment : theDatabaseList) {
+        for (AdditionalEquipment theEquipment : dbList) {
             AdditionalEquipmentDTO theDTO = new AdditionalEquipmentDTO();
             theDTO.setEquipmentName(theEquipment.getEquipmentName());
             theDTO.setEquipmentQuantity(theEquipment.getEquipmentQuantity());
@@ -54,7 +65,8 @@ public class AdditionalEquipmentServiceImpl implements AdditionalEquipmentServic
 
     @Override
     public List<AdditionalEquipmentDTO> getAllAvailableAdditionalEquipment() {
-        return null;
+        //method will filter all additional equipment that has available stock
+        return convertToDTOList(additionalEquipmentRepository.getAllAvailableEquipments());
     }
 
     @Override
