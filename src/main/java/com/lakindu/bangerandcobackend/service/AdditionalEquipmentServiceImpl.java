@@ -74,7 +74,7 @@ public class AdditionalEquipmentServiceImpl implements AdditionalEquipmentServic
     public void createAdditionalEquipment(AdditionalEquipmentDTO theDTO) throws ResourceAlreadyExistsException, BadValuePassedException {
         //construct a domain entity that can be persisted in the database
         AdditionalEquipment theDomainEntity = new AdditionalEquipment();
-        theDomainEntity.setEquipmentName(theDTO.getEquipmentName().trim().toUpperCase());
+        theDomainEntity.setEquipmentName(theDTO.getEquipmentName().trim());
         theDomainEntity.setEquipmentQuantity(theDTO.getEquipmentQuantity());
         theDomainEntity.setPricePerDay(Double.parseDouble(theDTO.getPricePerDay()));
 
@@ -98,7 +98,7 @@ public class AdditionalEquipmentServiceImpl implements AdditionalEquipmentServic
 
     @Override
     public void updateEquipment(AdditionalEquipmentDTO theDTO) throws ResourceNotFoundException, BadValuePassedException, ResourceAlreadyExistsException {
-        theDTO.setEquipmentName(theDTO.getEquipmentName().trim().toUpperCase());
+        theDTO.setEquipmentName(theDTO.getEquipmentName().trim());
 
         if (theDTO.getEquipmentId() == 0) {
             throw new BadValuePassedException("Please provide a valid equipment ID");
