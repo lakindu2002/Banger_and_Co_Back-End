@@ -67,6 +67,7 @@ public class AuthServiceImpl implements AuthService {
         theDTO.setFirstName(authenticatedUser.getFirstName());
         theDTO.setLastName(authenticatedUser.getLastName());
         theDTO.setUserRole(authenticatedUser.getUserRole().getRoleName());
+        theDTO.setDateOfBirth(authenticatedUser.getDateOfBirth());
 
         return theDTO;
     }

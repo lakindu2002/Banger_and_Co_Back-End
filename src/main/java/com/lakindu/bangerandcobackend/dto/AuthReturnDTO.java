@@ -1,11 +1,22 @@
 package com.lakindu.bangerandcobackend.dto;
 
+import java.util.Date;
+
 public class AuthReturnDTO {
     private String firstName;
     private String lastName;
     private byte[] profilePicture;
     private String userRole;
     private String username;
+    private Date dateOfBirth;
+
+    public Date getDateOfBirth() {
+        return dateOfBirth;
+    }
+
+    public void setDateOfBirth(Date dateOfBirth) {
+        this.dateOfBirth = dateOfBirth;
+    }
 
     public String getFirstName() {
         return firstName;
