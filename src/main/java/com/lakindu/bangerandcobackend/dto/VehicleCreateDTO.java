@@ -17,7 +17,7 @@ public class VehicleCreateDTO {
     //uk - ^[A-Z]{2}[0-9]{2} [A-Z]{3}$
     //lk - ^[A-Z]{2,3}-[0-9]{4}$
     @Pattern(regexp = "^[A-Z]{2,3}-[0-9]{4}$", message = "Please use the UK license plate format")
-    @Size(min = 8, max = 8, message = "License plate should be of 8 characters")
+    @Size(min = 7, max = 8, message = "License plate should be maximum of 8 characters")
     private String licensePlate;
 
     @NotBlank(message = "Please provide a transmission for the vehicle")
