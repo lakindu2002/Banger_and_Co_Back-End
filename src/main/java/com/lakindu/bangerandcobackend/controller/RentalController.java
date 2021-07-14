@@ -1,14 +1,17 @@
 package com.lakindu.bangerandcobackend.controller;
 
+import com.lakindu.bangerandcobackend.dto.RentalCreateDTO;
 import com.lakindu.bangerandcobackend.dto.VehicleShowDTO;
 import com.lakindu.bangerandcobackend.serviceinterface.RentalService;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.ArrayList;
 
 @RestController
@@ -18,7 +21,17 @@ public class RentalController {
     private final RentalService rentalService;
 
     @Autowired
-    public RentalController(RentalService rentalService) {
+    public RentalController(@Qualifier("rentalServiceImpl") RentalService rentalService) {
         this.rentalService = rentalService;
+    }
+
+    @PostMapping(path = "/makeRental")
+    public ResponseEntity<BangerAndCoResponse> makeRental(@Valid @RequestBody RentalCreateDTO theRental) {
+        rentalService.makeRental(theRental);
+
+        return new ResponseEntity<>(
+                new BangerAndCoResponse("The rental was placed successfully. You will receive an email with confirmation. We hope you have an excellent experience at Banger and Co.", HttpStatus.OK.value()),
+                HttpStatus.OK
+        );
     }
 }

@@ -1,5 +1,6 @@
 package com.lakindu.bangerandcobackend.service;
 
+import com.lakindu.bangerandcobackend.dto.RentalCreateDTO;
 import com.lakindu.bangerandcobackend.dto.VehicleRentalFilterDTO;
 import com.lakindu.bangerandcobackend.entity.AdditionalEquipment;
 import com.lakindu.bangerandcobackend.entity.Rental;
@@ -143,5 +144,10 @@ public class RentalServiceImpl implements RentalService {
                 throw new ResourceCannotBeDeletedException("Customers are already renting this vehicle and have not yet returned this. Wait until they return the vehicle before removing it.");
             }
         }
+    }
+
+    @Override
+    public void makeRental(RentalCreateDTO theRental) {
+
     }
 }

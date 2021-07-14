@@ -1,5 +1,6 @@
 package com.lakindu.bangerandcobackend.serviceinterface;
 
+import com.lakindu.bangerandcobackend.dto.RentalCreateDTO;
 import com.lakindu.bangerandcobackend.dto.VehicleRentalFilterDTO;
 import com.lakindu.bangerandcobackend.entity.AdditionalEquipment;
 import com.lakindu.bangerandcobackend.entity.Vehicle;
@@ -22,4 +23,6 @@ public interface RentalService {
     void checkIfEquipmentHasPendingOrOngoingRentals(AdditionalEquipment theEquipment) throws ResourceCannotBeDeletedException;
 
     void checkIfVehicleHasPendingOrOnGoingRentals(Vehicle theVehicleToBeRemoved) throws ResourceCannotBeDeletedException;
+
+    void makeRental(RentalCreateDTO theRental);
 }
