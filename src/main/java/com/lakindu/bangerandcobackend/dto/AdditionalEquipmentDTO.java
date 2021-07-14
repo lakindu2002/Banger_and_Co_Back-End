@@ -25,9 +25,19 @@ public class AdditionalEquipmentDTO {
     @Digits(integer = 5, fraction = 3, message = "Please provide a maximum of 5 numerics and 3 decimals for the price per day.")
     private String pricePerDay;
 
+    private int quantitySelectedForRental;
+
     public AdditionalEquipmentDTO() {
     }
 
+
+    public int getQuantitySelectedForRental() {
+        return quantitySelectedForRental;
+    }
+
+    public void setQuantitySelectedForRental(int quantitySelectedForRental) {
+        this.quantitySelectedForRental = quantitySelectedForRental;
+    }
 
     public String getPricePerDay() {
         return pricePerDay;

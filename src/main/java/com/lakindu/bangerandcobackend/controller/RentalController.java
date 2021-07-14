@@ -26,6 +26,7 @@ public class RentalController {
     }
 
     @PostMapping(path = "/makeRental")
+    @PreAuthorize("hasAuthority('CUSTOMER')")
     public ResponseEntity<BangerAndCoResponse> makeRental(@Valid @RequestBody RentalCreateDTO theRental) {
         rentalService.makeRental(theRental);
 
