@@ -1,6 +1,7 @@
 package com.lakindu.bangerandcobackend.serviceinterface;
 
 import com.lakindu.bangerandcobackend.dto.AdditionalEquipmentDTO;
+import com.lakindu.bangerandcobackend.entity.AdditionalEquipment;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceAlreadyExistsException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceCannotBeDeletedException;
@@ -56,4 +57,16 @@ public interface AdditionalEquipmentService {
      * @return The object containing the information based on the ID passed.
      */
     AdditionalEquipmentDTO getEquipmentByID(int equipmentId) throws ResourceNotFoundException;
+
+    /**
+     * Method will return the a database object for Additional Equipment for given id
+     *
+     * @param equipmentId Id to get data for
+     * @return The object in database for given Id
+     * @throws ResourceNotFoundException thrown when the equipment does not exist.
+     */
+    AdditionalEquipment _getAdditionalEquipmentById(int equipmentId) throws ResourceNotFoundException;
+
+    void checkIfEquipmentHasPendingOrOngoingRentals(AdditionalEquipment theEquipment) throws ResourceCannotBeDeletedException;
+
 }

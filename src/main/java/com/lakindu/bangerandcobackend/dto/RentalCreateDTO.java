@@ -25,6 +25,9 @@ public class RentalCreateDTO {
     @NotNull(message = "Please provide a valid vehicle")
     private int vehicleToBeRented;
 
+    @NotBlank(message = "Please provide a customer for the rental")
+    private String customerUsername;
+
     public RentalCreateDTO() {
         this.equipmentsAddedToRental = new ArrayList<AdditionalEquipmentDTO>();
     }
@@ -35,6 +38,14 @@ public class RentalCreateDTO {
 
     public void setEquipmentsAddedToRental(ArrayList<AdditionalEquipmentDTO> equipmentsAddedToRental) {
         this.equipmentsAddedToRental = equipmentsAddedToRental;
+    }
+
+    public String getCustomerUsername() {
+        return customerUsername;
+    }
+
+    public void setCustomerUsername(String customerUsername) {
+        this.customerUsername = customerUsername;
     }
 
     public String getPickupDate() {

@@ -1,36 +1,51 @@
 package com.lakindu.bangerandcobackend.service;
 
+import com.lakindu.bangerandcobackend.dto.AdditionalEquipmentDTO;
 import com.lakindu.bangerandcobackend.dto.RentalCreateDTO;
 import com.lakindu.bangerandcobackend.dto.VehicleRentalFilterDTO;
 import com.lakindu.bangerandcobackend.entity.AdditionalEquipment;
 import com.lakindu.bangerandcobackend.entity.Rental;
 import com.lakindu.bangerandcobackend.entity.Vehicle;
 import com.lakindu.bangerandcobackend.repository.RentalRepository;
+import com.lakindu.bangerandcobackend.serviceinterface.AdditionalEquipmentService;
 import com.lakindu.bangerandcobackend.serviceinterface.RentalService;
+import com.lakindu.bangerandcobackend.serviceinterface.UserService;
+import com.lakindu.bangerandcobackend.serviceinterface.VehicleService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceCannotBeDeletedException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotCreatedException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
-import javax.validation.constraints.NotNull;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class RentalServiceImpl implements RentalService {
 
     private final RentalRepository rentalRepository;
+    private final VehicleService vehicleService;
+    private final UserService userService;
+    private final AdditionalEquipmentService additionalEquipmentService;
+    private final int PRICE_PER_DAY_DIVISOR = 24; //price_per_day/24 = price per hour
 
     public RentalServiceImpl(
-            @Qualifier("rentalRepository") RentalRepository rentalRepository
+            @Qualifier("rentalRepository") RentalRepository rentalRepository,
+            @Qualifier("vehicleServiceImpl") VehicleService vehicleService,
+            @Qualifier("userServiceImpl") UserService userService,
+            @Qualifier("additionalEquipmentServiceImpl") AdditionalEquipmentService additionalEquipmentService
     ) {
         this.rentalRepository = rentalRepository;
+        this.vehicleService = vehicleService;
+        this.userService = userService;
+        this.additionalEquipmentService = additionalEquipmentService;
     }
 
 
@@ -92,62 +107,59 @@ public class RentalServiceImpl implements RentalService {
     }
 
     @Override
-    public void checkIfEquipmentHasPendingOrOngoingRentals(AdditionalEquipment theEquipment) throws ResourceCannotBeDeletedException {
-        List<Rental> rentalHavingThisEquipment = rentalRepository.findRentalsByEquipmentsAddedToRentalEquals(theEquipment);
+    public void makeRental(RentalCreateDTO theRental) throws ParseException, BadValuePassedException, ResourceNotFoundException, ResourceNotCreatedException {
+        Rental theRentalToBeMade = new Rental();
 
-        for (Rental eachRental : rentalHavingThisEquipment) {
-            //check if the rental is pending
-            if (!eachRental.getApproved()) {
-                throw new ResourceCannotBeDeletedException("There are pending rentals that have this equipment added to it");
-            }
-            //check if the rental is approved but not collected
-            //in the null check, "if" won't process past the null check
-            //first expression is evaluated first
-            //The && operator will stop evaluating (from left to right) as soon as it encounters a false.
-            if (eachRental.getApproved() && (eachRental.getCollected() != null && !eachRental.getCollected())) {
-                throw new ResourceCannotBeDeletedException("There are vehicles having this equipment added to it in rentals that are not yet collected");
-            }
-            //check if collected, but not returned
-            if ((eachRental.getCollected() != null && eachRental.getCollected()) && !eachRental.getReturned()) {
-                throw new ResourceCannotBeDeletedException("There are vehicles that are currently on rental that are having this equipment added to it.");
+        VehicleRentalFilterDTO theDateTime = new VehicleRentalFilterDTO();
+        theDateTime.setPickupDate(new SimpleDateFormat("yyyy-MM-dd").parse(theRental.getPickupDate()));
+        theDateTime.setReturnDate(new SimpleDateFormat("yyyy-MM-dd").parse(theRental.getReturnDate()));
+        theDateTime.setPickupTime(LocalTime.parse(theRental.getPickupTime()));
+        theDateTime.setReturnTime(LocalTime.parse(theRental.getReturnTime()));
+
+        //check if duration is maximum of 2 weeks and start and end time is between 8 and 18:00
+        //if same day rental, check if minimum of 5 hours is present.
+        validateRentalFilters(theDateTime);
+        //date and time is valid.
+
+        //check if vehicle is free on given duration.
+        Vehicle theVehicle = vehicleService._getVehicleInformation(theRental.getVehicleToBeRented());
+        LocalDateTime pickupDateTime = LocalDateTime.of(theDateTime.getPickupDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), theDateTime.getPickupTime());
+        LocalDateTime returnDateTime = LocalDateTime.of(theDateTime.getReturnDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), theDateTime.getReturnTime());
+
+
+        boolean isVehicleAvailable = vehicleService.isVehicleAvailableOnGivenDates(theVehicle, pickupDateTime, returnDateTime);
+        //calculate total cost for rental.
+
+        if (isVehicleAvailable) {
+            //vehicle can be rented.
+            //if rental has additional equipment, get the total and reduce quantity from database.
+            if (!theRental.getEquipmentsAddedToRental().isEmpty()) {
+                //no additional equipment, directly create rental.
             }
 
-            //if all these pass, it means rental has been returned.
+            theRentalToBeMade.setPickupDate(theDateTime.getPickupDate());
+            theRentalToBeMade.setReturnDate(theDateTime.getReturnDate());
+            theRentalToBeMade.setReturnTime(theDateTime.getReturnTime());
+            theRentalToBeMade.setPickupTime(theDateTime.getPickupTime());
+            theRentalToBeMade.setTotalCost(theRental.getTotalCostForRental());
+            theRentalToBeMade.setVehicleOnRental(theVehicle);
+            theRentalToBeMade.setTheCustomerRenting(userService._getUserWithoutDecompression(theRental.getCustomerUsername()));
+
+            Rental madeRental = rentalRepository.save(theRentalToBeMade); //create the rental.
+            //email the client.
+        } else {
+            throw new ResourceNotCreatedException("The rental could not be created because the vehicle was not available for the specified pickup and return duration");
         }
+
     }
 
-    @Override
-    public void checkIfVehicleHasPendingOrOnGoingRentals(Vehicle theVehicleToBeRemoved) throws ResourceCannotBeDeletedException {
-        List<Rental> rentalsForVehicle = rentalRepository.findRentalsByVehicleOnRentalEquals(theVehicleToBeRemoved);
-        //3 checks to be done
-        //check if any rentals are pending for the vehicle
-        //check if any rentals are approved but not yet collected
-        //check if any rentals are collected but not yet returned
+    private List<AdditionalEquipment> getAdditionalEquipmentForRental(ArrayList<AdditionalEquipmentDTO> equipmentsAddedToRental) throws ResourceNotFoundException {
+        List<AdditionalEquipment> addedEquipment = new ArrayList<>();
 
-        for (Rental eachRental : rentalsForVehicle) {
-            if (!eachRental.getApproved()) {
-                //rentals are pending for the vehicle
-                throw new ResourceCannotBeDeletedException(
-                        "There are pending rentals for this vehicle. " +
-                                "Therefore it cannot be removed. " +
-                                "Either reject the rentals or wait till they have been completed to remove the vehicle from Banger and Co"
-                );
-            }
-
-            if ((eachRental.getApproved()) && (eachRental.getCollected() != null && !eachRental.getCollected())) {
-//                rentals are approved but not yet collected
-                throw new ResourceCannotBeDeletedException("There are rentals for this vehicle that the customers have not yet collected. Wait until the customer collects and returns the vehicle before removing");
-            }
-
-            if ((eachRental.getCollected() != null && eachRental.getCollected()) && (eachRental.getReturned() != null && !eachRental.getReturned())) {
-//                rentals are collected but not yet returned
-                throw new ResourceCannotBeDeletedException("Customers are already renting this vehicle and have not yet returned this. Wait until they return the vehicle before removing it.");
-            }
+        for (AdditionalEquipmentDTO eachEquipment : equipmentsAddedToRental) {
+            AdditionalEquipment item = additionalEquipmentService._getAdditionalEquipmentById(eachEquipment.getEquipmentId());
+            addedEquipment.add(item);
         }
-    }
-
-    @Override
-    public void makeRental(RentalCreateDTO theRental) {
-
+        return addedEquipment;
     }
 }

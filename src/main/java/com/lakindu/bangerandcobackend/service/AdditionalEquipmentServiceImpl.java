@@ -2,9 +2,9 @@ package com.lakindu.bangerandcobackend.service;
 
 import com.lakindu.bangerandcobackend.dto.AdditionalEquipmentDTO;
 import com.lakindu.bangerandcobackend.entity.AdditionalEquipment;
+import com.lakindu.bangerandcobackend.entity.Rental;
 import com.lakindu.bangerandcobackend.repository.AdditionalEquipmentRepository;
 import com.lakindu.bangerandcobackend.serviceinterface.AdditionalEquipmentService;
-import com.lakindu.bangerandcobackend.serviceinterface.RentalService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceAlreadyExistsException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceCannotBeDeletedException;
@@ -23,15 +23,12 @@ import java.util.stream.Collectors;
 public class AdditionalEquipmentServiceImpl implements AdditionalEquipmentService {
 
     private final AdditionalEquipmentRepository additionalEquipmentRepository;
-    private final RentalService rentalService;
 
     @Autowired
     public AdditionalEquipmentServiceImpl(
-            @Qualifier("additionalEquipmentRepository") AdditionalEquipmentRepository additionalEquipmentRepository,
-            @Qualifier("rentalServiceImpl") RentalService rentalService
+            @Qualifier("additionalEquipmentRepository") AdditionalEquipmentRepository additionalEquipmentRepository
     ) {
         this.additionalEquipmentRepository = additionalEquipmentRepository;
-        this.rentalService = rentalService;
     }
 
     @Override
@@ -143,7 +140,7 @@ public class AdditionalEquipmentServiceImpl implements AdditionalEquipmentServic
         //if it can be deleted, first remove the additional equipment that is going to be removed from the rentals.
         //this will be removed by hibernate automatically.
 
-        rentalService.checkIfEquipmentHasPendingOrOngoingRentals(theEquipment); //two checks to be done.
+        checkIfEquipmentHasPendingOrOngoingRentals(theEquipment); //two checks to be done.
         //no exceptions thrown, proceed with deletion
         additionalEquipmentRepository.delete(theEquipment);
     }
@@ -164,4 +161,42 @@ public class AdditionalEquipmentServiceImpl implements AdditionalEquipmentServic
 
         return theReturningDTO; //return the object to the controller that will return the object via serialization back to client
     }
+
+    /**
+     * Method will return the a database object for Additional Equipment for given id
+     *
+     * @param equipmentId Id to get data for
+     * @return The object in database for given Id
+     * @throws ResourceNotFoundException thrown when the equipment does not exist.
+     */
+    @Override
+    public AdditionalEquipment _getAdditionalEquipmentById(int equipmentId) throws ResourceNotFoundException {
+        return additionalEquipmentRepository.findById(equipmentId).orElseThrow(() -> new ResourceNotFoundException("The equipment does not exist at Banger and Co."));
+    }
+
+    @Override
+    public void checkIfEquipmentHasPendingOrOngoingRentals(AdditionalEquipment theEquipment) throws ResourceCannotBeDeletedException {
+        List<Rental> rentalHavingThisEquipment = theEquipment.getRentalsThatHaveThisEquipment();
+
+        for (Rental eachRental : rentalHavingThisEquipment) {
+            //check if the rental is pending
+            if (!eachRental.getApproved()) {
+                throw new ResourceCannotBeDeletedException("There are pending rentals that have this equipment added to it");
+            }
+            //check if the rental is approved but not collected
+            //in the null check, "if" won't process past the null check
+            //first expression is evaluated first
+            //The && operator will stop evaluating (from left to right) as soon as it encounters a false.
+            if (eachRental.getApproved() && (eachRental.getCollected() != null && !eachRental.getCollected())) {
+                throw new ResourceCannotBeDeletedException("There are vehicles having this equipment added to it in rentals that are not yet collected");
+            }
+            //check if collected, but not returned
+            if ((eachRental.getCollected() != null && eachRental.getCollected()) && !eachRental.getReturned()) {
+                throw new ResourceCannotBeDeletedException("There are vehicles that are currently on rental that are having this equipment added to it.");
+            }
+
+            //if all these pass, it means rental has been returned.
+        }
+    }
+
 }

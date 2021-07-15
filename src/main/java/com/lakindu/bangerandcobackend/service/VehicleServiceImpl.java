@@ -1,7 +1,6 @@
 package com.lakindu.bangerandcobackend.service;
 
 import com.lakindu.bangerandcobackend.dto.VehicleCreateDTO;
-import com.lakindu.bangerandcobackend.dto.RentalShowDTO;
 import com.lakindu.bangerandcobackend.dto.VehicleRentalFilterDTO;
 import com.lakindu.bangerandcobackend.dto.VehicleShowDTO;
 import com.lakindu.bangerandcobackend.entity.Rental;
@@ -42,18 +41,15 @@ public class VehicleServiceImpl implements VehicleService {
 
     private final VehicleRepository vehicleRepository;
     private final VehicleTypeService vehicleTypeService;
-    private final RentalService rentalService;
     private final UserService userService;
 
     @Autowired
     public VehicleServiceImpl(
             @Qualifier("vehicleRepository") VehicleRepository vehicleRepository,
             @Qualifier("vehicleTypeServiceImpl") VehicleTypeService vehicleTypeService,
-            @Qualifier("rentalServiceImpl") RentalService rentalService,
             @Qualifier("userServiceImpl") UserService userService) {
         this.vehicleRepository = vehicleRepository;
         this.vehicleTypeService = vehicleTypeService;
-        this.rentalService = rentalService;
         this.userService = userService;
     }
 
@@ -136,7 +132,7 @@ public class VehicleServiceImpl implements VehicleService {
     public List<VehicleShowDTO> getAllVehiclesThatCanBeRentedForGivenPeriod(VehicleRentalFilterDTO theFilterDTO, Authentication loggedInUser) throws DataFormatException, IOException {
         List<VehicleShowDTO> vehiclesThatCanBeRentedForPeriod = new ArrayList<>();
         List<Vehicle> allVehiclesInDb = vehicleRepository.findAll();
-        boolean getOnlySmallTownCars = checkIfUserLessThan25(loggedInUser);
+        boolean getOnlySmallTownCars = isUserLessThan25Years(loggedInUser);
 
         //retrieve the LocalDateTime of the passed start - date, time & return - date, time.
         LocalDateTime filterPickUpDateTime = LocalDateTime.of(theFilterDTO.getPickupDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), theFilterDTO.getPickupTime());
@@ -147,60 +143,12 @@ public class VehicleServiceImpl implements VehicleService {
 
             //if user is a customer and is less than 25 years old, show only small town cars.
 
-            VehicleType theType = eachVehicle.getTheVehicleType();
-            List<Rental> rentalsForEachVehicle = eachVehicle.getRentalsForTheVehicle();
-            //boolean to check if the vehicle in loop can be added to the return of the available vehicles.
-            boolean canBeAddedToReturn = false;
-
             VehicleShowDTO vehicleReturnDTO = convertToPartialDTO(eachVehicle);
+            VehicleType theType = eachVehicle.getTheVehicleType();
 
-            if (rentalsForEachVehicle.isEmpty()) {
-                //no rentals for the vehicle, can be rented
-                canBeAddedToReturn = true;
-            } else {
-                //if vehicles have rentals present in DB
-                for (Rental eachRental : rentalsForEachVehicle) {
-                    //retrieve LocalDateTime of the Rental Pickup - Date, Time and Return - Date, Time.
-                    LocalDateTime eachRentalPickupDateTime = LocalDateTime.of(eachRental.getPickupDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), eachRental.getPickupTime());
-                    LocalDateTime eachRentalReturnDateTime = LocalDateTime.of(eachRental.getReturnDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), eachRental.getReturnTime());
-
-                    //if filtering Pickup DATE_TIME is between RENTAL Pickup DATE_TIME and Return DATE_TIME
-                    //OR
-                    //if filtering Return DATE_TIME is between RENTAL Pickup DATE_TIME and Return DATE_TIME
-                    if (
-                            ((filterPickUpDateTime.isAfter(eachRentalPickupDateTime)) && (filterPickUpDateTime.isBefore(eachRentalReturnDateTime)))
-                                    ||
-                                    ((filterReturnDateTime.isAfter(eachRentalPickupDateTime)) && (filterReturnDateTime.isBefore(eachRentalReturnDateTime)))
-
-                    ) {
-                        //The filtering Pickup DATE_TIME or Return DATE_TIME is between a rental.
-                        //check if that rental has been returned, if returned, can rent again.
-                        if (eachRental.getReturned() != null && eachRental.getReturned()) {
-                            canBeAddedToReturn = true;
-                        } else {
-                            canBeAddedToReturn = false;
-                        }
-                    } else {
-                        //The filtering Pickup DATE_TIME or Return DATE_TIME is not between a rental.
-                        //BUT
-                        //there may be rentals present between passed PICKUP Date_Time AND RETURN Date_Time
-                        if (eachRentalPickupDateTime.isAfter(filterPickUpDateTime) && eachRentalReturnDateTime.isBefore(filterReturnDateTime)) {
-                            //the rental in database is between the passed Pickup-Date_Time and Return Date_Time
-                            if (eachRental.getReturned() != null && eachRental.getReturned()) {
-                                //if the vehicle for those rentals are returned, vehicle can be rented again.
-                                canBeAddedToReturn = true;
-                            } else {
-                                canBeAddedToReturn = false;
-                            }
-                        } else {
-                            //the rental in database is not between passed Pickup-Date_Time and Return Date_Time
-                            //therefore it is not conflicting, can be rented.
-                            canBeAddedToReturn = true;
-                        }
-                    }
-                }
-            }
-            if (canBeAddedToReturn) {
+            //boolean to check if the vehicle in loop can be added to the return of the available vehicles.
+            boolean canBeAdded = isVehicleAvailableOnGivenDates(eachVehicle, filterPickUpDateTime, filterReturnDateTime);
+            if (canBeAdded) {
                 //if all the business validation for availability of vehicle passes, insert it to return list.
                 if (getOnlySmallTownCars) {
                     //the user can only rent small town cars, so add to return only if its small town car.
@@ -216,7 +164,7 @@ public class VehicleServiceImpl implements VehicleService {
         return vehiclesThatCanBeRentedForPeriod;
     }
 
-    private boolean checkIfUserLessThan25(Authentication loggedInUser) {
+    private boolean isUserLessThan25Years(Authentication loggedInUser) {
         if (loggedInUser == null) {
             //not logged in, guest
             return false;
@@ -236,10 +184,74 @@ public class VehicleServiceImpl implements VehicleService {
                     return false;
                 }
             } else {
-                //user is an admin
+                //user is an admin, do not check the less than 25 constraint.
                 return false;
             }
         }
+    }
+
+    public boolean isVehicleAvailableOnGivenDates(Vehicle theVehicle, LocalDateTime pickupDateTime, LocalDateTime returnDateTime) {
+        boolean canBeAdded = false;
+        List<Rental> rentalsForEachVehicle = theVehicle.getRentalsForTheVehicle();
+
+        if (rentalsForEachVehicle.isEmpty()) {
+            //no rentals for the vehicle, can be rented
+            canBeAdded = true;
+        } else {
+            //if vehicles have rentals present in DB
+            for (Rental eachRental : rentalsForEachVehicle) {
+                //retrieve LocalDateTime of the Rental Pickup - Date, Time and Return - Date, Time.
+                LocalDateTime eachRentalPickupDateTime = LocalDateTime.of(eachRental.getPickupDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), eachRental.getPickupTime());
+                LocalDateTime eachRentalReturnDateTime = LocalDateTime.of(eachRental.getReturnDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), eachRental.getReturnTime());
+
+                //if filtering Pickup DATE_TIME is between RENTAL Pickup DATE_TIME and Return DATE_TIME
+                //OR
+                //if filtering Return DATE_TIME is between RENTAL Pickup DATE_TIME and Return DATE_TIME
+                if (
+                        ((pickupDateTime.isAfter(eachRentalPickupDateTime)) && (pickupDateTime.isBefore(eachRentalReturnDateTime)))
+                                ||
+                                ((returnDateTime.isAfter(eachRentalPickupDateTime)) && (returnDateTime.isBefore(eachRentalReturnDateTime)))
+
+                ) {
+                    //The filtering Pickup DATE_TIME or Return DATE_TIME is between a rental.
+                    //check if that rental has been returned, if returned, can rent again.
+                    if (eachRental.getReturned() != null && eachRental.getReturned()) {
+                        canBeAdded = true;
+                    } else {
+                        canBeAdded = false;
+                    }
+                } else {
+                    //The filtering Pickup DATE_TIME or Return DATE_TIME is not between a rental.
+                    //BUT
+                    //there may be rentals present between passed PICKUP Date_Time AND RETURN Date_Time
+                    if (eachRentalPickupDateTime.isAfter(pickupDateTime) && eachRentalReturnDateTime.isBefore(returnDateTime)) {
+                        //the rental in database is between the passed Pickup-Date_Time and Return Date_Time
+                        if (eachRental.getReturned() != null && eachRental.getReturned()) {
+                            //if the vehicle for those rentals are returned, vehicle can be rented again.
+                            canBeAdded = true;
+                        } else {
+                            canBeAdded = false;
+                        }
+                    } else {
+                        //the rental in database is not between passed Pickup-Date_Time and Return Date_Time
+                        //therefore it is not conflicting, can be rented.
+                        canBeAdded = true;
+                    }
+                }
+            }
+        }
+        return canBeAdded;
+    }
+
+    /**
+     * Returns the vehicle for the given id.
+     *
+     * @param vehicleId The vehicle to retrieve
+     * @return The vehicle from the database.
+     */
+    @Override
+    public Vehicle _getVehicleInformation(int vehicleId) throws ResourceNotFoundException {
+        return vehicleRepository.findById(vehicleId).orElseThrow(() -> new ResourceNotFoundException("The vehicle you are trying to access does not exist at Banger and Co."));
     }
 
     @Override
@@ -248,12 +260,41 @@ public class VehicleServiceImpl implements VehicleService {
         //first check if vehicle actually exists for the ID.
         Vehicle theVehicleToBeRemoved = vehicleRepository.findById(vehicleId).orElseThrow(() -> new ResourceNotFoundException("The vehicle that you are trying to remove does not exist at Banger and Co."));
         //check if vehicle to be removed has any pending/on-going rentals
-        rentalService.checkIfVehicleHasPendingOrOnGoingRentals(theVehicleToBeRemoved);
+        checkIfVehicleHasPendingOrOnGoingRentals(theVehicleToBeRemoved);
         //if there are any rentals or vehicles pending, rental service will throw the relevant exceptions.
 
         //set the vehicle for null for each rental having this vehicle
         theVehicleToBeRemoved.clearRentals();
         vehicleRepository.delete(theVehicleToBeRemoved); //remove the vehicle from the database,
+    }
+
+    public void checkIfVehicleHasPendingOrOnGoingRentals(Vehicle theVehicleToBeRemoved) throws ResourceCannotBeDeletedException {
+        List<Rental> rentalsForVehicle = theVehicleToBeRemoved.getRentalsForTheVehicle();
+        //3 checks to be done
+        //check if any rentals are pending for the vehicle
+        //check if any rentals are approved but not yet collected
+        //check if any rentals are collected but not yet returned
+
+        for (Rental eachRental : rentalsForVehicle) {
+            if (!eachRental.getApproved()) {
+                //rentals are pending for the vehicle
+                throw new ResourceCannotBeDeletedException(
+                        "There are pending rentals for this vehicle. " +
+                                "Therefore it cannot be removed. " +
+                                "Either reject the rentals or wait till they have been completed to remove the vehicle from Banger and Co"
+                );
+            }
+
+            if ((eachRental.getApproved()) && (eachRental.getCollected() != null && !eachRental.getCollected())) {
+//                rentals are approved but not yet collected
+                throw new ResourceCannotBeDeletedException("There are rentals for this vehicle that the customers have not yet collected. Wait until the customer collects and returns the vehicle before removing");
+            }
+
+            if ((eachRental.getCollected() != null && eachRental.getCollected()) && (eachRental.getReturned() != null && !eachRental.getReturned())) {
+//                rentals are collected but not yet returned
+                throw new ResourceCannotBeDeletedException("Customers are already renting this vehicle and have not yet returned this. Wait until they return the vehicle before removing it.");
+            }
+        }
     }
 
     @Override

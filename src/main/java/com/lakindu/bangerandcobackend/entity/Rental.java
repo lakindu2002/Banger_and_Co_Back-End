@@ -63,6 +63,11 @@ public class Rental {
     public Rental() {
     }
 
+    @PrePersist
+    public void initializeEntity() {
+        this.isApproved = false;
+    }
+
     public int getRentalId() {
         return rentalId;
     }
