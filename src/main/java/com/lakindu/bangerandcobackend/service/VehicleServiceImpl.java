@@ -190,6 +190,14 @@ public class VehicleServiceImpl implements VehicleService {
         }
     }
 
+    /**
+     * Method will validate to check if the vehicle is available on the given pickup and return times.
+     *
+     * @param theVehicle     The vehicle to check
+     * @param pickupDateTime The customer pickup time
+     * @param returnDateTime The customer return time
+     * @return The boolean to indicate if the vehicle is available or not.
+     */
     public boolean isVehicleAvailableOnGivenDates(Vehicle theVehicle, LocalDateTime pickupDateTime, LocalDateTime returnDateTime) {
         boolean canBeAdded = false;
         List<Rental> rentalsForEachVehicle = theVehicle.getRentalsForTheVehicle();
@@ -208,9 +216,9 @@ public class VehicleServiceImpl implements VehicleService {
                 //OR
                 //if filtering Return DATE_TIME is between RENTAL Pickup DATE_TIME and Return DATE_TIME
                 if (
-                        ((pickupDateTime.isAfter(eachRentalPickupDateTime)) && (pickupDateTime.isBefore(eachRentalReturnDateTime)))
+                        ((pickupDateTime.isAfter(eachRentalPickupDateTime) || pickupDateTime.equals(eachRentalPickupDateTime)) && (pickupDateTime.isBefore(eachRentalReturnDateTime) || pickupDateTime.equals(eachRentalReturnDateTime)))
                                 ||
-                                ((returnDateTime.isAfter(eachRentalPickupDateTime)) && (returnDateTime.isBefore(eachRentalReturnDateTime)))
+                                ((returnDateTime.isAfter(eachRentalPickupDateTime) || returnDateTime.equals(eachRentalPickupDateTime)) && (returnDateTime.isBefore(eachRentalReturnDateTime) || returnDateTime.equals(eachRentalPickupDateTime)))
 
                 ) {
                     //The filtering Pickup DATE_TIME or Return DATE_TIME is between a rental.
