@@ -4,10 +4,7 @@ import com.lakindu.bangerandcobackend.dto.UserAdminCreateDTO;
 import com.lakindu.bangerandcobackend.dto.UserUpdateDTO;
 import com.lakindu.bangerandcobackend.dto.UserDTO;
 import com.lakindu.bangerandcobackend.entity.User;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceAlreadyExistsException;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotUpdatedException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -99,5 +96,5 @@ public interface UserService extends UserDetailsService {
      *
      * @param createdDTO The administrator to be created.
      */
-    void createAdmin(UserAdminCreateDTO createdDTO) throws ResourceAlreadyExistsException, DataFormatException, IOException, ResourceNotFoundException;
+    int createAdmin(UserAdminCreateDTO createdDTO) throws ResourceAlreadyExistsException, DataFormatException, IOException, ResourceNotFoundException, ResourceNotCreatedException;
 }

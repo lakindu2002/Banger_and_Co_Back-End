@@ -1,6 +1,7 @@
 package com.lakindu.bangerandcobackend.entity;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 @Table(name = "user_role")
@@ -13,7 +14,18 @@ public class Role {
     @Column(nullable = false, name = "role_name", length = 50)
     private String roleName;
 
+    @OneToMany(mappedBy = "userRole", fetch = FetchType.LAZY, cascade = {CascadeType.DETACH, CascadeType.REFRESH})
+    private List<User> usersInEachRole;
+
     public Role() {
+    }
+
+    public List<User> getUsersInEachRole() {
+        return usersInEachRole;
+    }
+
+    public void setUsersInEachRole(List<User> usersInEachRole) {
+        this.usersInEachRole = usersInEachRole;
     }
 
     public int getRoleId() {

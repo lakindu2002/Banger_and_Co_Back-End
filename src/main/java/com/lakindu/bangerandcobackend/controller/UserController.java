@@ -1,17 +1,13 @@
 package com.lakindu.bangerandcobackend.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lakindu.bangerandcobackend.dto.UserAdminCreateDTO;
 import com.lakindu.bangerandcobackend.dto.UserUpdateDTO;
 import com.lakindu.bangerandcobackend.dto.UserDTO;
 import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.serviceinterface.UserService;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.*;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceAlreadyExistsException;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotUpdatedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -144,7 +140,7 @@ public class UserController {
     public ResponseEntity<BangerAndCoResponse> createAdministrator(
             @RequestParam(name = "profilePic", required = true) MultipartFile profilePicture,
             @RequestParam(name = "userInfo", required = true) String profileInformation
-    ) throws IOException, DataFormatException, ResourceAlreadyExistsException, ResourceNotFoundException {
+    ) throws IOException, DataFormatException, ResourceAlreadyExistsException, ResourceNotFoundException, ResourceNotCreatedException {
 
         ObjectMapper theMapper = new ObjectMapper();
         UserAdminCreateDTO createdDTO = theMapper.readValue(profileInformation, UserAdminCreateDTO.class);
@@ -166,12 +162,12 @@ public class UserController {
             createdDTO.setLastName(createdDTO.getLastName().trim());
             createdDTO.setFirstName(createdDTO.getFirstName().trim());
             createdDTO.setProfilePicture(profilePicture.getBytes());
-            createdDTO.setUserPassword(createdDTO.getUsername());
+            createdDTO.setUserPassword(createdDTO.getUsername()); //assign the admin password as their username
 
-            theUserService.createAdmin(createdDTO);
+            int adminCountInSystem = theUserService.createAdmin(createdDTO);
 
             return new ResponseEntity<>(
-                    new BangerAndCoResponse("The administrator account has been successfully created and the user has been notified via an email", HttpStatus.OK.value()),
+                    new BangerAndCoResponse("The administrator account has been successfully created and the user has been notified via an email.\nThere are " + adminCountInSystem + " administrator accounts in the system.", HttpStatus.OK.value()),
                     HttpStatus.OK
             );
         }

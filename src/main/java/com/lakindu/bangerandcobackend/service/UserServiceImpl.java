@@ -353,7 +353,7 @@ public class UserServiceImpl implements UserService {
      * @param createdDTO The administrator to be created.
      */
     @Override
-    public void createAdmin(UserAdminCreateDTO createdDTO) throws ResourceAlreadyExistsException, DataFormatException, IOException, ResourceNotFoundException {
+    public int createAdmin(UserAdminCreateDTO createdDTO) throws ResourceAlreadyExistsException, DataFormatException, IOException, ResourceNotFoundException, ResourceNotCreatedException {
         createdDTO.setUsername(createdDTO.getUsername());
         createdDTO.setEmailAddress(createdDTO.getEmailAddress().toLowerCase());
         createdDTO.setUserPassword(encodePassword(createdDTO.getUserPassword()));
@@ -370,6 +370,11 @@ public class UserServiceImpl implements UserService {
         }
 
         User theAdmin = new User();
+        Role administratorRole = theRoleService._getRoleInformation("administrator");
+
+        if (administratorRole.getUsersInEachRole().size() == 5) {
+            throw new ResourceNotCreatedException("Total Administrator Account Exceeded, You cannot create more than 5 administrator accounts");
+        }
 
         theAdmin.setUsername(createdDTO.getUsername());
         theAdmin.setEmailAddress(createdDTO.getEmailAddress());
@@ -380,7 +385,7 @@ public class UserServiceImpl implements UserService {
         theAdmin.setContactNumber(createdDTO.getContactNumber());
         theAdmin.setProfilePicture(new CompressImage().processUnhandledImage(createdDTO.getProfilePicture()));
         theAdmin.setBlackListed(false);
-        theAdmin.setUserRole(theRoleService._getRoleInformation("administrator"));
+        theAdmin.setUserRole(administratorRole);
 
         User savedUser = theUserRepository.save(theAdmin);
 
@@ -392,6 +397,8 @@ public class UserServiceImpl implements UserService {
         } catch (Exception ex) {
             LOGGER.warning("FAILED TO SEND EMAIL");
         }
+
+        return administratorRole.getUsersInEachRole().size();
     }
 
     @Override
