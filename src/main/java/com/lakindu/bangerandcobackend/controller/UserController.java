@@ -1,5 +1,8 @@
 package com.lakindu.bangerandcobackend.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.lakindu.bangerandcobackend.dto.UserAdminCreateDTO;
 import com.lakindu.bangerandcobackend.dto.UserUpdateDTO;
 import com.lakindu.bangerandcobackend.dto.UserDTO;
 import com.lakindu.bangerandcobackend.entity.User;
@@ -16,11 +19,14 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.parameters.P;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.DataBinder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
+import javax.validation.ValidationException;
+import javax.validation.Validator;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -31,12 +37,15 @@ import java.util.zip.DataFormatException;
 @RequestMapping(path = "/api/user")
 public class UserController {
     private final UserService theUserService;
+    private final Validator validator;
 
     @Autowired //dependency injection handled by entity manager
     public UserController(
-            @Qualifier("userServiceImpl") UserService theUserService
+            @Qualifier("userServiceImpl") UserService theUserService,
+            @Qualifier("defaultValidator") Validator validator
     ) {
         this.theUserService = theUserService;
+        this.validator = validator;
     }
 
     @GetMapping(path = "/userInformation/{username}")
@@ -116,5 +125,55 @@ public class UserController {
                 new BangerAndCoResponse("The other identity image has been updated successfully", HttpStatus.OK.value()),
                 HttpStatus.OK
         );
+    }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @GetMapping(path = "/admin/getAllAdmins")
+    public ResponseEntity<List<UserDTO>> getAllAdmins() throws DataFormatException, IOException {
+        //method will retrieve a list of all available administrators from the system.
+        List<UserDTO> allAdministrators = theUserService.getAllAdministrators();
+        return new ResponseEntity<>(allAdministrators, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @PostMapping(
+            path = "/admin/createAdmin",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<BangerAndCoResponse> createAdministrator(
+            @RequestParam(name = "profilePic", required = true) MultipartFile profilePicture,
+            @RequestParam(name = "userInfo", required = true) String profileInformation
+    ) throws IOException, DataFormatException, ResourceAlreadyExistsException, ResourceNotFoundException {
+
+        ObjectMapper theMapper = new ObjectMapper();
+        UserAdminCreateDTO createdDTO = theMapper.readValue(profileInformation, UserAdminCreateDTO.class);
+
+        DataBinder theBinder = new DataBinder(createdDTO);
+        theBinder.addValidators((org.springframework.validation.Validator) validator);
+        theBinder.validate();
+
+        BindingResult bindingResult = theBinder.getBindingResult();
+
+        if (bindingResult.hasErrors()) {
+            //if the entity class does not meet the expected validations
+            throw new ValidationException("Valid inputs were not provided for the fields during Sign Up.");
+        } else {
+            createdDTO.setEmailAddress(createdDTO.getEmailAddress().trim());
+            createdDTO.setUsername(createdDTO.getUsername().trim());
+            createdDTO.setContactNumber(createdDTO.getContactNumber().trim());
+            createdDTO.setEmailAddress(createdDTO.getEmailAddress().trim());
+            createdDTO.setLastName(createdDTO.getLastName().trim());
+            createdDTO.setFirstName(createdDTO.getFirstName().trim());
+            createdDTO.setProfilePicture(profilePicture.getBytes());
+            createdDTO.setUserPassword(createdDTO.getUsername());
+
+            theUserService.createAdmin(createdDTO);
+
+            return new ResponseEntity<>(
+                    new BangerAndCoResponse("The administrator account has been successfully created and the user has been notified via an email", HttpStatus.OK.value()),
+                    HttpStatus.OK
+            );
+        }
     }
 }

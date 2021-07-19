@@ -1,5 +1,6 @@
 package com.lakindu.bangerandcobackend.serviceinterface;
 
+import com.lakindu.bangerandcobackend.dto.UserAdminCreateDTO;
 import com.lakindu.bangerandcobackend.dto.UserUpdateDTO;
 import com.lakindu.bangerandcobackend.dto.UserDTO;
 import com.lakindu.bangerandcobackend.entity.User;
@@ -85,4 +86,18 @@ public interface UserService extends UserDetailsService {
      * @author Lakindu Hewawasam
      */
     void updateCustomerOtherImage(String customerUsername, MultipartFile additionalImage, Authentication loggedInUser) throws ResourceNotUpdatedException, IOException, DataFormatException;
+
+    /**
+     * Method will return a list of all available administrators in the system.
+     *
+     * @return List of admins at Banger and Co.
+     */
+    List<UserDTO> getAllAdministrators() throws DataFormatException, IOException;
+
+    /**
+     * Method will create an administrator account at Banger And Co.
+     *
+     * @param createdDTO The administrator to be created.
+     */
+    void createAdmin(UserAdminCreateDTO createdDTO) throws ResourceAlreadyExistsException, DataFormatException, IOException, ResourceNotFoundException;
 }

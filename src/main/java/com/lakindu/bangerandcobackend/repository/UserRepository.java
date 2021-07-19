@@ -23,4 +23,7 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     @Query("SELECT theUser FROM User theUser WHERE theUser.username<>:username AND theUser.drivingLicenseNumber=:licenseNumber")
     User getUserByLicenseNumberForOther(String username, String licenseNumber);
+
+    @Query("SELECT theUser FROM User theUser WHERE theUser.userRole.roleName=:roleName")
+    List<User> getAllAdministrators(String roleName);
 }

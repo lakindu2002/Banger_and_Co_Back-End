@@ -5,5 +5,6 @@ public enum MailTemplateType {
     UPDATEACCOUNT,
     INQUIRY_REPLY,
     WHITELIST,
-    RENTAL_MADE
+    RENTAL_MADE,
+    ADMIN_CREATED;
 }

@@ -197,6 +197,19 @@ public class MailSender {
                 dynamicData.clear(); //clear hashmap contents after formatting template
                 return formattedTemplate;
             }
+            case ADMIN_CREATED: {
+                dynamicData.put("firstName", theHelper.getUserToBeInformed().getFirstName());
+                dynamicData.put("lastName", theHelper.getUserToBeInformed().getLastName());
+                dynamicData.put("adminUsername", theHelper.getUserToBeInformed().getUsername());
+
+                Template theTemplate = handlebars.compile("AdminAccountCreated"); //retrieve the template based on required type
+                //the template will be searched for {{}} and the relevant data will be assigned by the apply method.
+                //library provided by jknack.
+
+                final String formattedTemplate = theTemplate.apply(dynamicData);//return formatted template to the caller
+                dynamicData.clear(); //clear hashmap contents after formatting template
+                return formattedTemplate;
+            }
             default: {
                 return null;
             }

@@ -2,10 +2,8 @@ package com.lakindu.bangerandcobackend.dto;
 
 import javax.validation.constraints.*;
 import java.sql.Date;
-import java.util.List;
 
-public class UserDTO {
-
+public class UserAdminCreateDTO {
     @NotBlank(message = "Please Provide a Valid Username")
     @Size(min = 6, max = 15, message = "Please keep username between 6 and 15 characters")
     private String username;
@@ -37,56 +35,13 @@ public class UserDTO {
     @Size(min = 6, max = 15, message = "Please keep password between 6 and 15 characters")
     private String userPassword;
 
-    @NotBlank(message = "Please Provide a Valid Driving License Number")
-    @Size(message = "Driving License Must Be Of 8 Characters (X0000000)", min = 8, max = 8)
-    @Pattern(regexp = "^[A-Z]{1}[0-9]{7}$", message = "Please provide driving license with format - X0000000")
-    private String drivingLicenseNumber;
-
     private byte[] profilePicture;
 
-    private byte[] licensePic;
-
-    private byte[] otherIdentity;
-
-    private boolean isBlackListed;
-
-    private String userRole;
-
-    private List<RentalShowDTO> rentalListForCustomer;
-
-    public UserDTO() {
+    public byte[] getProfilePicture() {
+        return profilePicture;
     }
 
-    public String getDrivingLicenseNumber() {
-        return drivingLicenseNumber;
-    }
-
-    public void setDrivingLicenseNumber(String drivingLicenseNumber) {
-        this.drivingLicenseNumber = drivingLicenseNumber;
-    }
-
-    public byte[] getLicensePic() {
-        return licensePic;
-    }
-
-    public void setLicensePic(byte[] licensePic) {
-        this.licensePic = licensePic;
-    }
-
-    public byte[] getOtherIdentity() {
-        return otherIdentity;
-    }
-
-    public void setOtherIdentity(byte[] otherIdentity) {
-        this.otherIdentity = otherIdentity;
-    }
-
-    public List<RentalShowDTO> getRentalListForCustomer() {
-        return rentalListForCustomer;
-    }
-
-    public void setRentalListForCustomer(List<RentalShowDTO> rentalListForCustomer) {
-        this.rentalListForCustomer = rentalListForCustomer;
+    public UserAdminCreateDTO() {
     }
 
     public String getUsername() {
@@ -137,35 +92,15 @@ public class UserDTO {
         this.contactNumber = contactNumber;
     }
 
-    public byte[] getProfilePicture() {
-        return profilePicture;
-    }
-
-    public void setProfilePicture(byte[] profilePicture) {
-        this.profilePicture = profilePicture;
-    }
-
-    public boolean isBlackListed() {
-        return isBlackListed;
-    }
-
-    public void setBlackListed(boolean blackListed) {
-        isBlackListed = blackListed;
-    }
-
-    public String getUserRole() {
-        return userRole;
-    }
-
-    public void setUserRole(String userRole) {
-        this.userRole = userRole;
-    }
-
     public String getUserPassword() {
         return userPassword;
     }
 
     public void setUserPassword(String userPassword) {
         this.userPassword = userPassword;
+    }
+
+    public void setProfilePicture(byte[] profilePicture) {
+        this.profilePicture = profilePicture;
     }
 }

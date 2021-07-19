@@ -1,6 +1,7 @@
 package com.lakindu.bangerandcobackend.service;
 
 import com.lakindu.bangerandcobackend.auth.CustomUserPrincipal;
+import com.lakindu.bangerandcobackend.dto.UserAdminCreateDTO;
 import com.lakindu.bangerandcobackend.dto.UserUpdateDTO;
 import com.lakindu.bangerandcobackend.dto.UserDTO;
 import com.lakindu.bangerandcobackend.entity.Role;
@@ -11,10 +12,7 @@ import com.lakindu.bangerandcobackend.serviceinterface.UserService;
 import com.lakindu.bangerandcobackend.util.FileHandler.CompressImage;
 import com.lakindu.bangerandcobackend.util.FileHandler.DecompressImage;
 import com.lakindu.bangerandcobackend.util.FileHandler.ImageHandler;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceAlreadyExistsException;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotUpdatedException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.*;
 import com.lakindu.bangerandcobackend.util.mailsender.MailSender;
 import com.lakindu.bangerandcobackend.util.mailsender.MailSenderHelper;
 import com.lakindu.bangerandcobackend.util.mailsender.MailTemplateType;
@@ -128,7 +126,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @Transactional
-    public void createUser(UserDTO theNewUser, MultipartFile profilePicture, MultipartFile licensePic, MultipartFile otherIdentity) throws IOException, ResourceNotFoundException, DataFormatException, ResourceAlreadyExistsException {
+    public void createUser(UserDTO theNewUser, MultipartFile profilePicture, MultipartFile licensePic, MultipartFile otherIdentity) throws IOException, ResourceNotFoundException, DataFormatException, ResourceAlreadyExistsException, ResourceNotCreatedException {
         theNewUser.setUsername(theNewUser.getUsername());
         theNewUser.setEmailAddress(theNewUser.getEmailAddress().toLowerCase());
         theNewUser.setBlackListed(false);
@@ -216,26 +214,30 @@ public class UserServiceImpl implements UserService {
     public List<UserDTO> getAllCustomers() throws DataFormatException, IOException {
         //method will return all the customers that can be viewed by the administrator.
         List<User> theCustomersInDb = theUserRepository.getAllUsersExceptAdministrator("administrator"); //return all users in database except administrator.
-        List<UserDTO> theCustomerList = new ArrayList<>();
+        //construct a DTO for each user and add to the return list that can be viewed by the admin.
+        return convertToDTOList(theCustomersInDb);
 
-        for (User eachCustomer : theCustomersInDb) {
-            //construct a DTO for each user and add to the return list that can be viewed by the admin.
-            UserDTO theCustomerDTO = new UserDTO();
+    }
 
-            theCustomerDTO.setUsername(eachCustomer.getUsername());
-            theCustomerDTO.setEmailAddress(eachCustomer.getEmailAddress());
-            theCustomerDTO.setFirstName(eachCustomer.getFirstName());
-            theCustomerDTO.setLastName(eachCustomer.getLastName());
-            theCustomerDTO.setDateOfBirth(eachCustomer.getDateOfBirth());
-            theCustomerDTO.setUserPassword(null);
-            theCustomerDTO.setContactNumber(eachCustomer.getContactNumber());
-            theCustomerDTO.setUserRole(eachCustomer.getUserRole().getRoleName());
-            theCustomerDTO.setProfilePicture(new DecompressImage().processUnhandledImage(eachCustomer.getProfilePicture()));
-            theCustomerDTO.setBlackListed(eachCustomer.isBlackListed());
+    private List<UserDTO> convertToDTOList(List<User> dbList) throws DataFormatException, IOException {
+        List<UserDTO> theUserList = new ArrayList<>();
+        for (User eachCustomer : dbList) {
+            UserDTO theUser = new UserDTO();
 
-            theCustomerList.add(theCustomerDTO); //attach the entitys DTO to the DTO List.
+            theUser.setUsername(eachCustomer.getUsername());
+            theUser.setEmailAddress(eachCustomer.getEmailAddress());
+            theUser.setFirstName(eachCustomer.getFirstName());
+            theUser.setLastName(eachCustomer.getLastName());
+            theUser.setDateOfBirth(eachCustomer.getDateOfBirth());
+            theUser.setUserPassword(null);
+            theUser.setContactNumber(eachCustomer.getContactNumber());
+            theUser.setUserRole(eachCustomer.getUserRole().getRoleName());
+            theUser.setProfilePicture(new DecompressImage().processUnhandledImage(eachCustomer.getProfilePicture()));
+            theUser.setBlackListed(eachCustomer.isBlackListed());
+
+            theUserList.add(theUser); //attach the entitys DTO to the DTO List.
         }
-        return theCustomerList;
+        return theUserList;
     }
 
     @Override
@@ -331,6 +333,64 @@ public class UserServiceImpl implements UserService {
             }
         } else {
             throw new ResourceNotUpdatedException("The account that you are trying to update does not belong to you");
+        }
+    }
+
+    /**
+     * Method will return a list of all available administrators in the system.
+     *
+     * @return List of admins at Banger and Co.
+     */
+    @Override
+    public List<UserDTO> getAllAdministrators() throws DataFormatException, IOException {
+        List<User> administratorList = theUserRepository.getAllAdministrators("administrator");
+        return convertToDTOList(administratorList);
+    }
+
+    /**
+     * Method will create an administrator account at Banger And Co.
+     *
+     * @param createdDTO The administrator to be created.
+     */
+    @Override
+    public void createAdmin(UserAdminCreateDTO createdDTO) throws ResourceAlreadyExistsException, DataFormatException, IOException, ResourceNotFoundException {
+        createdDTO.setUsername(createdDTO.getUsername());
+        createdDTO.setEmailAddress(createdDTO.getEmailAddress().toLowerCase());
+        createdDTO.setUserPassword(encodePassword(createdDTO.getUserPassword()));
+
+        //check if email or username exists.
+        User userByUsername = theUserRepository.findUserByUsername(createdDTO.getUsername());
+        User userByEmailAddress = theUserRepository.findUserByEmailAddress(createdDTO.getEmailAddress());
+
+        if (userByUsername != null) {
+            throw new ResourceAlreadyExistsException("This username is already taken");
+        }
+        if (userByEmailAddress != null) {
+            throw new ResourceAlreadyExistsException("There is already an account with this email address associated to it");
+        }
+
+        User theAdmin = new User();
+
+        theAdmin.setUsername(createdDTO.getUsername());
+        theAdmin.setEmailAddress(createdDTO.getEmailAddress());
+        theAdmin.setFirstName(createdDTO.getFirstName());
+        theAdmin.setLastName(createdDTO.getLastName());
+        theAdmin.setDateOfBirth(createdDTO.getDateOfBirth());
+        theAdmin.setUserPassword(createdDTO.getUserPassword());
+        theAdmin.setContactNumber(createdDTO.getContactNumber());
+        theAdmin.setProfilePicture(new CompressImage().processUnhandledImage(createdDTO.getProfilePicture()));
+        theAdmin.setBlackListed(false);
+        theAdmin.setUserRole(theRoleService._getRoleInformation("administrator"));
+
+        User savedUser = theUserRepository.save(theAdmin);
+
+        //send an email to created admin.
+        try {
+            theSender.sendMail(new MailSenderHelper(
+                    savedUser, "Account Created Successfully", MailTemplateType.ADMIN_CREATED
+            ));
+        } catch (Exception ex) {
+            LOGGER.warning("FAILED TO SEND EMAIL");
         }
     }
 
