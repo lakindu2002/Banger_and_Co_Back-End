@@ -5,6 +5,7 @@ import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import com.github.jknack.handlebars.io.TemplateLoader;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
@@ -14,7 +15,9 @@ import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Properties;
+import java.util.logging.Logger;
 
 @Component
 public class MailSender {
@@ -42,6 +45,8 @@ public class MailSender {
     private Session theMailSession;
     private HashMap<String, String> dynamicData;
 
+    private Logger LOGGER = Logger.getLogger(MailSender.class.getName());
+
     @PostConstruct
     public void init() {
         dynamicData = new HashMap<>(); //create a HashMap to apply handle bar values
@@ -68,6 +73,7 @@ public class MailSender {
         theMailSession.setDebug(false);
     }
 
+    @Async //execute operation in a secondary thread.
     public void sendMail(MailSenderHelper theHelper) {
         Message theMessage = new MimeMessage(theMailSession); //create a MimeMessage to send via Email
         try {
@@ -90,6 +96,8 @@ public class MailSender {
             theMessage.setContent(contentToEmail, mailType); //attach the body with mail type - html
 
             Transport.send(theMessage); //send the mail via gmail to the user
+            LOGGER.info("AN EMAIL WAS SENT");
+            LOGGER.info(String.format("THE MAIL OF TYPE: %s WAS SENT", theHelper.getTemplateName().toString().toUpperCase()));
         } catch (MessagingException | IOException e) {
             e.printStackTrace();
         }
