@@ -1,6 +1,7 @@
 package com.lakindu.bangerandcobackend.controller;
 
 import com.lakindu.bangerandcobackend.dto.RentalCreateDTO;
+import com.lakindu.bangerandcobackend.dto.RentalShowDTO;
 import com.lakindu.bangerandcobackend.dto.VehicleShowDTO;
 import com.lakindu.bangerandcobackend.serviceinterface.RentalService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "/api/rental")
@@ -38,5 +40,12 @@ public class RentalController {
                 new BangerAndCoResponse("The rental was placed successfully. You will receive an email with confirmation. We hope you have an excellent experience at Banger and Co.", HttpStatus.OK.value()),
                 HttpStatus.OK
         );
+    }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @GetMapping(path = "/find/pendingRentals")
+    public ResponseEntity<List<RentalShowDTO>> getAllPendingRentals() {
+        List<RentalShowDTO> allPendingRentals = rentalService.getAllPendingRentals();
+        return new ResponseEntity<>(allPendingRentals, HttpStatus.OK);
     }
 }

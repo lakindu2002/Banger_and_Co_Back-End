@@ -4,6 +4,8 @@ import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import com.github.jknack.handlebars.io.TemplateLoader;
+import com.lakindu.bangerandcobackend.entity.AdditionalEquipment;
+import com.lakindu.bangerandcobackend.entity.Rental;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -13,6 +15,7 @@ import javax.mail.*;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
@@ -78,7 +81,8 @@ public class MailSender {
         Message theMessage = new MimeMessage(theMailSession); //create a MimeMessage to send via Email
         try {
             //format a template according to the mail sending type.
-            String contentToEmail = setTemplate(theHelper.getTemplateName(), theHelper); //retrieve formatted template
+            //null set because no rental.
+            String contentToEmail = setTemplate(theHelper.getTemplateName(), theHelper, null); //retrieve formatted template
 
             theMessage.setSentDate(new Date()); //set current date is sent date
             theMessage.setFrom(new InternetAddress(cooperateEmailAddress)); //set the sender
@@ -103,7 +107,7 @@ public class MailSender {
         }
     }
 
-    private String setTemplate(MailTemplateType theType, MailSenderHelper theHelper) throws IOException {
+    private String setTemplate(MailTemplateType theType, MailSenderHelper theHelper, Rental rentalMade) throws IOException {
         TemplateLoader configurer = new ClassPathTemplateLoader(); //load templates from classpath
         configurer.setPrefix("/templates"); //template has "/templates" path as prefix
         configurer.setSuffix(".html"); //templates are of html
@@ -164,10 +168,56 @@ public class MailSender {
                 dynamicData.clear(); //clear hashmap contents after formatting template
                 return formattedTemplate;
             }
+            case RENTAL_MADE: {
+                SimpleDateFormat theDateFormat = new SimpleDateFormat("dd MMMM yyyy");
+                dynamicData.put("firstName", theHelper.getUserToBeInformed().getFirstName());
+                dynamicData.put("lastName", theHelper.getUserToBeInformed().getLastName());
+                dynamicData.put("pickupDate", theDateFormat.format(rentalMade.getPickupDate()));
+                dynamicData.put("pickupTime", rentalMade.getPickupTime().toString());
+                dynamicData.put("returnDate", theDateFormat.format(rentalMade.getReturnDate()));
+                dynamicData.put("returnTime", rentalMade.getReturnTime().toString());
+                dynamicData.put("vehicleName", rentalMade.getVehicleOnRental().getVehicleName());
+                dynamicData.put("totalCostForRental", String.valueOf(rentalMade.getTotalCost()));
+
+                StringBuilder theBuilder = new StringBuilder();
+                if (rentalMade.getEquipmentsAddedToRental() == null || rentalMade.getEquipmentsAddedToRental().size() == 0) {
+                    dynamicData.put("equipmentList", "None");
+                } else {
+                    for (AdditionalEquipment equipment : rentalMade.getEquipmentsAddedToRental()) {
+                        theBuilder.append(equipment.getEquipmentName()).append("\n");
+                    }
+                    dynamicData.put("equipmentList", theBuilder.toString().trim());
+                }
+
+                Template theTemplate = handlebars.compile("RentalMadeCustomer"); //retrieve the template based on required type
+                //the template will be searched for {{}} and the relevant data will be assigned by the apply method.
+                //library provided by jknack.
+
+                final String formattedTemplate = theTemplate.apply(dynamicData);//return formatted template to the caller
+                dynamicData.clear(); //clear hashmap contents after formatting template
+                return formattedTemplate;
+            }
             default: {
                 return null;
             }
         }
 
+    }
+
+    @Async
+    public void sendRentalMail(MailSenderHelper theHelper, Rental madeRental) throws IOException, MessagingException {
+        String formattedTemplate = setTemplate(theHelper.getTemplateName(), theHelper, madeRental);
+
+        MimeMessage theMessage = new MimeMessage(theMailSession);
+        theMessage.setSentDate(new Date()); //set current date is sent date
+        theMessage.setFrom(new InternetAddress(cooperateEmailAddress)); //set the sender
+        theMessage.setSubject(theHelper.getSubject()); //set the Subject for the Mail
+        theMessage.setContent(formattedTemplate, mailType);
+        theMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(theHelper.getUserToBeInformed().getEmailAddress()));
+
+        Transport.send(theMessage);
+
+        LOGGER.info("AN EMAIL WAS SENT");
+        LOGGER.info(String.format("THE MAIL OF TYPE: %s WAS SENT", theHelper.getTemplateName().toString().toUpperCase()));
     }
 }

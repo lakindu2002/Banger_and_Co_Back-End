@@ -1,6 +1,7 @@
 package com.lakindu.bangerandcobackend.serviceinterface;
 
 import com.lakindu.bangerandcobackend.dto.RentalCreateDTO;
+import com.lakindu.bangerandcobackend.dto.RentalShowDTO;
 import com.lakindu.bangerandcobackend.dto.VehicleRentalFilterDTO;
 import com.lakindu.bangerandcobackend.entity.AdditionalEquipment;
 import com.lakindu.bangerandcobackend.entity.Vehicle;
@@ -10,6 +11,7 @@ import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.Re
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
 
 import java.text.ParseException;
+import java.util.List;
 
 public interface RentalService {
     /**
@@ -25,4 +27,11 @@ public interface RentalService {
     void validateRentalFilters(VehicleRentalFilterDTO theFilterDTO) throws BadValuePassedException;
 
     void makeRental(RentalCreateDTO theRental) throws ParseException, BadValuePassedException, ResourceNotFoundException, ResourceNotCreatedException;
+
+    /**
+     * Method will get a list of all pending rentals from the database.
+     *
+     * @return - The list of vehicles that are pending.
+     */
+    List<RentalShowDTO> getAllPendingRentals();
 }

@@ -2,9 +2,11 @@ package com.lakindu.bangerandcobackend.service;
 
 import com.lakindu.bangerandcobackend.dto.AdditionalEquipmentDTO;
 import com.lakindu.bangerandcobackend.dto.RentalCreateDTO;
+import com.lakindu.bangerandcobackend.dto.RentalShowDTO;
 import com.lakindu.bangerandcobackend.dto.VehicleRentalFilterDTO;
 import com.lakindu.bangerandcobackend.entity.AdditionalEquipment;
 import com.lakindu.bangerandcobackend.entity.Rental;
+import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.entity.Vehicle;
 import com.lakindu.bangerandcobackend.repository.RentalRepository;
 import com.lakindu.bangerandcobackend.serviceinterface.AdditionalEquipmentService;
@@ -14,6 +16,9 @@ import com.lakindu.bangerandcobackend.serviceinterface.VehicleService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotCreatedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
+import com.lakindu.bangerandcobackend.util.mailsender.MailSender;
+import com.lakindu.bangerandcobackend.util.mailsender.MailSenderHelper;
+import com.lakindu.bangerandcobackend.util.mailsender.MailTemplateType;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
@@ -23,6 +28,7 @@ import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 @Service
 public class RentalServiceImpl implements RentalService {
@@ -31,18 +37,22 @@ public class RentalServiceImpl implements RentalService {
     private final VehicleService vehicleService;
     private final UserService userService;
     private final AdditionalEquipmentService additionalEquipmentService;
+    private final MailSender mailSender;
     private final int PRICE_PER_DAY_DIVISOR = 24; //price_per_day/24 = price per hour
+    private final Logger LOGGER = Logger.getLogger(RentalServiceImpl.class.getName());
 
     public RentalServiceImpl(
             @Qualifier("rentalRepository") RentalRepository rentalRepository,
             @Qualifier("vehicleServiceImpl") VehicleService vehicleService,
             @Qualifier("userServiceImpl") UserService userService,
-            @Qualifier("additionalEquipmentServiceImpl") AdditionalEquipmentService additionalEquipmentService
+            @Qualifier("additionalEquipmentServiceImpl") AdditionalEquipmentService additionalEquipmentService,
+            @Qualifier("mailSender") MailSender mailSender
     ) {
         this.rentalRepository = rentalRepository;
         this.vehicleService = vehicleService;
         this.userService = userService;
         this.additionalEquipmentService = additionalEquipmentService;
+        this.mailSender = mailSender;
     }
 
     class RentalEquipmentCalculatorSupporter {
@@ -149,6 +159,7 @@ public class RentalServiceImpl implements RentalService {
         boolean isVehicleAvailable = vehicleService.isVehicleAvailableOnGivenDates(theVehicle, pickupDateTime, returnDateTime);
         if (isVehicleAvailable) {
             double costForVehicle = calculateCostForVehicle(rentalPeriodInHours, theVehicle);
+            User theCustomer = userService._getUserWithoutDecompression(theRental.getCustomerUsername());
             //vehicle can be rented.
             //if rental has additional equipment, get the total and reduce quantity from database.
             if (theRental.getEquipmentsAddedToRental().isEmpty()) {
@@ -166,14 +177,30 @@ public class RentalServiceImpl implements RentalService {
             theRentalToBeMade.setPickupTime(theDateTime.getPickupTime());
             theRentalToBeMade.setTotalCost(theRental.getTotalCostForRental());
             theRentalToBeMade.setVehicleOnRental(theVehicle);
-            theRentalToBeMade.setTheCustomerRenting(userService._getUserWithoutDecompression(theRental.getCustomerUsername()));
+            theRentalToBeMade.setTheCustomerRenting(theCustomer);
 
             Rental madeRental = rentalRepository.save(theRentalToBeMade); //create the rental.
             //email the client.
+            try {
+                mailSender.sendRentalMail(new MailSenderHelper(theCustomer, "Rental Made Successfully", MailTemplateType.RENTAL_MADE), madeRental);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                LOGGER.warning("EMAIL NOT SENT DURING RENTAL: " + ex.getMessage());
+            }
         } else {
             throw new ResourceNotCreatedException("The rental could not be created because the vehicle was not available for the specified pickup and return duration");
         }
 
+    }
+
+    /**
+     * Method will get a list of all pending rentals from the database.
+     *
+     * @return - The list of vehicles that are pending.
+     */
+    @Override
+    public List<RentalShowDTO> getAllPendingRentals() {
+        return null;
     }
 
     /**
