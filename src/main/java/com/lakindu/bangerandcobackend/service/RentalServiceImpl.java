@@ -19,10 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +43,27 @@ public class RentalServiceImpl implements RentalService {
         this.vehicleService = vehicleService;
         this.userService = userService;
         this.additionalEquipmentService = additionalEquipmentService;
+    }
+
+    class RentalEquipmentCalculatorSupporter {
+        public List<AdditionalEquipment> getEquipmentsInRental() {
+            return equipmentsInRental;
+        }
+
+        public void setEquipmentsInRental(List<AdditionalEquipment> equipmentsInRental) {
+            this.equipmentsInRental = equipmentsInRental;
+        }
+
+        public double getTotalCostForAdditionalEquipment() {
+            return totalCostForAdditionalEquipment;
+        }
+
+        public void setTotalCostForAdditionalEquipment(double totalCostForAdditionalEquipment) {
+            this.totalCostForAdditionalEquipment = totalCostForAdditionalEquipment;
+        }
+
+        private List<AdditionalEquipment> equipmentsInRental;
+        private double totalCostForAdditionalEquipment;
     }
 
 
@@ -116,6 +134,9 @@ public class RentalServiceImpl implements RentalService {
         theDateTime.setPickupTime(LocalTime.parse(theRental.getPickupTime()));
         theDateTime.setReturnTime(LocalTime.parse(theRental.getReturnTime()));
 
+        LocalDateTime pickupDateTime = LocalDateTime.of(theDateTime.getPickupDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), theDateTime.getPickupTime());
+        LocalDateTime returnDateTime = LocalDateTime.of(theDateTime.getReturnDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), theDateTime.getReturnTime());
+
         //check if duration is maximum of 2 weeks and start and end time is between 8 and 18:00
         //if same day rental, check if minimum of 5 hours is present.
         validateRentalFilters(theDateTime);
@@ -123,20 +144,22 @@ public class RentalServiceImpl implements RentalService {
 
         //check if vehicle is free on given duration.
         Vehicle theVehicle = vehicleService._getVehicleInformation(theRental.getVehicleToBeRented());
-        LocalDateTime pickupDateTime = LocalDateTime.of(theDateTime.getPickupDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), theDateTime.getPickupTime());
-        LocalDateTime returnDateTime = LocalDateTime.of(theDateTime.getReturnDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), theDateTime.getReturnTime());
-
+        long rentalPeriodInHours = pickupDateTime.until(returnDateTime, ChronoUnit.HOURS);
 
         boolean isVehicleAvailable = vehicleService.isVehicleAvailableOnGivenDates(theVehicle, pickupDateTime, returnDateTime);
-        //calculate total cost for rental.
-
         if (isVehicleAvailable) {
+            double costForVehicle = calculateCostForVehicle(rentalPeriodInHours, theVehicle);
             //vehicle can be rented.
             //if rental has additional equipment, get the total and reduce quantity from database.
-            if (!theRental.getEquipmentsAddedToRental().isEmpty()) {
+            if (theRental.getEquipmentsAddedToRental().isEmpty()) {
                 //no additional equipment, directly create rental.
+                theRentalToBeMade.setTotalCost(costForVehicle);
+            } else {
+                //have additional equipment, reduce the quantity of the equipment and calculate cost for it.
+                RentalEquipmentCalculatorSupporter equipmentsAdded = getEquipmentsAndTotalPriceForEquipments(theRental.getEquipmentsAddedToRental(), rentalPeriodInHours);
+                theRentalToBeMade.setTotalCost(equipmentsAdded.getTotalCostForAdditionalEquipment() + costForVehicle);
+                theRentalToBeMade.setEquipmentsAddedToRental(equipmentsAdded.getEquipmentsInRental());
             }
-
             theRentalToBeMade.setPickupDate(theDateTime.getPickupDate());
             theRentalToBeMade.setReturnDate(theDateTime.getReturnDate());
             theRentalToBeMade.setReturnTime(theDateTime.getReturnTime());
@@ -153,13 +176,56 @@ public class RentalServiceImpl implements RentalService {
 
     }
 
-    private List<AdditionalEquipment> getAdditionalEquipmentForRental(ArrayList<AdditionalEquipmentDTO> equipmentsAddedToRental) throws ResourceNotFoundException {
+    /**
+     * Calculates the total price of the vehicle for the duration of the rental.
+     *
+     * <p>Price calculated with price per hour.</p>
+     * <p>Per Per Day/24 = Price Per Hour</p>
+     * <p>Duration in hours * Price per hour = cost of vehicle for rental.</p>
+     *
+     * @param rentalPeriodInHours The period of the rental in hours.
+     * @param theVehicle          The vehicle being rented
+     * @return The total cost for the vehicle for the period of rental.
+     */
+    private double calculateCostForVehicle(long rentalPeriodInHours, Vehicle theVehicle) {
+        //get price per hour for vehicle
+        double pricePerHourForVehicle = theVehicle.getTheVehicleType().getPricePerDay() / PRICE_PER_DAY_DIVISOR;
+        //price per hour * price per hour for vehicle = price for vehicle on rental.
+        return pricePerHourForVehicle * rentalPeriodInHours;
+    }
+
+    /**
+     * Retrieves a list of the equipments added to the rental after their quantities have been deducted for the quantities added to the rental.
+     *
+     * @param equipmentsAddedToRental The equipments customer want in the rental
+     * @param rentalPeriodInHours     The duration of the rental in hours.
+     * @return The object consisting of total cost for rental and equipments in the rental.
+     * @throws ResourceNotFoundException   Thrown when the equipments cannot be found
+     * @throws ResourceNotCreatedException Thrown when the equipment quantity exceeds three.
+     */
+    private RentalEquipmentCalculatorSupporter getEquipmentsAndTotalPriceForEquipments(List<AdditionalEquipmentDTO> equipmentsAddedToRental, long rentalPeriodInHours) throws ResourceNotFoundException, ResourceNotCreatedException {
+        RentalEquipmentCalculatorSupporter supporter = new RentalEquipmentCalculatorSupporter();
         List<AdditionalEquipment> addedEquipment = new ArrayList<>();
+        double totalPriceForEquipments = 0;
 
         for (AdditionalEquipmentDTO eachEquipment : equipmentsAddedToRental) {
-            AdditionalEquipment item = additionalEquipmentService._getAdditionalEquipmentById(eachEquipment.getEquipmentId());
-            addedEquipment.add(item);
+            //cannot select more than 3 for each equipment
+            if (eachEquipment.getQuantitySelectedForRental() > 3) {
+                throw new ResourceNotCreatedException("The equipment " + eachEquipment.getEquipmentName() + " exceed more than 3, therefore rental cannot be made. Maximum addon quantity should be 3.");
+            } else {
+                if (eachEquipment.getQuantitySelectedForRental() != 0) {
+                    AdditionalEquipment item = additionalEquipmentService._getAdditionalEquipmentById(eachEquipment.getEquipmentId());
+                    //calculate total price for rental and reduce equipment quantity as rental is made.
+                    item.setEquipmentQuantity(item.getEquipmentQuantity() - eachEquipment.getQuantitySelectedForRental());
+                    addedEquipment.add(item);
+
+                    double costForEachEquipment = item.getPricePerDay() / PRICE_PER_DAY_DIVISOR;
+                    totalPriceForEquipments += costForEachEquipment * rentalPeriodInHours;
+                }
+            }
         }
-        return addedEquipment;
+        supporter.setEquipmentsInRental(addedEquipment);
+        supporter.setTotalCostForAdditionalEquipment(totalPriceForEquipments);
+        return supporter;
     }
 }

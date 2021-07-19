@@ -52,7 +52,7 @@ public class Rental {
     private Vehicle vehicleOnRental;
 
     //map many to many
-    @ManyToMany()
+    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
     @JoinTable(
             name = "rental_customization",
             joinColumns = @JoinColumn(name = "rental_id", nullable = false),
