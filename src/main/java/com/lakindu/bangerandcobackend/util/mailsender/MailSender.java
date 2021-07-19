@@ -73,7 +73,7 @@ public class MailSender {
         theMailSession.setDebug(false);
     }
 
-    @Async //execute operation in a secondary thread.
+    @Async
     public void sendMail(MailSenderHelper theHelper) {
         Message theMessage = new MimeMessage(theMailSession); //create a MimeMessage to send via Email
         try {
