@@ -58,18 +58,7 @@ public class User {
     @OneToMany(mappedBy = "theCustomerRenting", fetch = FetchType.LAZY, cascade = {CascadeType.DETACH, CascadeType.REFRESH})
     private List<Rental> customerRentalList;
 
-    @OneToMany(mappedBy = "resolvedBy", fetch = FetchType.LAZY, cascade = {CascadeType.DETACH, CascadeType.REFRESH})
-    private List<Inquiry> resolvedInquiries;
-
     public User() {
-    }
-
-    public List<Inquiry> getResolvedInquiries() {
-        return resolvedInquiries;
-    }
-
-    public void setResolvedInquiries(List<Inquiry> resolvedInquiries) {
-        this.resolvedInquiries = resolvedInquiries;
     }
 
     public String getDrivingLicenseNumber() {
