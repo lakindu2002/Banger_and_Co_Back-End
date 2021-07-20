@@ -353,7 +353,7 @@ public class UserServiceImpl implements UserService {
      * @param createdDTO The administrator to be created.
      */
     @Override
-    public int createAdmin(UserAdminCreateDTO createdDTO) throws ResourceAlreadyExistsException, DataFormatException, IOException, ResourceNotFoundException, ResourceNotCreatedException {
+    public void createAdmin(UserAdminCreateDTO createdDTO) throws ResourceAlreadyExistsException, DataFormatException, IOException, ResourceNotFoundException, ResourceNotCreatedException {
         createdDTO.setUsername(createdDTO.getUsername());
         createdDTO.setEmailAddress(createdDTO.getEmailAddress().toLowerCase());
         createdDTO.setUserPassword(encodePassword(createdDTO.getUserPassword()));
@@ -371,10 +371,6 @@ public class UserServiceImpl implements UserService {
 
         User theAdmin = new User();
         Role administratorRole = theRoleService._getRoleInformation("administrator");
-
-        if (administratorRole.getUsersInEachRole().size() == 5) {
-            throw new ResourceNotCreatedException("Total Administrator Account Exceeded, You cannot create more than 5 administrator accounts");
-        }
 
         theAdmin.setUsername(createdDTO.getUsername());
         theAdmin.setEmailAddress(createdDTO.getEmailAddress());
@@ -397,8 +393,38 @@ public class UserServiceImpl implements UserService {
         } catch (Exception ex) {
             LOGGER.warning("FAILED TO SEND EMAIL");
         }
+    }
 
-        return administratorRole.getUsersInEachRole().size();
+    @Override
+    public void removeAdministrator(String username, Authentication loggedInUser) throws ResourceCannotBeDeletedException, ResourceNotFoundException {
+        if (!username.equalsIgnoreCase(loggedInUser.getName())) {
+            //admins can only remove their own account
+            User deletingAdministrator = theUserRepository.findUserByUsername(username);
+            if (deletingAdministrator.getUserRole().getRoleName().equalsIgnoreCase("administrator")) {
+                //clear any resolved inquiries before removing the admin account
+                if (theRoleService._getRoleInformation("administrator").getUsersInEachRole().size() == 1) {
+                    //only one admin left
+                    throw new ResourceCannotBeDeletedException("There is only one administrator account present in the system. Therefore, your account cannot be removed");
+                }
+                deletingAdministrator.clearInquiriesResolved();
+                theUserRepository.delete(deletingAdministrator);
+
+                //send an email.
+                try {
+                    theSender.sendMail(
+                            new MailSenderHelper(deletingAdministrator, "Administrator Account Deleted", MailTemplateType.ADMIN_DELETED)
+                    );
+                } catch (Exception ex) {
+                    LOGGER.warning("ERROR SENDING EMAIL: " + ex.getMessage());
+                }
+
+            } else {
+                throw new ResourceCannotBeDeletedException("This account is not an administrator account");
+            }
+
+        } else {
+            throw new ResourceCannotBeDeletedException("You cannot delete your own administrator account");
+        }
     }
 
     @Override

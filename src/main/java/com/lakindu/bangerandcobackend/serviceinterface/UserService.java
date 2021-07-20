@@ -96,5 +96,17 @@ public interface UserService extends UserDetailsService {
      *
      * @param createdDTO The administrator to be created.
      */
-    int createAdmin(UserAdminCreateDTO createdDTO) throws ResourceAlreadyExistsException, DataFormatException, IOException, ResourceNotFoundException, ResourceNotCreatedException;
+    void createAdmin(UserAdminCreateDTO createdDTO) throws ResourceAlreadyExistsException, DataFormatException, IOException, ResourceNotFoundException, ResourceNotCreatedException;
+
+    /**
+     * Method executed by the administrator to remove their account. They cannot remove other admin accounts, only their own.
+     * <p>
+     * There must be a minimum of one administrators present in the system at any given time.
+     * </p>
+     *
+     * @param username     The administrator to remove the account for
+     * @param loggedInUser The logged in user in the spring security context
+     * @throws ResourceCannotBeDeletedException The exception thrown when the user cannot be removed.
+     */
+    void removeAdministrator(String username, Authentication loggedInUser) throws ResourceCannotBeDeletedException, ResourceNotFoundException;
 }

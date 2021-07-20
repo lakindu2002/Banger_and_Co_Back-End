@@ -132,6 +132,21 @@ public class UserController {
     }
 
     @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @DeleteMapping(path = "/admin/delete/{username}")
+    public ResponseEntity<BangerAndCoResponse> deleteAdministrator(
+            @PathVariable(name = "username") String username,
+            Authentication loggedInUser
+    ) throws ResourceCannotBeDeletedException, ResourceNotFoundException {
+        //method executed by administrator to remove their account.
+
+        theUserService.removeAdministrator(username, loggedInUser);
+        return new ResponseEntity<>(
+                new BangerAndCoResponse("The administrator account has been removed from Banger and Co. successfully", HttpStatus.OK.value()),
+                HttpStatus.OK
+        );
+    }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
     @PostMapping(
             path = "/admin/createAdmin",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
@@ -164,10 +179,10 @@ public class UserController {
             createdDTO.setProfilePicture(profilePicture.getBytes());
             createdDTO.setUserPassword(createdDTO.getUsername()); //assign the admin password as their username
 
-            int adminCountInSystem = theUserService.createAdmin(createdDTO);
+            theUserService.createAdmin(createdDTO);
 
             return new ResponseEntity<>(
-                    new BangerAndCoResponse("The administrator account has been successfully created and the user has been notified via an email.\nThere are " + adminCountInSystem + " administrator accounts in the system.", HttpStatus.OK.value()),
+                    new BangerAndCoResponse("The administrator account has been successfully created and the user has been notified via an email.", HttpStatus.OK.value()),
                     HttpStatus.OK
             );
         }
