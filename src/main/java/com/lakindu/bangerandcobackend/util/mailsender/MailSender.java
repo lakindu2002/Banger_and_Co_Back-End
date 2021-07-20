@@ -6,6 +6,7 @@ import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
 import com.github.jknack.handlebars.io.TemplateLoader;
 import com.lakindu.bangerandcobackend.entity.AdditionalEquipment;
 import com.lakindu.bangerandcobackend.entity.Rental;
+import com.lakindu.bangerandcobackend.entity.RentalCustomization;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
@@ -180,11 +181,12 @@ public class MailSender {
                 dynamicData.put("totalCostForRental", String.valueOf(rentalMade.getTotalCost()));
 
                 StringBuilder theBuilder = new StringBuilder();
-                if (rentalMade.getEquipmentsAddedToRental() == null || rentalMade.getEquipmentsAddedToRental().size() == 0) {
+                if (rentalMade.getRentalCustomizationList() == null || rentalMade.getRentalCustomizationList().size() == 0) {
                     dynamicData.put("equipmentList", "None");
                 } else {
-                    for (AdditionalEquipment equipment : rentalMade.getEquipmentsAddedToRental()) {
-                        theBuilder.append(equipment.getEquipmentName()).append("\n");
+                    for (RentalCustomization eachCustomization : rentalMade.getRentalCustomizationList()) {
+                        AdditionalEquipment equipment = eachCustomization.getEquipmentAddedToRental();
+                        theBuilder.append(equipment.getEquipmentName()).append(", ");
                     }
                     dynamicData.put("equipmentList", theBuilder.toString().trim());
                 }

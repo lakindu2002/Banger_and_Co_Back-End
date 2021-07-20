@@ -2,6 +2,7 @@ package com.lakindu.bangerandcobackend.serviceinterface;
 
 import com.lakindu.bangerandcobackend.dto.AdditionalEquipmentDTO;
 import com.lakindu.bangerandcobackend.entity.AdditionalEquipment;
+import com.lakindu.bangerandcobackend.entity.RentalCustomization;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceAlreadyExistsException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceCannotBeDeletedException;
@@ -69,10 +70,5 @@ public interface AdditionalEquipmentService {
 
     void checkIfEquipmentHasPendingOrOngoingRentals(AdditionalEquipment theEquipment) throws ResourceCannotBeDeletedException;
 
-    /**
-     * Method will update the additional equipment stock back into the original state after rejection.
-     *
-     * @param equipmentsAddedToRental The stock to add back
-     */
-    void updateQuantityInDB(List<AdditionalEquipment> equipmentsAddedToRental);
+    void addQuantityBackToItem(RentalCustomization eachCustomization);
 }

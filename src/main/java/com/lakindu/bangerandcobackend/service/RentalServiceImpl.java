@@ -4,10 +4,7 @@ import com.lakindu.bangerandcobackend.dto.AdditionalEquipmentDTO;
 import com.lakindu.bangerandcobackend.dto.RentalCreateDTO;
 import com.lakindu.bangerandcobackend.dto.RentalShowDTO;
 import com.lakindu.bangerandcobackend.dto.VehicleRentalFilterDTO;
-import com.lakindu.bangerandcobackend.entity.AdditionalEquipment;
-import com.lakindu.bangerandcobackend.entity.Rental;
-import com.lakindu.bangerandcobackend.entity.User;
-import com.lakindu.bangerandcobackend.entity.Vehicle;
+import com.lakindu.bangerandcobackend.entity.*;
 import com.lakindu.bangerandcobackend.repository.RentalRepository;
 import com.lakindu.bangerandcobackend.serviceinterface.AdditionalEquipmentService;
 import com.lakindu.bangerandcobackend.serviceinterface.RentalService;
@@ -20,7 +17,6 @@ import com.lakindu.bangerandcobackend.util.mailsender.MailSender;
 import com.lakindu.bangerandcobackend.util.mailsender.MailSenderHelper;
 import com.lakindu.bangerandcobackend.util.mailsender.MailTemplateType;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
@@ -28,7 +24,6 @@ import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -58,12 +53,15 @@ public class RentalServiceImpl implements RentalService {
     }
 
     static class RentalEquipmentCalculatorSupporter {
-        public List<AdditionalEquipment> getEquipmentsInRental() {
-            return equipmentsInRental;
+        private List<RentalCustomization> rentalCustomizationList;
+        private double totalCostForAdditionalEquipment;
+
+        public List<RentalCustomization> getRentalCustomizationList() {
+            return rentalCustomizationList;
         }
 
-        public void setEquipmentsInRental(List<AdditionalEquipment> equipmentsInRental) {
-            this.equipmentsInRental = equipmentsInRental;
+        public void setRentalCustomizationList(List<RentalCustomization> rentalCustomizationList) {
+            this.rentalCustomizationList = rentalCustomizationList;
         }
 
         public double getTotalCostForAdditionalEquipment() {
@@ -73,9 +71,6 @@ public class RentalServiceImpl implements RentalService {
         public void setTotalCostForAdditionalEquipment(double totalCostForAdditionalEquipment) {
             this.totalCostForAdditionalEquipment = totalCostForAdditionalEquipment;
         }
-
-        private List<AdditionalEquipment> equipmentsInRental;
-        private double totalCostForAdditionalEquipment;
     }
 
 
@@ -175,9 +170,9 @@ public class RentalServiceImpl implements RentalService {
                 theRentalToBeMade.setTotalCost(costForVehicle);
             } else {
                 //have additional equipment, reduce the quantity of the equipment and calculate cost for it.
-                RentalEquipmentCalculatorSupporter equipmentsAdded = getEquipmentsAndTotalPriceForEquipments(theRental.getEquipmentsAddedToRental(), rentalPeriodInHours);
+                RentalEquipmentCalculatorSupporter equipmentsAdded = getEquipmentsAndTotalPriceForEquipments(theRental.getEquipmentsAddedToRental(), rentalPeriodInHours, theRentalToBeMade);
                 theRentalToBeMade.setTotalCost(equipmentsAdded.getTotalCostForAdditionalEquipment() + costForVehicle);
-                theRentalToBeMade.setEquipmentsAddedToRental(equipmentsAdded.getEquipmentsInRental());
+                theRentalToBeMade.setRentalCustomizationList(equipmentsAdded.getRentalCustomizationList());
             }
             theRentalToBeMade.setPickupDate(theDateTime.getPickupDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
             theRentalToBeMade.setReturnDate(theDateTime.getReturnDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
@@ -225,13 +220,13 @@ public class RentalServiceImpl implements RentalService {
 
         for (Rental eachRental : allRentalsThatHavePassedReturnDate) {
             User theCustomerNotCollected = eachRental.getTheCustomerRenting();
-            List<AdditionalEquipment> equipmentInRental = eachRental.getEquipmentsAddedToRental();
+            List<RentalCustomization> rentalCustomizationList = eachRental.getRentalCustomizationList();
 
+            for (RentalCustomization eachCustomization : rentalCustomizationList) {
+                additionalEquipmentService.addQuantityBackToItem(eachCustomization);
+            }
             userService.blackListCustomer(theCustomerNotCollected, eachRental);
             blackListedCustomers.add(theCustomerNotCollected);
-
-            //before removing rental, update the additional equipment quantity.
-            additionalEquipmentService.updateQuantityInDB(equipmentInRental);
             rentalRepository.delete(eachRental);
         }
 
@@ -261,13 +256,14 @@ public class RentalServiceImpl implements RentalService {
      *
      * @param equipmentsAddedToRental The equipments customer want in the rental
      * @param rentalPeriodInHours     The duration of the rental in hours.
+     * @param theRentalToBeMade
      * @return The object consisting of total cost for rental and equipments in the rental.
      * @throws ResourceNotFoundException   Thrown when the equipments cannot be found
      * @throws ResourceNotCreatedException Thrown when the equipment quantity exceeds three.
      */
-    private RentalEquipmentCalculatorSupporter getEquipmentsAndTotalPriceForEquipments(List<AdditionalEquipmentDTO> equipmentsAddedToRental, long rentalPeriodInHours) throws ResourceNotFoundException, ResourceNotCreatedException {
+    private RentalEquipmentCalculatorSupporter getEquipmentsAndTotalPriceForEquipments(List<AdditionalEquipmentDTO> equipmentsAddedToRental, long rentalPeriodInHours, Rental theRentalToBeMade) throws ResourceNotFoundException, ResourceNotCreatedException {
         RentalEquipmentCalculatorSupporter supporter = new RentalEquipmentCalculatorSupporter();
-        List<AdditionalEquipment> addedEquipment = new ArrayList<>();
+        List<RentalCustomization> addedCustomization = new ArrayList<>();
         double totalPriceForEquipments = 0;
 
         for (AdditionalEquipmentDTO eachEquipment : equipmentsAddedToRental) {
@@ -279,14 +275,20 @@ public class RentalServiceImpl implements RentalService {
                     AdditionalEquipment item = additionalEquipmentService._getAdditionalEquipmentById(eachEquipment.getEquipmentId());
                     //calculate total price for rental and reduce equipment quantity as rental is made.
                     item.setEquipmentQuantity(item.getEquipmentQuantity() - eachEquipment.getQuantitySelectedForRental());
-                    addedEquipment.add(item);
+
+                    RentalCustomization eachCustomization = new RentalCustomization();
+                    eachCustomization.setTheRentalInformation(theRentalToBeMade);
+                    eachCustomization.setEquipmentAddedToRental(item);
+                    eachCustomization.setQuantityAddedForEquipmentInRental(eachEquipment.getQuantitySelectedForRental());
+
+                    addedCustomization.add(eachCustomization);
 
                     double costForEachEquipment = item.getPricePerDay() / PRICE_PER_DAY_DIVISOR;
                     totalPriceForEquipments += costForEachEquipment * rentalPeriodInHours;
                 }
             }
         }
-        supporter.setEquipmentsInRental(addedEquipment);
+        supporter.setRentalCustomizationList(addedCustomization);
         supporter.setTotalCostForAdditionalEquipment(totalPriceForEquipments);
         return supporter;
     }

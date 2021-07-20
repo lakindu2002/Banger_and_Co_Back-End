@@ -49,16 +49,18 @@ public class Rental {
     @JoinColumn(name = "vehicle_id", nullable = true) //map the foreign key.
     private Vehicle vehicleOnRental;
 
-    //map many to many
-    @ManyToMany(cascade = {CascadeType.DETACH, CascadeType.MERGE, CascadeType.REFRESH})
-    @JoinTable(
-            name = "rental_customization",
-            joinColumns = @JoinColumn(name = "rental_id", nullable = false),
-            inverseJoinColumns = @JoinColumn(name = "equipment_id", nullable = false)
-    )
-    private List<AdditionalEquipment> equipmentsAddedToRental;
+    @OneToMany(mappedBy = "theRentalInformation", cascade = {CascadeType.ALL}, fetch = FetchType.LAZY)
+    private List<RentalCustomization> rentalCustomizationList;
 
     public Rental() {
+    }
+
+    public List<RentalCustomization> getRentalCustomizationList() {
+        return rentalCustomizationList;
+    }
+
+    public void setRentalCustomizationList(List<RentalCustomization> rentalCustomizationList) {
+        this.rentalCustomizationList = rentalCustomizationList;
     }
 
     @PrePersist
@@ -160,13 +162,5 @@ public class Rental {
 
     public void setVehicleOnRental(Vehicle vehicleOnRental) {
         this.vehicleOnRental = vehicleOnRental;
-    }
-
-    public List<AdditionalEquipment> getEquipmentsAddedToRental() {
-        return equipmentsAddedToRental;
-    }
-
-    public void setEquipmentsAddedToRental(List<AdditionalEquipment> equipmentsAddedToRental) {
-        this.equipmentsAddedToRental = equipmentsAddedToRental;
     }
 }
