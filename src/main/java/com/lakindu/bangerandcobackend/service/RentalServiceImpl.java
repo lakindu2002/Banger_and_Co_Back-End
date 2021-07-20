@@ -200,7 +200,7 @@ public class RentalServiceImpl implements RentalService {
      */
     @Override
     public List<RentalShowDTO> getAllPendingRentals() {
-        return null;
+        return new ArrayList<>();
     }
 
     /**
