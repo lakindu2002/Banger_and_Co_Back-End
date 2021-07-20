@@ -156,10 +156,16 @@ public class RentalServiceImpl implements RentalService {
         Vehicle theVehicle = vehicleService._getVehicleInformation(theRental.getVehicleToBeRented());
         long rentalPeriodInHours = pickupDateTime.until(returnDateTime, ChronoUnit.HOURS);
 
+        User theCustomer = userService._getUserWithoutDecompression(theRental.getCustomerUsername());
+
+        if (theCustomer.isBlackListed()) {
+            //customer cannot rent since they are blacklisted
+            throw new ResourceNotCreatedException("Your account has been blacklisted as you have a rental that you have not picked up. Therefore, until the administrator whitelists you, you cannot make any rentals at Banger and Co.");
+        }
+
         boolean isVehicleAvailable = vehicleService.isVehicleAvailableOnGivenDates(theVehicle, pickupDateTime, returnDateTime);
         if (isVehicleAvailable) {
             double costForVehicle = calculateCostForVehicle(rentalPeriodInHours, theVehicle);
-            User theCustomer = userService._getUserWithoutDecompression(theRental.getCustomerUsername());
             //vehicle can be rented.
             //if rental has additional equipment, get the total and reduce quantity from database.
             if (theRental.getEquipmentsAddedToRental().isEmpty()) {
