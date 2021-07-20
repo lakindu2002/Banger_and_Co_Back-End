@@ -20,6 +20,7 @@ import com.lakindu.bangerandcobackend.util.mailsender.MailSender;
 import com.lakindu.bangerandcobackend.util.mailsender.MailSenderHelper;
 import com.lakindu.bangerandcobackend.util.mailsender.MailTemplateType;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
@@ -27,6 +28,7 @@ import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
 
@@ -55,7 +57,7 @@ public class RentalServiceImpl implements RentalService {
         this.mailSender = mailSender;
     }
 
-    class RentalEquipmentCalculatorSupporter {
+    static class RentalEquipmentCalculatorSupporter {
         public List<AdditionalEquipment> getEquipmentsInRental() {
             return equipmentsInRental;
         }
@@ -177,8 +179,8 @@ public class RentalServiceImpl implements RentalService {
                 theRentalToBeMade.setTotalCost(equipmentsAdded.getTotalCostForAdditionalEquipment() + costForVehicle);
                 theRentalToBeMade.setEquipmentsAddedToRental(equipmentsAdded.getEquipmentsInRental());
             }
-            theRentalToBeMade.setPickupDate(theDateTime.getPickupDate());
-            theRentalToBeMade.setReturnDate(theDateTime.getReturnDate());
+            theRentalToBeMade.setPickupDate(theDateTime.getPickupDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+            theRentalToBeMade.setReturnDate(theDateTime.getReturnDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
             theRentalToBeMade.setReturnTime(theDateTime.getReturnTime());
             theRentalToBeMade.setPickupTime(theDateTime.getPickupTime());
             theRentalToBeMade.setTotalCost(theRental.getTotalCostForRental());
@@ -207,6 +209,19 @@ public class RentalServiceImpl implements RentalService {
     @Override
     public List<RentalShowDTO> getAllPendingRentals() {
         return new ArrayList<>();
+    }
+
+    /**
+     * Method will blacklist customers if they have a rental that they have not picked up.
+     * All blacklisted customers will be notified via an email informing about their account being blacklisted.
+     */
+    @Override
+    @Async
+    public void blacklistCustomers() {
+        List<User> blackListedCustomers = new ArrayList<>();
+        List<Rental> rentals = rentalRepository.findAll();
+        LocalDate localDate = new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+        List<Rental> rentalsAfterCurrentDateTime = rentalRepository.findRentalsAfterCurrentDateTime(localDate, LocalTime.now());
     }
 
     /**

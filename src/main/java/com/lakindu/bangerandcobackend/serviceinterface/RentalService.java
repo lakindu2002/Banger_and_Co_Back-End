@@ -34,4 +34,10 @@ public interface RentalService {
      * @return - The list of vehicles that are pending.
      */
     List<RentalShowDTO> getAllPendingRentals();
+
+    /**
+     * Method will blacklist customers if they have a rental that they have not picked up.
+     * All blacklisted customers will be notified via an email informing about their account being blacklisted.
+     */
+    void blacklistCustomers();
 }

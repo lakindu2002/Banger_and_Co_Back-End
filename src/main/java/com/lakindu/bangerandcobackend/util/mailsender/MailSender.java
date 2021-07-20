@@ -16,6 +16,7 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
@@ -169,12 +170,11 @@ public class MailSender {
                 return formattedTemplate;
             }
             case RENTAL_MADE: {
-                SimpleDateFormat theDateFormat = new SimpleDateFormat("dd MMMM yyyy");
                 dynamicData.put("firstName", theHelper.getUserToBeInformed().getFirstName());
                 dynamicData.put("lastName", theHelper.getUserToBeInformed().getLastName());
-                dynamicData.put("pickupDate", theDateFormat.format(rentalMade.getPickupDate()));
+                dynamicData.put("pickupDate", rentalMade.getPickupDate().format(DateTimeFormatter.ISO_DATE));
                 dynamicData.put("pickupTime", rentalMade.getPickupTime().toString());
-                dynamicData.put("returnDate", theDateFormat.format(rentalMade.getReturnDate()));
+                dynamicData.put("returnDate", rentalMade.getReturnDate().format(DateTimeFormatter.ISO_DATE));
                 dynamicData.put("returnTime", rentalMade.getReturnTime().toString());
                 dynamicData.put("vehicleName", rentalMade.getVehicleOnRental().getVehicleName());
                 dynamicData.put("totalCostForRental", String.valueOf(rentalMade.getTotalCost()));

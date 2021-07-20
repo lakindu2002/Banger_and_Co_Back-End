@@ -5,6 +5,7 @@ import com.lakindu.bangerandcobackend.dto.UserAdminCreateDTO;
 import com.lakindu.bangerandcobackend.dto.UserUpdateDTO;
 import com.lakindu.bangerandcobackend.dto.UserDTO;
 import com.lakindu.bangerandcobackend.entity.User;
+import com.lakindu.bangerandcobackend.serviceinterface.RentalService;
 import com.lakindu.bangerandcobackend.serviceinterface.UserService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.*;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
@@ -24,6 +25,7 @@ import javax.validation.Valid;
 import javax.validation.ValidationException;
 import javax.validation.Validator;
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.zip.DataFormatException;
@@ -33,14 +35,17 @@ import java.util.zip.DataFormatException;
 @RequestMapping(path = "/api/user")
 public class UserController {
     private final UserService theUserService;
+    private final RentalService rentalService;
     private final Validator validator;
 
     @Autowired //dependency injection handled by entity manager
     public UserController(
             @Qualifier("userServiceImpl") UserService theUserService,
+            @Qualifier("rentalServiceImpl") RentalService rentalService,
             @Qualifier("defaultValidator") Validator validator
     ) {
         this.theUserService = theUserService;
+        this.rentalService = rentalService;
         this.validator = validator;
     }
 
@@ -119,6 +124,16 @@ public class UserController {
         theUserService.updateCustomerOtherImage(customerUsername, licenseImage, loggedInUser);
         return new ResponseEntity<>(
                 new BangerAndCoResponse("The other identity image has been updated successfully", HttpStatus.OK.value()),
+                HttpStatus.OK
+        );
+    }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @PutMapping(path = "/blacklist")
+    public ResponseEntity<BangerAndCoResponse> blackListCustomers() throws ParseException {
+        rentalService.blacklistCustomers();
+        return new ResponseEntity<>(
+                new BangerAndCoResponse("The blacklist operation has been operated successfully", HttpStatus.OK.value()),
                 HttpStatus.OK
         );
     }

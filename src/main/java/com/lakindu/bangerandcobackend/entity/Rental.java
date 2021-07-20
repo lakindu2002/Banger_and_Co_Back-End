@@ -1,6 +1,7 @@
 package com.lakindu.bangerandcobackend.entity;
 
 import javax.persistence.*;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
@@ -14,10 +15,10 @@ public class Rental {
     private int rentalId;
 
     @Column(name = "pickup_date", nullable = false)
-    private Date pickupDate;
+    private LocalDate pickupDate;
 
     @Column(name = "return_date", nullable = false)
-    private Date returnDate;
+    private LocalDate returnDate;
 
     @Column(name = "pickup_time", nullable = false)
     private LocalTime pickupTime;
@@ -73,19 +74,19 @@ public class Rental {
         this.rentalId = rentalId;
     }
 
-    public Date getPickupDate() {
+    public LocalDate getPickupDate() {
         return pickupDate;
     }
 
-    public void setPickupDate(Date pickupDate) {
+    public void setPickupDate(LocalDate pickupDate) {
         this.pickupDate = pickupDate;
     }
 
-    public Date getReturnDate() {
+    public LocalDate getReturnDate() {
         return returnDate;
     }
 
-    public void setReturnDate(Date returnDate) {
+    public void setReturnDate(LocalDate returnDate) {
         this.returnDate = returnDate;
     }
 

@@ -211,8 +211,8 @@ public class VehicleServiceImpl implements VehicleService {
             //if vehicles have rentals present in DB
             for (Rental eachRental : rentalsForEachVehicle) {
                 //retrieve LocalDateTime of the Rental Pickup - Date, Time and Return - Date, Time.
-                LocalDateTime eachRentalPickupDateTime = LocalDateTime.of(eachRental.getPickupDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), eachRental.getPickupTime());
-                LocalDateTime eachRentalReturnDateTime = LocalDateTime.of(eachRental.getReturnDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), eachRental.getReturnTime());
+                LocalDateTime eachRentalPickupDateTime = LocalDateTime.of(eachRental.getPickupDate(), eachRental.getPickupTime());
+                LocalDateTime eachRentalReturnDateTime = LocalDateTime.of(eachRental.getReturnDate(), eachRental.getReturnTime());
 
                 //if filtering Pickup DATE_TIME is between RENTAL Pickup DATE_TIME and Return DATE_TIME
                 //OR
