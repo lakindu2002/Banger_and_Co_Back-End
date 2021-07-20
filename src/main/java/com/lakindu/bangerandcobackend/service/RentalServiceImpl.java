@@ -213,8 +213,8 @@ public class RentalServiceImpl implements RentalService {
      * <b>Business Rule: </b> If the rental has been approved and has not been collected even after the day of return, the user will get blacklisted.
      */
     @Override
-    public void blacklistCustomers() {
-        List<User> blackListedCustomers = new ArrayList<>();
+    public void blacklistCustomers() throws ResourceNotFoundException {
+        List<User> blacklistedUsers = new ArrayList<>();
         List<Rental> allRentalsThatHavePassedReturnDate = rentalRepository.getAllRentalsThatHavePassedReturnDate(
                 LocalDate.now(), true, false);
 
@@ -226,11 +226,19 @@ public class RentalServiceImpl implements RentalService {
                 additionalEquipmentService.addQuantityBackToItem(eachCustomization);
             }
             userService.blackListCustomer(theCustomerNotCollected, eachRental);
-            blackListedCustomers.add(theCustomerNotCollected);
+            blacklistedUsers.add(theCustomerNotCollected);
             rentalRepository.delete(eachRental);
         }
 
         //send an email to all the administrators in the system regarding the blacklisted customers
+        List<User> adminList = userService._getAllAdministrators();
+        try {
+            mailSender.sendBulkRentalEmails(
+                    adminList, "Blacklist Job Report", blacklistedUsers, MailTemplateType.ADMIN_BULK_BLACKLIST
+            );
+        } catch (Exception ex) {
+            LOGGER.warning("EMAIL NOT SENT DURING BLACKLIST");
+        }
     }
 
     /**

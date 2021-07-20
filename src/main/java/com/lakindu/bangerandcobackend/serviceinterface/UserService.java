@@ -118,4 +118,6 @@ public interface UserService extends UserDetailsService {
      * @param theRentalNotCollected   The rental that they did not collect
      */
     void blackListCustomer(User theCustomerNotCollected, Rental theRentalNotCollected);
+
+    List<User> _getAllAdministrators() throws ResourceNotFoundException;
 }

@@ -1,5 +1,6 @@
 package com.lakindu.bangerandcobackend.repository;
 
+import com.lakindu.bangerandcobackend.entity.Role;
 import com.lakindu.bangerandcobackend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -26,4 +27,6 @@ public interface UserRepository extends JpaRepository<User, String> {
 
     @Query("SELECT theUser FROM User theUser WHERE theUser.userRole.roleName=:roleName")
     List<User> getAllAdministrators(String roleName);
+
+    List<User> getUsersByUserRoleEquals(Role administrator);
 }

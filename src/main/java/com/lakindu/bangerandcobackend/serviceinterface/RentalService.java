@@ -41,5 +41,5 @@ public interface RentalService {
      * <br>
      * <b>Business Rule: </b> If the rental has been approved and has not been collected even after the day of return, the user will get blacklisted.
      */
-    void blacklistCustomers();
+    void blacklistCustomers() throws ResourceNotFoundException;
 }

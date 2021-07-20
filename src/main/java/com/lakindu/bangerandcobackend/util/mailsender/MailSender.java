@@ -7,21 +7,20 @@ import com.github.jknack.handlebars.io.TemplateLoader;
 import com.lakindu.bangerandcobackend.entity.AdditionalEquipment;
 import com.lakindu.bangerandcobackend.entity.Rental;
 import com.lakindu.bangerandcobackend.entity.RentalCustomization;
+import com.lakindu.bangerandcobackend.entity.User;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.mail.*;
+import javax.mail.internet.AddressException;
 import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Properties;
+import java.util.*;
 import java.util.logging.Logger;
 
 @Component
@@ -264,5 +263,56 @@ public class MailSender {
 
         LOGGER.info("AN EMAIL WAS SENT");
         LOGGER.info(String.format("THE MAIL OF TYPE: %s WAS SENT", theHelper.getTemplateName().toString().toUpperCase()));
+    }
+
+    @Async
+    public void sendBulkRentalEmails(List<User> adminList, String subject, List<User> blacklistedUsers, MailTemplateType theType) throws MessagingException, IOException {
+        MimeMessage theMessage = new MimeMessage(theMailSession);
+        String formattedTemplate = getTemplateForBlackList(blacklistedUsers);
+
+        theMessage.setSentDate(new Date()); //set current date is sent date
+        theMessage.setFrom(new InternetAddress(cooperateEmailAddress)); //set the sender
+        theMessage.setSubject(subject); //set the Subject for the Mail
+        theMessage.setContent(formattedTemplate, mailType);
+        theMessage.addRecipients(Message.RecipientType.TO, getAddressList(adminList));
+
+        Transport.send(theMessage);
+
+        LOGGER.info("AN EMAIL WAS SENT");
+        LOGGER.info(String.format("THE MAIL OF TYPE: %s WAS SENT", theType.toString().toUpperCase()));
+    }
+
+    private String getTemplateForBlackList(List<User> blackListedUsers) throws IOException {
+        TemplateLoader configurer = new ClassPathTemplateLoader(); //load templates from classpath
+        configurer.setPrefix("/templates"); //template has "/templates" path as prefix
+        configurer.setSuffix(".html"); //templates are of html
+
+        Handlebars handlebars = new Handlebars(configurer); //create a Handlebars class with current loader used to load templates
+
+        Template theTemplate = handlebars.compile("AdminAccountBlackList");
+
+
+        StringBuilder customerNames = new StringBuilder();
+        for (User eachCustomer : blackListedUsers) {
+            customerNames.append(String.format("%s %s (%s), ", eachCustomer.getFirstName(), eachCustomer.getLastName(), eachCustomer.getUsername()));
+        }
+
+
+        dynamicData.put("executedDate", new Date().toString());
+        dynamicData.put("size", String.valueOf(blackListedUsers.size()));
+        dynamicData.put("customerNames", customerNames.toString());
+
+        String formattedContent = theTemplate.apply(dynamicData);
+        dynamicData.clear();
+
+        return formattedContent;
+    }
+
+    private Address[] getAddressList(List<User> adminList) throws AddressException {
+        List<Address> theEmailAddresses = new ArrayList<>();
+        for (User eachAdmin : adminList) {
+            theEmailAddresses.add(new InternetAddress(eachAdmin.getEmailAddress()));
+        }
+        return theEmailAddresses.toArray(new Address[adminList.size()]);
     }
 }
