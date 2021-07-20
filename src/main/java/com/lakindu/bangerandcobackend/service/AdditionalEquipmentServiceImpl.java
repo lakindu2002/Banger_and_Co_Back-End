@@ -199,4 +199,20 @@ public class AdditionalEquipmentServiceImpl implements AdditionalEquipmentServic
         }
     }
 
+    /**
+     * Method will update the additional equipment stock back into the original state after rejection.
+     *
+     * @param equipmentsAddedToRental The stock to add back
+     */
+    @Override
+    public void updateQuantityInDB(List<AdditionalEquipment> equipmentsAddedToRental) {
+        List<AdditionalEquipment> updatedEquipmentList = new ArrayList<>();
+
+        for (AdditionalEquipment eachEquipmentInRental : equipmentsAddedToRental) {
+
+        }
+
+        additionalEquipmentRepository.saveAll(updatedEquipmentList);
+    }
+
 }

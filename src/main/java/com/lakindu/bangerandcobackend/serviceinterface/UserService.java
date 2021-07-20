@@ -3,6 +3,7 @@ package com.lakindu.bangerandcobackend.serviceinterface;
 import com.lakindu.bangerandcobackend.dto.UserAdminCreateDTO;
 import com.lakindu.bangerandcobackend.dto.UserUpdateDTO;
 import com.lakindu.bangerandcobackend.dto.UserDTO;
+import com.lakindu.bangerandcobackend.entity.Rental;
 import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.*;
 import org.springframework.security.core.Authentication;
@@ -109,4 +110,12 @@ public interface UserService extends UserDetailsService {
      * @throws ResourceCannotBeDeletedException The exception thrown when the user cannot be removed.
      */
     void removeAdministrator(String username, Authentication loggedInUser) throws ResourceCannotBeDeletedException, ResourceNotFoundException;
+
+    /**
+     * Method will change the user status to blacklisted = true and will email the user to inform that they have been blacklisted.
+     *
+     * @param theCustomerNotCollected The customer going to be blacklisted
+     * @param theRentalNotCollected   The rental that they did not collect
+     */
+    void blackListCustomer(User theCustomerNotCollected, Rental theRentalNotCollected);
 }

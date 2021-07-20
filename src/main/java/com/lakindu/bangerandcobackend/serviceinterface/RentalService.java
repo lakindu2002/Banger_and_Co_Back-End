@@ -38,6 +38,8 @@ public interface RentalService {
     /**
      * Method will blacklist customers if they have a rental that they have not picked up.
      * All blacklisted customers will be notified via an email informing about their account being blacklisted.
+     * <br>
+     * <b>Business Rule: </b> If the rental has been approved and has not been collected even after the day of return, the user will get blacklisted.
      */
     void blacklistCustomers();
 }

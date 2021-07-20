@@ -4,6 +4,7 @@ import com.lakindu.bangerandcobackend.auth.CustomUserPrincipal;
 import com.lakindu.bangerandcobackend.dto.UserAdminCreateDTO;
 import com.lakindu.bangerandcobackend.dto.UserUpdateDTO;
 import com.lakindu.bangerandcobackend.dto.UserDTO;
+import com.lakindu.bangerandcobackend.entity.Rental;
 import com.lakindu.bangerandcobackend.entity.Role;
 import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.repository.UserRepository;
@@ -28,6 +29,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
+import javax.mail.MessagingException;
 import javax.transaction.Transactional;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -426,6 +428,30 @@ public class UserServiceImpl implements UserService {
 
         } else {
             throw new ResourceCannotBeDeletedException("You cannot delete your own administrator account");
+        }
+    }
+
+    /**
+     * Method will change the user status to blacklisted = true and will email the user to inform that they have been blacklisted.
+     *
+     * @param theCustomerNotCollected The customer going to be blacklisted
+     * @param theRentalNotCollected   The rental that they did not collect
+     */
+    @Override
+    public void blackListCustomer(User theCustomerNotCollected, Rental theRentalNotCollected) {
+        //if user is already blacklisted do not send email again
+        if (!theCustomerNotCollected.isBlackListed()) {
+            theCustomerNotCollected.setBlackListed(true);
+            theUserRepository.save(theCustomerNotCollected);
+            try {
+                theSender.sendRentalMail(
+                        new MailSenderHelper(
+                                theCustomerNotCollected, "Account Blacklisted", MailTemplateType.ACCOUNT_BLACKLISTED
+                        ), theRentalNotCollected
+                );
+            } catch (IOException | MessagingException e) {
+                LOGGER.warning("EMAIL NOT SENT TO BLACKLISTED CUSTOMER");
+            }
         }
     }
 

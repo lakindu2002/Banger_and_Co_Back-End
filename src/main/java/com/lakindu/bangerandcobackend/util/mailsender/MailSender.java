@@ -223,6 +223,23 @@ public class MailSender {
                 dynamicData.clear(); //clear hashmap contents after formatting template
                 return formattedTemplate;
             }
+            case ACCOUNT_BLACKLISTED: {
+                dynamicData.put("firstName", theHelper.getUserToBeInformed().getFirstName());
+                dynamicData.put("lastName", theHelper.getUserToBeInformed().getLastName());
+                dynamicData.put("pickupDate", rentalMade.getPickupDate().format(DateTimeFormatter.ISO_DATE));
+                dynamicData.put("returnDate", rentalMade.getReturnDate().format(DateTimeFormatter.ISO_DATE));
+                if (rentalMade.getVehicleOnRental() != null) {
+                    dynamicData.put("vehicleName", rentalMade.getVehicleOnRental().getVehicleName());
+                }
+
+                Template theTemplate = handlebars.compile("CustomerBlacklisted"); //retrieve the template based on required type
+                //the template will be searched for {{}} and the relevant data will be assigned by the apply method.
+                //library provided by jknack.
+
+                final String formattedTemplate = theTemplate.apply(dynamicData);//return formatted template to the caller
+                dynamicData.clear(); //clear hashmap contents after formatting template
+                return formattedTemplate;
+            }
             default: {
                 return null;
             }

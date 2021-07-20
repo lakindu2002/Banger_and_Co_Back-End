@@ -214,14 +214,28 @@ public class RentalServiceImpl implements RentalService {
     /**
      * Method will blacklist customers if they have a rental that they have not picked up.
      * All blacklisted customers will be notified via an email informing about their account being blacklisted.
+     * <br>
+     * <b>Business Rule: </b> If the rental has been approved and has not been collected even after the day of return, the user will get blacklisted.
      */
     @Override
-    @Async
     public void blacklistCustomers() {
         List<User> blackListedCustomers = new ArrayList<>();
-        List<Rental> rentals = rentalRepository.findAll();
-        LocalDate localDate = new Date().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-        List<Rental> rentalsAfterCurrentDateTime = rentalRepository.findRentalsAfterCurrentDateTime(localDate, LocalTime.now());
+        List<Rental> allRentalsThatHavePassedReturnDate = rentalRepository.getAllRentalsThatHavePassedReturnDate(
+                LocalDate.now(), true, false);
+
+        for (Rental eachRental : allRentalsThatHavePassedReturnDate) {
+            User theCustomerNotCollected = eachRental.getTheCustomerRenting();
+            List<AdditionalEquipment> equipmentInRental = eachRental.getEquipmentsAddedToRental();
+
+            userService.blackListCustomer(theCustomerNotCollected, eachRental);
+            blackListedCustomers.add(theCustomerNotCollected);
+
+            //before removing rental, update the additional equipment quantity.
+            additionalEquipmentService.updateQuantityInDB(equipmentInRental);
+            rentalRepository.delete(eachRental);
+        }
+
+        //send an email to all the administrators in the system regarding the blacklisted customers
     }
 
     /**

@@ -69,4 +69,10 @@ public interface AdditionalEquipmentService {
 
     void checkIfEquipmentHasPendingOrOngoingRentals(AdditionalEquipment theEquipment) throws ResourceCannotBeDeletedException;
 
+    /**
+     * Method will update the additional equipment stock back into the original state after rejection.
+     *
+     * @param equipmentsAddedToRental The stock to add back
+     */
+    void updateQuantityInDB(List<AdditionalEquipment> equipmentsAddedToRental);
 }

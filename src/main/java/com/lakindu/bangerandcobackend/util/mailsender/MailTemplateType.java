@@ -7,5 +7,7 @@ public enum MailTemplateType {
     WHITELIST,
     RENTAL_MADE,
     ADMIN_CREATED,
-    ADMIN_DELETED;
+    ADMIN_DELETED,
+    ACCOUNT_BLACKLISTED,
+    ADMIN_BULK_BLACKLIST
 }
