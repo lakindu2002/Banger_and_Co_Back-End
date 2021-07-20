@@ -3,10 +3,12 @@ package com.lakindu.bangerandcobackend.serviceinterface;
 import com.lakindu.bangerandcobackend.dto.VehicleCreateDTO;
 import com.lakindu.bangerandcobackend.dto.VehicleRentalFilterDTO;
 import com.lakindu.bangerandcobackend.dto.VehicleShowDTO;
+import com.lakindu.bangerandcobackend.dto.VehicleUpdateDTO;
 import com.lakindu.bangerandcobackend.entity.Vehicle;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceAlreadyExistsException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceCannotBeDeletedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotUpdatedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -115,4 +117,11 @@ public interface VehicleService {
     void checkIfVehicleHasPendingOrOnGoingRentals(Vehicle theVehicleToBeRemoved) throws ResourceCannotBeDeletedException;
 
 
+    /**
+     * Method executed to update a vehicle. The vehicle can be updated only if there are no pending or on-going rentals for the vehicle.
+     *
+     * @param updateObject The new update information
+     * @return The updated vehicle information.
+     */
+    Vehicle updateVehicle(VehicleUpdateDTO updateObject) throws ResourceNotFoundException, DataFormatException, IOException, ResourceNotUpdatedException, ResourceCannotBeDeletedException;
 }

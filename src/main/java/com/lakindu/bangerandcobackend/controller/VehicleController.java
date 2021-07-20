@@ -1,9 +1,12 @@
 package com.lakindu.bangerandcobackend.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lakindu.bangerandcobackend.dto.VehicleCreateDTO;
 import com.lakindu.bangerandcobackend.dto.VehicleRentalFilterDTO;
 import com.lakindu.bangerandcobackend.dto.VehicleShowDTO;
+import com.lakindu.bangerandcobackend.dto.VehicleUpdateDTO;
+import com.lakindu.bangerandcobackend.entity.Vehicle;
 import com.lakindu.bangerandcobackend.serviceinterface.RentalService;
 import com.lakindu.bangerandcobackend.serviceinterface.VehicleService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.*;
@@ -142,5 +145,48 @@ public class VehicleController {
     public ResponseEntity<VehicleShowDTO> getVehicleByLicensePlate(@PathVariable(name = "vehicleId") int vehicleId) throws ResourceNotFoundException, IOException, DataFormatException {
         VehicleShowDTO theVehicle = vehicleService.getVehicleById(vehicleId);
         return new ResponseEntity<>(theVehicle, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @PutMapping(
+            path = "/update",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+            produces = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<BangerAndCoResponse> updateVehicle(
+            @RequestParam(name = "updateInfo") String updateInfo,
+            @RequestParam(name = "newPicture", required = false) MultipartFile newImage) throws IOException,
+            InputValidNotValidatedException,
+            DataFormatException,
+            ResourceCannotBeDeletedException,
+            ResourceNotUpdatedException,
+            ResourceNotFoundException {
+
+        ObjectMapper theMapper = new ObjectMapper();
+        VehicleUpdateDTO updateObject = theMapper.readValue(updateInfo, VehicleUpdateDTO.class);
+
+        DataBinder theBinder = new DataBinder(updateObject);
+        theBinder.addValidators((org.springframework.validation.Validator) validator);
+        theBinder.validate();
+
+        BindingResult theValidatedResult = theBinder.getBindingResult();
+        if (theValidatedResult.hasErrors()) {
+            //if there are any validation errors,throw the custom exception.
+            throw new InputValidNotValidatedException("Please provide valid inputs for the filter", theValidatedResult);
+        }
+
+        updateObject.setVehicleName(updateObject.getVehicleName().trim());
+        if (newImage != null) {
+            //have file
+            updateObject.setNewPicture(newImage.getBytes());
+        }
+        Vehicle updatedVehicle = vehicleService.updateVehicle(updateObject);
+
+        return new ResponseEntity<>(
+                new BangerAndCoResponse(
+                        "The vehicle information for " + updatedVehicle.getVehicleName() + " has been updated successfully",
+                        HttpStatus.OK.value()
+                ), HttpStatus.OK
+        );
     }
 }

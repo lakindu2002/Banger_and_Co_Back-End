@@ -3,6 +3,7 @@ package com.lakindu.bangerandcobackend.service;
 import com.lakindu.bangerandcobackend.dto.VehicleCreateDTO;
 import com.lakindu.bangerandcobackend.dto.VehicleRentalFilterDTO;
 import com.lakindu.bangerandcobackend.dto.VehicleShowDTO;
+import com.lakindu.bangerandcobackend.dto.VehicleUpdateDTO;
 import com.lakindu.bangerandcobackend.entity.Rental;
 import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.entity.Vehicle;
@@ -18,6 +19,7 @@ import com.lakindu.bangerandcobackend.util.FileHandler.ImageHandler;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceAlreadyExistsException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceCannotBeDeletedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotUpdatedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.Authentication;
@@ -288,21 +290,48 @@ public class VehicleServiceImpl implements VehicleService {
                 //rentals are pending for the vehicle
                 throw new ResourceCannotBeDeletedException(
                         "There are pending rentals for this vehicle. " +
-                                "Therefore it cannot be removed. " +
-                                "Either reject the rentals or wait till they have been completed to remove the vehicle from Banger and Co"
+                                "Either reject the rentals or wait till they have been completed"
                 );
             }
 
             if ((eachRental.getApproved()) && (eachRental.getCollected() != null && !eachRental.getCollected())) {
 //                rentals are approved but not yet collected
-                throw new ResourceCannotBeDeletedException("There are rentals for this vehicle that the customers have not yet collected. Wait until the customer collects and returns the vehicle before removing");
+                throw new ResourceCannotBeDeletedException("There are rentals for this vehicle that the customers have not yet collected. Please wait until the customer collects and returns the vehicle");
             }
 
             if ((eachRental.getCollected() != null && eachRental.getCollected()) && (eachRental.getReturned() != null && !eachRental.getReturned())) {
 //                rentals are collected but not yet returned
-                throw new ResourceCannotBeDeletedException("Customers are already renting this vehicle and have not yet returned this. Wait until they return the vehicle before removing it.");
+                throw new ResourceCannotBeDeletedException("Customers are already renting this vehicle and have not yet returned this. Please wait until they return the vehicle");
             }
         }
+    }
+
+    /**
+     * Method executed to update a vehicle. The vehicle can be updated only if there are no pending or on-going rentals for the vehicle.
+     *
+     * @param updateObject The new update information
+     * @return The updated vehicle information.
+     */
+    @Override
+    public Vehicle updateVehicle(VehicleUpdateDTO updateObject) throws ResourceNotFoundException, DataFormatException, IOException, ResourceCannotBeDeletedException {
+        //retrieve the vehicle and the type from the database.
+        Vehicle theVehicle = vehicleRepository.findById(updateObject.getVehicleId()).orElseThrow(
+                () -> new ResourceNotFoundException("The vehicle that you wish to update does not exist at Banger and Co.")
+        );
+
+        VehicleType theType = vehicleTypeService._getType(updateObject.getVehicleType());
+
+        //check if vehicle has any pending or ongoing rentals
+        checkIfVehicleHasPendingOrOnGoingRentals(theVehicle);
+
+        //can be removed.
+        theVehicle.setTheVehicleType(theType); //update the type
+        theVehicle.setVehicleName(updateObject.getVehicleName()); //update the vehicle name
+        if (updateObject.getNewPicture() != null) {
+            //have new image.
+            theVehicle.setVehicleImage(new CompressImage().processUnhandledImage(updateObject.getNewPicture()));
+        }
+        return vehicleRepository.save(theVehicle);
     }
 
     @Override
