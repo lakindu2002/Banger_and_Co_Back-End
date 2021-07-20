@@ -25,16 +25,18 @@ public class AdditionalEquipment {
     @Column(name = "price_per_day", nullable = false)
     private double pricePerDay;
 
-    //many to many relationship between rental and this entity.
-    @ManyToMany()
-    @JoinTable(
-            name = "rental_customization",
-            joinColumns = @JoinColumn(name = "equipment_id", nullable = false),
-            inverseJoinColumns = @JoinColumn(name = "rental_id", nullable = false)
-    )
-    private List<Rental> rentalsThatHaveThisEquipment;
+    @OneToMany(mappedBy = "equipmentAddedToRental", cascade = {CascadeType.DETACH, CascadeType.REFRESH, CascadeType.REMOVE})
+    private List<RentalCustomization> rentalsHavingThisCustomization;
 
     public AdditionalEquipment() {
+    }
+
+    public List<RentalCustomization> getRentalsHavingThisCustomization() {
+        return rentalsHavingThisCustomization;
+    }
+
+    public void setRentalsHavingThisCustomization(List<RentalCustomization> rentalsHavingThisCustomization) {
+        this.rentalsHavingThisCustomization = rentalsHavingThisCustomization;
     }
 
     public double getPricePerDay() {
@@ -43,14 +45,6 @@ public class AdditionalEquipment {
 
     public void setPricePerDay(double pricePerDay) {
         this.pricePerDay = pricePerDay;
-    }
-
-    public List<Rental> getRentalsThatHaveThisEquipment() {
-        return rentalsThatHaveThisEquipment;
-    }
-
-    public void setRentalsThatHaveThisEquipment(List<Rental> rentalsThatHaveThisEquipment) {
-        this.rentalsThatHaveThisEquipment = rentalsThatHaveThisEquipment;
     }
 
     public int getEquipmentId() {

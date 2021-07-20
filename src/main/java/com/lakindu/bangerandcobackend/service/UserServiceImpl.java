@@ -456,6 +456,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public List<User> _getAllAdministrators() throws ResourceNotFoundException {
+        return theUserRepository.getUsersByUserRoleEquals(theRoleService._getRoleInformation("administrator"));
+    }
+
+    @Override
     public String encodePassword(String password) {
         return passwordEncoder.encode(password);
     }

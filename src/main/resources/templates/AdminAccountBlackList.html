@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        .main-table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .paragraphs {
+            font-family: sans-serif;
+            font-size: 18px;
+            line-height: 25px;
+        }
+
+        .logo {
+            width: 180px;
+        }
+
+        hr {
+            width: 99.3%;
+            text-align: left;
+            margin-left: 0;
+            background-color: #469bc2;
+            padding: 3px;
+        }
+
+        .custom-padding {
+            padding-right: 20px;
+            padding-top: 20px;
+            padding-left: 20px;
+        }
+    </style>
+</head>
+
+<body style="background-color:#ebe8e8;">
+<div>
+    <table class="main-table" border="0">
+        <tr>
+            <td align="center" class="custom-padding">
+                <img class="logo"
+                     src="https://firebasestorage.googleapis.com/v0/b/bangerandco-964de.appspot.com/o/app_logo.png?alt=media&token=143828e3-5294-4caf-a190-3e6f596842bd">
+            </td>
+        </tr>
+
+        <tr>
+            <td align="center" class="custom-padding">
+                <hr>
+            </td>
+        </tr>
+
+        <tr>
+            <td style="padding-left: 20px; padding-right: 20px">
+                <p class="paragraphs">
+                    Hello Administrator,
+                </p>
+
+                <p class="paragraphs">
+                    During the blacklist job that executed on - {{executedDate}}, the system successfully blacklisted
+                    {{size}} customers.
+                </p>
+
+                <p class="paragraphs">
+                    Visit the User Management component of the administrator panel to view these users. Their pending
+                    rentals have been successfully removed from the system. And the additional equipment added has been
+                    re-stocked.
+                </p>
+
+                <p class="paragraphs">
+                    These Customers are: {{customerNames}}
+                </p>
+
+                <p class="paragraphs">
+                    Signed,<br>Banger and Co.
+                </p>
+            </td>
+        </tr>
+    </table>
+</div>
+</body>
+</html>

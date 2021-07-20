@@ -3,6 +3,7 @@ package com.lakindu.bangerandcobackend.service;
 import com.lakindu.bangerandcobackend.dto.AdditionalEquipmentDTO;
 import com.lakindu.bangerandcobackend.entity.AdditionalEquipment;
 import com.lakindu.bangerandcobackend.entity.Rental;
+import com.lakindu.bangerandcobackend.entity.RentalCustomization;
 import com.lakindu.bangerandcobackend.repository.AdditionalEquipmentRepository;
 import com.lakindu.bangerandcobackend.serviceinterface.AdditionalEquipmentService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
@@ -17,7 +18,6 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class AdditionalEquipmentServiceImpl implements AdditionalEquipmentService {
@@ -176,9 +176,10 @@ public class AdditionalEquipmentServiceImpl implements AdditionalEquipmentServic
 
     @Override
     public void checkIfEquipmentHasPendingOrOngoingRentals(AdditionalEquipment theEquipment) throws ResourceCannotBeDeletedException {
-        List<Rental> rentalHavingThisEquipment = theEquipment.getRentalsThatHaveThisEquipment();
+        List<RentalCustomization> rentalHavingThisEquipment = theEquipment.getRentalsHavingThisCustomization();
 
-        for (Rental eachRental : rentalHavingThisEquipment) {
+        for (RentalCustomization eachCustomization : rentalHavingThisEquipment) {
+            Rental eachRental = eachCustomization.getTheRentalInformation();
             //check if the rental is pending
             if (!eachRental.getApproved()) {
                 throw new ResourceCannotBeDeletedException("There are pending rentals that have this equipment added to it");
@@ -199,20 +200,13 @@ public class AdditionalEquipmentServiceImpl implements AdditionalEquipmentServic
         }
     }
 
-    /**
-     * Method will update the additional equipment stock back into the original state after rejection.
-     *
-     * @param equipmentsAddedToRental The stock to add back
-     */
     @Override
-    public void updateQuantityInDB(List<AdditionalEquipment> equipmentsAddedToRental) {
-        List<AdditionalEquipment> updatedEquipmentList = new ArrayList<>();
+    public void addQuantityBackToItem(RentalCustomization rentalCustomization) {
+        AdditionalEquipment equipmentAddedToRental = rentalCustomization.getEquipmentAddedToRental();
+        int quantityAddedForEquipmentInRental = rentalCustomization.getQuantityAddedForEquipmentInRental();
 
-        for (AdditionalEquipment eachEquipmentInRental : equipmentsAddedToRental) {
+        equipmentAddedToRental.setEquipmentQuantity(quantityAddedForEquipmentInRental + equipmentAddedToRental.getEquipmentQuantity());
 
-        }
-
-        additionalEquipmentRepository.saveAll(updatedEquipmentList);
+        additionalEquipmentRepository.save(equipmentAddedToRental);
     }
-
 }
