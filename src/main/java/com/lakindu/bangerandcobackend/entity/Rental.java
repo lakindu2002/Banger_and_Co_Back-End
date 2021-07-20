@@ -40,9 +40,6 @@ public class Rental {
     @Column(name = "is_late_return_requested", nullable = true)
     private Boolean isLateReturnRequested;
 
-    @Column(name = "is_late_return_approved", nullable = true)
-    private Boolean isLateReturnApproved;
-
     @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH}, optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "customer_username", nullable = false) //map foreign key.
     private User theCustomerRenting;
@@ -146,14 +143,6 @@ public class Rental {
 
     public void setLateReturnRequested(Boolean lateReturnRequested) {
         isLateReturnRequested = lateReturnRequested;
-    }
-
-    public Boolean getLateReturnApproved() {
-        return isLateReturnApproved;
-    }
-
-    public void setLateReturnApproved(Boolean lateReturnApproved) {
-        isLateReturnApproved = lateReturnApproved;
     }
 
     public User getTheCustomerRenting() {
