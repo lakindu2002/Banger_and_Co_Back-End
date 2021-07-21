@@ -96,6 +96,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public String _getUserRole(String userName) {
+        return theUserRepository.getUserRole(userName);
+    }
+
+    @Override
     public UserDTO getUserInformation(String username) throws Exception {
         final User theUser = theUserRepository.findUserByUsername(username);
         if (theUser == null) {

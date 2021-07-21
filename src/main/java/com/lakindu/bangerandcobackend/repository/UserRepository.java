@@ -29,4 +29,7 @@ public interface UserRepository extends JpaRepository<User, String> {
     List<User> getAllAdministrators(String roleName);
 
     List<User> getUsersByUserRoleEquals(Role administrator);
+
+    @Query("SELECT theUser.userRole.roleName FROM User theUser WHERE theUser.username=:userName")
+    String getUserRole(String userName);
 }

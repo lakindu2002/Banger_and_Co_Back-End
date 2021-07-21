@@ -54,6 +54,10 @@ public class AuthServiceImpl implements AuthService {
                 //located in the UserService
         );
 
+        if (userService._getUserRole(theAuthRequest.getUsername()).equalsIgnoreCase("administrator")) {
+            rentalService.blacklistCustomers();
+        }
+
         User theLoggedInUser = userService._getUserWithImageDecompression(theAuthRequest.getUsername());
         CustomUserPrincipal thePrincipal = new CustomUserPrincipal(theLoggedInUser);
         String generatedToken = theTokenIssuer.generateToken(thePrincipal);

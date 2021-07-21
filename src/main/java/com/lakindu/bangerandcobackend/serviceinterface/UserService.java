@@ -21,6 +21,8 @@ public interface UserService extends UserDetailsService {
 
     User _getUserWithoutDecompression(String username);
 
+    String _getUserRole(String userName);
+
     UserDTO getUserInformation(String username) throws Exception;
 
     void createUser(UserDTO theNewUser, MultipartFile profilePicture, MultipartFile licensePicture, MultipartFile otherIdentity) throws Exception;
@@ -114,8 +116,8 @@ public interface UserService extends UserDetailsService {
     /**
      * Method will change the user status to blacklisted = true and will email the user to inform that they have been blacklisted.
      *
-     * @param usernameOfCustomer The customer going to be blacklisted
-     * @param theRentalNotCollected   The rental that they did not collect
+     * @param usernameOfCustomer    The customer going to be blacklisted
+     * @param theRentalNotCollected The rental that they did not collect
      */
     void blackListCustomer(String usernameOfCustomer, Rental theRentalNotCollected);
 

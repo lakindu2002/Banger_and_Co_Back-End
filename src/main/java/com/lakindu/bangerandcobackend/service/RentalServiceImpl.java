@@ -282,14 +282,16 @@ public class RentalServiceImpl implements RentalService {
             }
         }
 
-//        send an email to all the administrators in the system regarding the blacklisted customers
-        List<String> adminList = userService._getAllAdminEmails();
-        try {
-            mailSender.sendBulkRentalEmails(
-                    adminList, "Blacklist Job Report", blacklistedUsers, MailTemplateType.ADMIN_BULK_BLACKLIST
-            );
-        } catch (Exception ex) {
-            LOGGER.warning("EMAIL NOT SENT DURING BLACKLIST");
+//        send an email to all the administrators in the system regarding the blacklisted customers if there are any
+        if (blacklistedUsers.size() > 0) {
+            List<String> adminList = userService._getAllAdminEmails();
+            try {
+                mailSender.sendBulkRentalEmails(
+                        adminList, "Blacklist Job Report", blacklistedUsers, MailTemplateType.ADMIN_BULK_BLACKLIST
+                );
+            } catch (Exception ex) {
+                LOGGER.warning("EMAIL NOT SENT DURING BLACKLIST");
+            }
         }
     }
 
