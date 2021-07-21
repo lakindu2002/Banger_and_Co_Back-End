@@ -130,7 +130,7 @@ public class UserController {
 
     @PreAuthorize("hasAuthority('ADMINISTRATOR')")
     @PutMapping(path = "/blacklist")
-    public ResponseEntity<BangerAndCoResponse> blackListCustomers() throws ParseException, ResourceNotFoundException {
+    public ResponseEntity<BangerAndCoResponse> blackListCustomers() throws ResourceNotFoundException {
         rentalService.blacklistCustomers();
         return new ResponseEntity<>(
                 new BangerAndCoResponse("The blacklist operation has been operated successfully", HttpStatus.OK.value()),

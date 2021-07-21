@@ -3,10 +3,14 @@ package com.lakindu.bangerandcobackend.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lakindu.bangerandcobackend.dto.AuthRequest;
 import com.lakindu.bangerandcobackend.auth.AuthReturnBuilder;
+import com.lakindu.bangerandcobackend.dto.AuthReturnDTO;
 import com.lakindu.bangerandcobackend.dto.UserDTO;
 import com.lakindu.bangerandcobackend.serviceinterface.AuthService;
+import com.lakindu.bangerandcobackend.serviceinterface.RentalService;
 import com.lakindu.bangerandcobackend.serviceinterface.UserService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.InputValidNotValidatedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -29,15 +33,18 @@ public class AuthController {
     private final UserService userService;
     private final AuthService authService;
     private final Validator validator;
+    private final RentalService rentalService;
 
     @Autowired
     public AuthController(
             @Qualifier("userServiceImpl") UserService userService,
             @Qualifier("authServiceImpl") AuthService authService,
-            Validator validator) {
+            @Qualifier("defaultValidator") Validator validator,
+            @Qualifier("rentalServiceImpl") RentalService rentalService) {
         this.userService = userService;
         this.authService = authService;
         this.validator = validator;
+        this.rentalService = rentalService;
     }
 
 
@@ -68,7 +75,7 @@ public class AuthController {
         final BindingResult theBindingResult = theDataBinder.getBindingResult(); //retrieve error list
         if (theBindingResult.hasErrors()) {
             //if the entity class does not meet the expected validations
-            throw new ValidationException("Valid inputs were not provided for the fields during Sign Up.");
+            throw new InputValidNotValidatedException("Please provide valid inputs during sign up", theBindingResult);
         } else {
             theUserDTO.setEmailAddress(theUserDTO.getEmailAddress().trim());
             theUserDTO.setUsername(theUserDTO.getUsername().trim());
@@ -97,11 +104,16 @@ public class AuthController {
         //use auth service to perform authentication
         theAuthRequest.setUsername(theAuthRequest.getUsername().trim());
         final AuthReturnBuilder theBuiltReturn = authService.performAuthentication(theAuthRequest);
+        AuthReturnDTO userDTO = theBuiltReturn.getUserDTO();
 
         //compile response body
         HashMap<String, Object> returnEntity = new HashMap<>();
         returnEntity.put("response", theBuiltReturn.getTheAPIResponse());
-        returnEntity.put("user_info", theBuiltReturn.getUserDTO());
+        returnEntity.put("user_info", userDTO);
+
+        if (userDTO.getUserRole().equalsIgnoreCase("administrator")) {
+            rentalService.blacklistCustomers();
+        }
 
         //body, header, code
         return new ResponseEntity<>(returnEntity, theBuiltReturn.getReturnHeaders(), HttpStatus.OK);
