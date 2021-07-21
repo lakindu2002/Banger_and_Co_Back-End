@@ -40,7 +40,7 @@ public class RentalServiceImpl implements RentalService {
     private final MailSender mailSender;
 
     private final int PRICE_PER_DAY_DIVISOR = 24; //price_per_day/24 = price per hour
-    private final int ITEMS_PER_PAGE = 3;
+    private final int ITEMS_PER_PAGE = 10;
 
     private final Logger LOGGER = Logger.getLogger(RentalServiceImpl.class.getName());
 
