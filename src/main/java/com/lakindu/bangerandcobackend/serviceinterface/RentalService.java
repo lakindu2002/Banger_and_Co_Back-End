@@ -1,6 +1,7 @@
 package com.lakindu.bangerandcobackend.serviceinterface;
 
 import com.lakindu.bangerandcobackend.dto.RentalCreateDTO;
+import com.lakindu.bangerandcobackend.dto.RentalShowDTO;
 import com.lakindu.bangerandcobackend.dto.VehicleRentalFilterDTO;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotCreatedException;
@@ -42,4 +43,12 @@ public interface RentalService {
      * <b>Business Rule: </b> If the rental has been approved and has not been collected even after the day of return, the user will get blacklisted.
      */
     void blacklistCustomers() throws ResourceNotFoundException;
+
+    /**
+     * Method will return the return for the passed rental id from the database
+     *
+     * @param rentalId The rental to get detailed information for
+     * @return The rental object from the database.
+     */
+    RentalShowDTO getRentalById(Integer rentalId) throws Exception;
 }

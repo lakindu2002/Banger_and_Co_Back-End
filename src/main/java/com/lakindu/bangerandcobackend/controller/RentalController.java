@@ -55,4 +55,11 @@ public class RentalController {
         HashMap<String, Object> allPendingRentalsWithPageToken = rentalService.getAllPendingRentals(pageNumber);
         return new ResponseEntity<>(allPendingRentalsWithPageToken, HttpStatus.OK);
     }
+
+    @PreAuthorize("hasAuthority('CUSTOMER') or hasAuthority('ADMINISTRATOR')")
+    @GetMapping(path = "/find/{rentalId}")
+    public ResponseEntity<RentalShowDTO> getRentalById(@PathVariable(name = "rentalId", required = true) Integer rentalId) throws Exception {
+        RentalShowDTO theRentalDTO = rentalService.getRentalById(rentalId);
+        return new ResponseEntity<>(theRentalDTO, HttpStatus.OK);
+    }
 }

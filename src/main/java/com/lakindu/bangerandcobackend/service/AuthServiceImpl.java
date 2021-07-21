@@ -55,7 +55,7 @@ public class AuthServiceImpl implements AuthService {
         );
 
         if (userService._getUserRole(theAuthRequest.getUsername()).equalsIgnoreCase("administrator")) {
-            rentalService.blacklistCustomers();
+//            rentalService.blacklistCustomers();
         }
 
         User theLoggedInUser = userService._getUserWithImageDecompression(theAuthRequest.getUsername());

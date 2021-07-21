@@ -296,6 +296,27 @@ public class RentalServiceImpl implements RentalService {
     }
 
     /**
+     * Method will return the return for the passed rental id from the database
+     *
+     * @param rentalId The rental to get detailed information for
+     * @return The rental object from the database.
+     */
+    @Override
+    public RentalShowDTO getRentalById(Integer rentalId) throws Exception {
+        Rental theRental = rentalRepository.findById(rentalId).orElseThrow(() -> new ResourceNotFoundException("The rental you are trying to find does not exist at Banger and Co."));
+        RentalShowDTO rentalShowDTO = convertToDTO(theRental);
+
+        //the `convertToDTO` method does not retrieve the license and other image
+        //therefore manually fetch it by calling the methods in the user service and the set it to the user object in the rental dto
+        UserDTO theUserOnRental = rentalShowDTO.getCustomerUsername();
+        theUserOnRental.setLicensePic(userService.getCustomerLicenseImage(theUserOnRental.getUsername()));
+        theUserOnRental.setOtherIdentity(userService.getCustomerOtherImage(theUserOnRental.getUsername()));
+
+        rentalShowDTO.setCustomerUsername(theUserOnRental); //assign the user with the two identity images
+        return rentalShowDTO;
+    }
+
+    /**
      * Calculates the total price of the vehicle for the duration of the rental.
      *
      * <p>Price calculated with price per hour.</p>
