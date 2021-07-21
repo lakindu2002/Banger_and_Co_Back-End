@@ -9,17 +9,13 @@ import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.entity.Vehicle;
 import com.lakindu.bangerandcobackend.entity.VehicleType;
 import com.lakindu.bangerandcobackend.repository.VehicleRepository;
-import com.lakindu.bangerandcobackend.serviceinterface.RentalService;
 import com.lakindu.bangerandcobackend.serviceinterface.UserService;
 import com.lakindu.bangerandcobackend.serviceinterface.VehicleService;
 import com.lakindu.bangerandcobackend.serviceinterface.VehicleTypeService;
-import com.lakindu.bangerandcobackend.util.FileHandler.CompressImage;
-import com.lakindu.bangerandcobackend.util.FileHandler.DecompressImage;
 import com.lakindu.bangerandcobackend.util.FileHandler.ImageHandler;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceAlreadyExistsException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceCannotBeDeletedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotUpdatedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.core.Authentication;
@@ -69,8 +65,7 @@ public class VehicleServiceImpl implements VehicleService {
         if (theVehicleInDB == null) {
             //vehicle does not exist, create it
             //compress image before saving.
-            ImageHandler theCompressor = new CompressImage();
-            byte[] compressedImage = theCompressor.processUnhandledImage(vehicleImage.getBytes()); //call template method
+            byte[] compressedImage = new ImageHandler().compressImage(vehicleImage.getBytes());
             //this will compress the image via defalter
 
             //construct an entity that can be used to save in database.
@@ -329,7 +324,7 @@ public class VehicleServiceImpl implements VehicleService {
         theVehicle.setVehicleName(updateObject.getVehicleName()); //update the vehicle name
         if (updateObject.getNewPicture() != null) {
             //have new image.
-            theVehicle.setVehicleImage(new CompressImage().processUnhandledImage(updateObject.getNewPicture()));
+            theVehicle.setVehicleImage(new ImageHandler().compressImage(updateObject.getNewPicture()));
         }
         return vehicleRepository.save(theVehicle);
     }
@@ -352,7 +347,7 @@ public class VehicleServiceImpl implements VehicleService {
         vehicleReturnDTO.setFuelType(theVehicle.getFuelType());
         vehicleReturnDTO.setTransmission(theVehicle.getTransmission());
         vehicleReturnDTO.setSeatingCapacity(theVehicle.getSeatingCapacity());
-        vehicleReturnDTO.setVehicleImage(new DecompressImage().processUnhandledImage(theVehicle.getVehicleImage()));
+        vehicleReturnDTO.setVehicleImage(new ImageHandler().decompressImage(theVehicle.getVehicleImage()));
         vehicleReturnDTO.setVehicleType(vehicleTypeService.constructDTO(theVehicle.getTheVehicleType()));
 
         return vehicleReturnDTO;

@@ -1,7 +1,6 @@
 package com.lakindu.bangerandcobackend.security;
 
 import com.lakindu.bangerandcobackend.auth.JWTAuthFilter;
-import com.lakindu.bangerandcobackend.service.UserServiceImpl;
 import com.lakindu.bangerandcobackend.serviceinterface.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

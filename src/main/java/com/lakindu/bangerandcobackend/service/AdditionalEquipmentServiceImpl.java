@@ -209,4 +209,29 @@ public class AdditionalEquipmentServiceImpl implements AdditionalEquipmentServic
 
         additionalEquipmentRepository.save(equipmentAddedToRental);
     }
+
+    @Override
+    public List<AdditionalEquipmentDTO> getEquipmentForRental(List<RentalCustomization> rentalCustomizationList) {
+        //method will get the list of additional equipment that has been added to the rental.
+        //this will be done by interacting with the table between rental and additional equipment - rental customization
+        List<AdditionalEquipmentDTO> returnDTOs = new ArrayList<>();
+
+        for (RentalCustomization eachCustomization : rentalCustomizationList) {
+            //iterate over the list
+            AdditionalEquipment eachEquipmentAdded = eachCustomization.getEquipmentAddedToRental(); //retrieve the item added
+            int quantityAddedForTheRental = eachCustomization.getQuantityAddedForEquipmentInRental(); //retrieve quantity of item added in the rental
+
+            //construct a dto
+            AdditionalEquipmentDTO theDTO = new AdditionalEquipmentDTO();
+            theDTO.setEquipmentId(eachEquipmentAdded.getEquipmentId());
+            theDTO.setEquipmentName(eachEquipmentAdded.getEquipmentName());
+            theDTO.setEquipmentQuantity(eachEquipmentAdded.getEquipmentQuantity());
+            theDTO.setLKR(eachEquipmentAdded.getPricePerDay());
+            theDTO.setQuantitySelectedForRental(quantityAddedForTheRental); //set the quantity added for the rental in the dto
+
+            returnDTOs.add(theDTO); //add the dto to the return list.
+        }
+
+        return returnDTOs;
+    }
 }

@@ -71,4 +71,6 @@ public interface AdditionalEquipmentService {
     void checkIfEquipmentHasPendingOrOngoingRentals(AdditionalEquipment theEquipment) throws ResourceCannotBeDeletedException;
 
     void addQuantityBackToItem(RentalCustomization eachCustomization);
+
+    List<AdditionalEquipmentDTO> getEquipmentForRental(List<RentalCustomization> rentalCustomizationList);
 }

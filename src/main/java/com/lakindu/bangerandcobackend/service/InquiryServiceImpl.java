@@ -113,7 +113,7 @@ public class InquiryServiceImpl implements InquiryService {
             throw new ResourceNotFoundException("The inquiry does not exist");
         } else {
             //send am email to the client that lodged the email
-            theInquiry.setReplied(true);
+            theInquiry.setReplied(true); //set the inquiry status to resolved.
             theInquiry.setResolvedBy(userService._getUserWithoutDecompression(theAuthentication.getName()));
             MailSenderHelper theHelper = new MailSenderHelper();
             theHelper.setInquiryReply(inquiryReply);

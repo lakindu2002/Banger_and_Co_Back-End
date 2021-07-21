@@ -120,7 +120,7 @@ public class VehicleTypeServiceImpl implements VehicleTypeService {
                         () -> new ResourceNotFoundException("The vehicle type that you wish to update does not exist at Banger and Co.")
                 );
 
-        //allows the PRICE PER DAY to be updated ONLY when no PENDING or ON-GOING rentals are present.
+        //NO VALIDATIONS ARE REQUIRED AS ONCE A RENTAL HAS BEEN CREATED, THEY WILL BE CHARGED ON THEIR PREVIOUS RATE.
 
         //if exception has not been thrown, update the price.
         theTypeInDatabase.setPricePerDay(Double.parseDouble(theUpdateDTO.getPricePerDay()));

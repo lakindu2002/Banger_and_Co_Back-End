@@ -9,7 +9,7 @@ This project uses the following dependencies to interact with the Angular Front 
 - MySQL
 - Spring Security
 - JWT
-- Image Compression (Via Template Method)
+- Image Compression
 - Java Mail
 - Bean Validation on DTOs to implement Server Side Validation
 

@@ -8,11 +8,8 @@ import com.lakindu.bangerandcobackend.entity.Rental;
 import com.lakindu.bangerandcobackend.entity.Role;
 import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.repository.UserRepository;
-import com.lakindu.bangerandcobackend.serviceinterface.RentalService;
 import com.lakindu.bangerandcobackend.serviceinterface.RoleService;
 import com.lakindu.bangerandcobackend.serviceinterface.UserService;
-import com.lakindu.bangerandcobackend.util.FileHandler.CompressImage;
-import com.lakindu.bangerandcobackend.util.FileHandler.DecompressImage;
 import com.lakindu.bangerandcobackend.util.FileHandler.ImageHandler;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.*;
 import com.lakindu.bangerandcobackend.util.mailsender.MailSender;
@@ -20,7 +17,6 @@ import com.lakindu.bangerandcobackend.util.mailsender.MailSenderHelper;
 import com.lakindu.bangerandcobackend.util.mailsender.MailTemplateType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -84,8 +80,7 @@ public class UserServiceImpl implements UserService {
         //get logged in user information by accessing database
         User theUser = theUserRepository.findUserByUsername(username);
         if (theUser != null) {
-            ImageHandler theDecompressor = new DecompressImage();
-            final byte[] decompressedImage = theDecompressor.processUnhandledImage(theUser.getProfilePicture());
+            final byte[] decompressedImage = new ImageHandler().decompressImage(theUser.getProfilePicture());
             theUser.setProfilePicture(decompressedImage);
 
             return theUser;
@@ -105,8 +100,7 @@ public class UserServiceImpl implements UserService {
         if (theUser == null) {
             throw new ResourceNotFoundException("The username does not exist");
         } else {
-            ImageHandler theDecompressor = new DecompressImage();
-            final byte[] decompressedImage = theDecompressor.processUnhandledImage(theUser.getProfilePicture());
+            final byte[] decompressedImage = new ImageHandler().decompressImage(theUser.getProfilePicture());
             theUser.setProfilePicture(decompressedImage);
 
             UserDTO theDTO = new UserDTO();
@@ -156,9 +150,9 @@ public class UserServiceImpl implements UserService {
                 if (theUserRepository.findUserByDrivingLicenseNumberEquals(entityToBeSaved.getDrivingLicenseNumber()) == null) {
                     //license number does not exist in DB
                     //compress the images before saving.
-                    entityToBeSaved.setProfilePicture(new CompressImage().processUnhandledImage(theNewUser.getProfilePicture()));
-                    entityToBeSaved.setDrivingLicense(new CompressImage().processUnhandledImage(theNewUser.getLicensePic()));
-                    entityToBeSaved.setOtherIdentity(new CompressImage().processUnhandledImage(theNewUser.getOtherIdentity()));
+                    entityToBeSaved.setProfilePicture(new ImageHandler().compressImage(theNewUser.getProfilePicture()));
+                    entityToBeSaved.setDrivingLicense(new ImageHandler().compressImage(theNewUser.getLicensePic()));
+                    entityToBeSaved.setOtherIdentity(new ImageHandler().compressImage(theNewUser.getOtherIdentity()));
 
                     User registeredUser = theUserRepository.save(entityToBeSaved);
                     //save user and send welcome email
@@ -236,7 +230,7 @@ public class UserServiceImpl implements UserService {
             theUser.setUserPassword(null);
             theUser.setContactNumber(eachCustomer.getContactNumber());
             theUser.setUserRole(eachCustomer.getUserRole().getRoleName());
-            theUser.setProfilePicture(new DecompressImage().processUnhandledImage(eachCustomer.getProfilePicture()));
+            theUser.setProfilePicture(new ImageHandler().decompressImage((eachCustomer.getProfilePicture())));
             theUser.setBlackListed(eachCustomer.isBlackListed());
 
             theUserList.add(theUser); //attach the entitys DTO to the DTO List.
@@ -286,7 +280,7 @@ public class UserServiceImpl implements UserService {
 
             //retrieve the user information
             User updatingUser = _getUserWithoutDecompression(customerUsername);
-            updatingUser.setDrivingLicense(new CompressImage().processUnhandledImage(licenseImage.getBytes()));
+            updatingUser.setDrivingLicense(new ImageHandler().compressImage(licenseImage.getBytes()));
             theUserRepository.save(updatingUser); //update the license image.
 
             //send email
@@ -306,12 +300,12 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public byte[] getCustomerLicenseImage(String username) throws DataFormatException, IOException {
-        return new DecompressImage().processUnhandledImage(theUserRepository.getUserByUsername(username).getDrivingLicense());
+        return new ImageHandler().decompressImage(theUserRepository.getUserByUsername(username).getDrivingLicense());
     }
 
     @Override
     public byte[] getCustomerOtherImage(String username) throws DataFormatException, IOException {
-        return new DecompressImage().processUnhandledImage(theUserRepository.getUserByUsername(username).getOtherIdentity());
+        return new ImageHandler().decompressImage(theUserRepository.getUserByUsername(username).getOtherIdentity());
     }
 
     @Override
@@ -322,7 +316,7 @@ public class UserServiceImpl implements UserService {
 
             //retrieve the user information
             User updatingUser = _getUserWithoutDecompression(customerUsername);
-            updatingUser.setOtherIdentity(new CompressImage().processUnhandledImage(otherIdentity.getBytes()));
+            updatingUser.setOtherIdentity(new ImageHandler().compressImage((otherIdentity.getBytes())));
             theUserRepository.save(updatingUser); //update the license image.
 
             //send email
@@ -383,7 +377,7 @@ public class UserServiceImpl implements UserService {
         theAdmin.setDateOfBirth(createdDTO.getDateOfBirth());
         theAdmin.setUserPassword(createdDTO.getUserPassword());
         theAdmin.setContactNumber(createdDTO.getContactNumber());
-        theAdmin.setProfilePicture(new CompressImage().processUnhandledImage(createdDTO.getProfilePicture()));
+        theAdmin.setProfilePicture(new ImageHandler().compressImage(createdDTO.getProfilePicture()));
         theAdmin.setBlackListed(false);
         theAdmin.setUserRole(administratorRole);
 
@@ -462,6 +456,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String encodePassword(String password) {
+        //encode the password using the password encoder BCrypt.
         return passwordEncoder.encode(password);
     }
 }

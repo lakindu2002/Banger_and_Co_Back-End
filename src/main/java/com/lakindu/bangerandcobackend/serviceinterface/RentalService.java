@@ -1,17 +1,15 @@
 package com.lakindu.bangerandcobackend.serviceinterface;
 
 import com.lakindu.bangerandcobackend.dto.RentalCreateDTO;
-import com.lakindu.bangerandcobackend.dto.RentalShowDTO;
 import com.lakindu.bangerandcobackend.dto.VehicleRentalFilterDTO;
-import com.lakindu.bangerandcobackend.entity.AdditionalEquipment;
-import com.lakindu.bangerandcobackend.entity.Vehicle;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceCannotBeDeletedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotCreatedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
 
+import java.io.IOException;
 import java.text.ParseException;
-import java.util.List;
+import java.util.HashMap;
+import java.util.zip.DataFormatException;
 
 public interface RentalService {
     /**
@@ -31,9 +29,10 @@ public interface RentalService {
     /**
      * Method will get a list of all pending rentals from the database.
      *
-     * @return - The list of vehicles that are pending.
+     * @param pageNumber The page number to query data for.
+     * @return - The list of vehicles that are pending and the next page number token.
      */
-    List<RentalShowDTO> getAllPendingRentals();
+    HashMap<String, Object> getAllPendingRentals(int pageNumber) throws DataFormatException, IOException, ResourceNotFoundException;
 
     /**
      * Method will blacklist customers if they have a rental that they have not picked up.

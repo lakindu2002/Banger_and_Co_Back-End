@@ -1,9 +1,6 @@
 package com.lakindu.bangerandcobackend.service;
 
-import com.lakindu.bangerandcobackend.dto.AdditionalEquipmentDTO;
-import com.lakindu.bangerandcobackend.dto.RentalCreateDTO;
-import com.lakindu.bangerandcobackend.dto.RentalShowDTO;
-import com.lakindu.bangerandcobackend.dto.VehicleRentalFilterDTO;
+import com.lakindu.bangerandcobackend.dto.*;
 import com.lakindu.bangerandcobackend.entity.*;
 import com.lakindu.bangerandcobackend.repository.RentalRepository;
 import com.lakindu.bangerandcobackend.serviceinterface.AdditionalEquipmentService;
@@ -17,15 +14,20 @@ import com.lakindu.bangerandcobackend.util.mailsender.MailSender;
 import com.lakindu.bangerandcobackend.util.mailsender.MailSenderHelper;
 import com.lakindu.bangerandcobackend.util.mailsender.MailTemplateType;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.zip.DataFormatException;
 
 @Service
 public class RentalServiceImpl implements RentalService {
@@ -35,7 +37,10 @@ public class RentalServiceImpl implements RentalService {
     private final UserService userService;
     private final AdditionalEquipmentService additionalEquipmentService;
     private final MailSender mailSender;
+
     private final int PRICE_PER_DAY_DIVISOR = 24; //price_per_day/24 = price per hour
+    private final int ITEMS_PER_PAGE = 3;
+
     private final Logger LOGGER = Logger.getLogger(RentalServiceImpl.class.getName());
 
     public RentalServiceImpl(
@@ -202,8 +207,49 @@ public class RentalServiceImpl implements RentalService {
      * @return - The list of vehicles that are pending.
      */
     @Override
-    public List<RentalShowDTO> getAllPendingRentals() {
-        return new ArrayList<>();
+    public HashMap<String, Object> getAllPendingRentals(int pageNumber) throws DataFormatException, IOException, ResourceNotFoundException {
+        HashMap<String, Object> returnList = new HashMap<String, Object>();
+
+        Pageable thePage = PageRequest.of(pageNumber, ITEMS_PER_PAGE);
+        List<Rental> allPendingRentals = rentalRepository.getAllByIsApprovedEquals(
+                false, thePage
+        );
+
+        List<RentalShowDTO> theRentalList = new ArrayList<>();
+
+        for (Rental eachRental : allPendingRentals) {
+            RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
+
+            VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
+            theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+
+            rentalShowDTO.setVehicleToBeRented(theVehicleToBeShown);
+            theRentalList.add(rentalShowDTO);
+        }
+
+        returnList.put("nextPageNumber", pageNumber + 1);
+        returnList.put("thePendingRentals", theRentalList);
+
+        return returnList;
+    }
+
+    private RentalShowDTO convertToDTO(Rental eachRental) throws DataFormatException, IOException, ResourceNotFoundException {
+        RentalShowDTO theDTO = new RentalShowDTO();
+
+        theDTO.setRentalId(eachRental.getRentalId());
+        theDTO.setPickupDate(eachRental.getPickupDate());
+        theDTO.setReturnDate(eachRental.getReturnDate());
+        theDTO.setPickupTime(eachRental.getPickupTime());
+        theDTO.setReturnTime(eachRental.getReturnTime());
+        theDTO.setTotalCostForRental(eachRental.getTotalCost());
+        theDTO.setReturned(eachRental.getReturned());
+        theDTO.setApproved(eachRental.getApproved());
+        theDTO.setCollected(eachRental.getCollected());
+        theDTO.setLateReturnRequested(eachRental.getLateReturnRequested());
+        theDTO.setVehicleToBeRented(vehicleService.getVehicleById(eachRental.getVehicleOnRental().getVehicleId()));
+        theDTO.setEquipmentsAddedToRental(additionalEquipmentService.getEquipmentForRental(eachRental.getRentalCustomizationList()));
+
+        return theDTO;
     }
 
     /**

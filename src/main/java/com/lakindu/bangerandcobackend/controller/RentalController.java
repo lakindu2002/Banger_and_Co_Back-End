@@ -16,9 +16,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.zip.DataFormatException;
 
 @RestController
 @RequestMapping(path = "/api/rental")
@@ -44,8 +47,12 @@ public class RentalController {
 
     @PreAuthorize("hasAuthority('ADMINISTRATOR')")
     @GetMapping(path = "/find/pendingRentals")
-    public ResponseEntity<List<RentalShowDTO>> getAllPendingRentals() {
-        List<RentalShowDTO> allPendingRentals = rentalService.getAllPendingRentals();
-        return new ResponseEntity<>(allPendingRentals, HttpStatus.OK);
+    public ResponseEntity<HashMap<String, Object>> getAllPendingRentals(@RequestParam(name = "pageNumber", required = false) Integer pageNumber) throws DataFormatException, IOException, ResourceNotFoundException {
+        //if a page number is not provided, take the page number as 0 to get the first page results
+        if (pageNumber == null) {
+            pageNumber = 0;
+        }
+        HashMap<String, Object> allPendingRentalsWithPageToken = rentalService.getAllPendingRentals(pageNumber);
+        return new ResponseEntity<>(allPendingRentalsWithPageToken, HttpStatus.OK);
     }
 }
