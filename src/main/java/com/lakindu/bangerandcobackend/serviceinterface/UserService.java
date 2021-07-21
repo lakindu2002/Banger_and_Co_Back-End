@@ -114,10 +114,10 @@ public interface UserService extends UserDetailsService {
     /**
      * Method will change the user status to blacklisted = true and will email the user to inform that they have been blacklisted.
      *
-     * @param theCustomerNotCollected The customer going to be blacklisted
+     * @param usernameOfCustomer The customer going to be blacklisted
      * @param theRentalNotCollected   The rental that they did not collect
      */
-    void blackListCustomer(User theCustomerNotCollected, Rental theRentalNotCollected);
+    void blackListCustomer(String usernameOfCustomer, Rental theRentalNotCollected);
 
-    List<User> _getAllAdministrators() throws ResourceNotFoundException;
+    List<String> _getAllAdminEmails() throws ResourceNotFoundException;
 }

@@ -11,11 +11,11 @@ public class RentalCustomization {
     private int rentalCustomizationId;
 
     @JoinColumn(name = "rental_id", nullable = false)
-    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
+    @ManyToOne(cascade = {})
     private Rental theRentalInformation;
 
     @JoinColumn(name = "equipment_id", nullable = false)
-    @ManyToOne(cascade = {CascadeType.MERGE, CascadeType.REFRESH})
+    @ManyToOne(cascade = {})
     private AdditionalEquipment equipmentAddedToRental;
 
     @Column(name = "added_quantity", nullable = false)

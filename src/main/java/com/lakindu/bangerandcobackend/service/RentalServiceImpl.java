@@ -19,7 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
+import javax.transaction.Transactional;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Logger;
-import java.util.zip.DataFormatException;
 
 @Service
 public class RentalServiceImpl implements RentalService {
@@ -263,25 +262,28 @@ public class RentalServiceImpl implements RentalService {
      * <b>Business Rule: </b> If the rental has been approved and has not been collected even after the day of return, the user will get blacklisted.
      */
     @Override
+    @Transactional
     public void blacklistCustomers() throws ResourceNotFoundException {
         List<User> blacklistedUsers = new ArrayList<>();
         List<Rental> allRentalsThatHavePassedReturnDate = rentalRepository.getAllRentalsThatHavePassedReturnDate(
                 LocalDate.now(), true, false);
 
         for (Rental eachRental : allRentalsThatHavePassedReturnDate) {
-            User theCustomerNotCollected = eachRental.getTheCustomerRenting();
-            List<RentalCustomization> rentalCustomizationList = eachRental.getRentalCustomizationList();
+            if (LocalDateTime.now().isAfter(LocalDateTime.of(eachRental.getReturnDate(), eachRental.getReturnTime()))) {
+                User theCustomerNotCollected = eachRental.getTheCustomerRenting();
+                List<RentalCustomization> rentalCustomizationList = eachRental.getRentalCustomizationList();
 
-            for (RentalCustomization eachCustomization : rentalCustomizationList) {
-                additionalEquipmentService.addQuantityBackToItem(eachCustomization);
+                for (RentalCustomization eachCustomization : rentalCustomizationList) {
+                    additionalEquipmentService.addQuantityBackToItem(eachCustomization);
+                }
+                userService.blackListCustomer(theCustomerNotCollected.getUsername(), eachRental);
+                blacklistedUsers.add(theCustomerNotCollected);
+                rentalRepository.delete(eachRental);
             }
-            userService.blackListCustomer(theCustomerNotCollected, eachRental);
-            blacklistedUsers.add(theCustomerNotCollected);
-            rentalRepository.delete(eachRental);
         }
 
-        //send an email to all the administrators in the system regarding the blacklisted customers
-        List<User> adminList = userService._getAllAdministrators();
+//        send an email to all the administrators in the system regarding the blacklisted customers
+        List<String> adminList = userService._getAllAdminEmails();
         try {
             mailSender.sendBulkRentalEmails(
                     adminList, "Blacklist Job Report", blacklistedUsers, MailTemplateType.ADMIN_BULK_BLACKLIST

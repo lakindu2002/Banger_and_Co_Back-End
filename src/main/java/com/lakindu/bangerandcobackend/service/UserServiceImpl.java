@@ -31,6 +31,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 import java.util.zip.DataFormatException;
 
 
@@ -431,15 +432,17 @@ public class UserServiceImpl implements UserService {
      * @param theRentalNotCollected   The rental that they did not collect
      */
     @Override
-    public void blackListCustomer(User theCustomerNotCollected, Rental theRentalNotCollected) {
+    @Transactional
+    public void blackListCustomer(String theCustomerNotCollected, Rental theRentalNotCollected) {
+        User userByUsername = theUserRepository.getUserByUsername(theCustomerNotCollected);
         //if user is already blacklisted do not send email again
-        if (!theCustomerNotCollected.isBlackListed()) {
-            theCustomerNotCollected.setBlackListed(true);
-            theUserRepository.save(theCustomerNotCollected);
+        if (!userByUsername.isBlackListed()) {
+            userByUsername.setBlackListed(true);
+            theUserRepository.save(userByUsername);
             try {
                 theSender.sendRentalMail(
                         new MailSenderHelper(
-                                theCustomerNotCollected, "Account Blacklisted", MailTemplateType.ACCOUNT_BLACKLISTED
+                                userByUsername, "Account Blacklisted", MailTemplateType.ACCOUNT_BLACKLISTED
                         ), theRentalNotCollected
                 );
             } catch (IOException | MessagingException e) {
@@ -449,8 +452,15 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<User> _getAllAdministrators() throws ResourceNotFoundException {
-        return theUserRepository.getUsersByUserRoleEquals(theRoleService._getRoleInformation("administrator"));
+    public List<String> _getAllAdminEmails() throws ResourceNotFoundException {
+        List<User> administrator = theUserRepository.getUsersByUserRoleEquals(theRoleService._getRoleInformation("administrator"));
+        List<String> emailList;
+
+        emailList = administrator.stream().map((eachUser) -> {
+            return eachUser.getEmailAddress();
+        }).collect(Collectors.toList());
+
+        return emailList;
     }
 
     @Override

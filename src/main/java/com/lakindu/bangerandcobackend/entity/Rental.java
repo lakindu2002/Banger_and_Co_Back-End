@@ -40,7 +40,7 @@ public class Rental {
     @Column(name = "is_late_return_requested", nullable = true)
     private Boolean isLateReturnRequested;
 
-    @ManyToOne(cascade = {CascadeType.DETACH, CascadeType.REFRESH}, optional = false, fetch = FetchType.EAGER)
+    @ManyToOne(cascade = {}, optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "customer_username", nullable = false) //map foreign key.
     private User theCustomerRenting;
 

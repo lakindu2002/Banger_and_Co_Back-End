@@ -33,7 +33,6 @@ public class AuthController {
     private final UserService userService;
     private final AuthService authService;
     private final Validator validator;
-    private final RentalService rentalService;
 
     @Autowired
     public AuthController(
@@ -44,7 +43,6 @@ public class AuthController {
         this.userService = userService;
         this.authService = authService;
         this.validator = validator;
-        this.rentalService = rentalService;
     }
 
 
@@ -110,10 +108,6 @@ public class AuthController {
         HashMap<String, Object> returnEntity = new HashMap<>();
         returnEntity.put("response", theBuiltReturn.getTheAPIResponse());
         returnEntity.put("user_info", userDTO);
-
-        if (userDTO.getUserRole().equalsIgnoreCase("administrator")) {
-            rentalService.blacklistCustomers();
-        }
 
         //body, header, code
         return new ResponseEntity<>(returnEntity, theBuiltReturn.getReturnHeaders(), HttpStatus.OK);

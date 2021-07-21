@@ -9,6 +9,18 @@ public class AuthReturnDTO {
     private String userRole;
     private String username;
     private Date dateOfBirth;
+    private boolean blacklisted;
+
+    public AuthReturnDTO() {
+    }
+
+    public boolean isBlacklisted() {
+        return blacklisted;
+    }
+
+    public void setBlacklisted(boolean blacklisted) {
+        this.blacklisted = blacklisted;
+    }
 
     public Date getDateOfBirth() {
         return dateOfBirth;

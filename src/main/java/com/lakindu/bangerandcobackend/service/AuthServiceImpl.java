@@ -8,6 +8,7 @@ import com.lakindu.bangerandcobackend.auth.AuthReturnBuilder;
 import com.lakindu.bangerandcobackend.dto.AuthReturnDTO;
 import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.serviceinterface.AuthService;
+import com.lakindu.bangerandcobackend.serviceinterface.RentalService;
 import com.lakindu.bangerandcobackend.serviceinterface.UserService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,17 +27,21 @@ public class AuthServiceImpl implements AuthService {
     private final UserService userService;
     private final JWTHandler theTokenIssuer;
     private final JWTConstants theConstants;
+    private final RentalService rentalService;
 
     @Autowired
     public AuthServiceImpl(
             AuthenticationManager authenticationManager,
             @Qualifier("userServiceImpl") UserService userService,
             @Qualifier("JWTHandler") JWTHandler theTokenIssuer,
-            @Qualifier("JWTConstants") JWTConstants theConstants) {
+            @Qualifier("JWTConstants") JWTConstants theConstants,
+            @Qualifier("rentalServiceImpl") RentalService rentalService
+    ) {
         this.authenticationManager = authenticationManager;
         this.userService = userService;
         this.theTokenIssuer = theTokenIssuer;
         this.theConstants = theConstants;
+        this.rentalService = rentalService;
     }
 
     @Override
@@ -68,6 +73,7 @@ public class AuthServiceImpl implements AuthService {
         theDTO.setLastName(authenticatedUser.getLastName());
         theDTO.setUserRole(authenticatedUser.getUserRole().getRoleName());
         theDTO.setDateOfBirth(authenticatedUser.getDateOfBirth());
+        theDTO.setBlacklisted(authenticatedUser.isBlackListed());
 
         return theDTO;
     }

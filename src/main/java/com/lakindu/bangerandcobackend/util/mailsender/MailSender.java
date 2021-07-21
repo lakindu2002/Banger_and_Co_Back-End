@@ -266,7 +266,7 @@ public class MailSender {
     }
 
     @Async
-    public void sendBulkRentalEmails(List<User> adminList, String subject, List<User> blacklistedUsers, MailTemplateType theType) throws MessagingException, IOException {
+    public void sendBulkRentalEmails(List<String> adminList, String subject, List<User> blacklistedUsers, MailTemplateType theType) throws MessagingException, IOException {
         MimeMessage theMessage = new MimeMessage(theMailSession);
         String formattedTemplate = getTemplateForBlackList(blacklistedUsers);
 
@@ -308,10 +308,10 @@ public class MailSender {
         return formattedContent;
     }
 
-    private Address[] getAddressList(List<User> adminList) throws AddressException {
+    private Address[] getAddressList(List<String> adminList) throws AddressException {
         List<Address> theEmailAddresses = new ArrayList<>();
-        for (User eachAdmin : adminList) {
-            theEmailAddresses.add(new InternetAddress(eachAdmin.getEmailAddress()));
+        for (String eachAdmin : adminList) {
+            theEmailAddresses.add(new InternetAddress(eachAdmin));
         }
         return theEmailAddresses.toArray(new Address[adminList.size()]);
     }
