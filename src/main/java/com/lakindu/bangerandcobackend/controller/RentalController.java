@@ -47,7 +47,7 @@ public class RentalController {
 
     @PreAuthorize("hasAuthority('ADMINISTRATOR')")
     @GetMapping(path = "/find/pendingRentals")
-    public ResponseEntity<HashMap<String, Object>> getAllPendingRentals(@RequestParam(name = "pageNumber", required = false) Integer pageNumber) throws DataFormatException, IOException, ResourceNotFoundException {
+    public ResponseEntity<HashMap<String, Object>> getAllPendingRentals(@RequestParam(name = "pageNumber", required = false) Integer pageNumber) throws Exception {
         //if a page number is not provided, take the page number as 0 to get the first page results
         if (pageNumber == null) {
             pageNumber = 0;

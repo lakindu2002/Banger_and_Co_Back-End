@@ -16,6 +16,7 @@ import com.lakindu.bangerandcobackend.util.mailsender.MailTemplateType;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -203,14 +204,16 @@ public class RentalServiceImpl implements RentalService {
 
     /**
      * Method will get a list of all pending rentals from the database.
+     * A sort will be done to retrieve the vehicles with the soonest pickup date to be in the first.
      *
      * @return - The list of vehicles that are pending.
      */
     @Override
-    public HashMap<String, Object> getAllPendingRentals(int pageNumber) throws DataFormatException, IOException, ResourceNotFoundException {
+    public HashMap<String, Object> getAllPendingRentals(int pageNumber) throws Exception {
         HashMap<String, Object> returnList = new HashMap<String, Object>();
+        //sort the rentals to get the vehicles that need to be picked up earliest.
 
-        Pageable thePage = PageRequest.of(pageNumber, ITEMS_PER_PAGE);
+        Pageable thePage = PageRequest.of(pageNumber, ITEMS_PER_PAGE, Sort.by("pickupDate").ascending());
         List<Rental> allPendingRentals = rentalRepository.getAllByIsApprovedEquals(
                 false, thePage
         );
@@ -233,7 +236,7 @@ public class RentalServiceImpl implements RentalService {
         return returnList;
     }
 
-    private RentalShowDTO convertToDTO(Rental eachRental) throws DataFormatException, IOException, ResourceNotFoundException {
+    private RentalShowDTO convertToDTO(Rental eachRental) throws Exception {
         RentalShowDTO theDTO = new RentalShowDTO();
 
         theDTO.setRentalId(eachRental.getRentalId());
@@ -248,6 +251,7 @@ public class RentalServiceImpl implements RentalService {
         theDTO.setLateReturnRequested(eachRental.getLateReturnRequested());
         theDTO.setVehicleToBeRented(vehicleService.getVehicleById(eachRental.getVehicleOnRental().getVehicleId()));
         theDTO.setEquipmentsAddedToRental(additionalEquipmentService.getEquipmentForRental(eachRental.getRentalCustomizationList()));
+        theDTO.setCustomerUsername(userService.getUserInformation(eachRental.getTheCustomerRenting().getUsername()));
 
         return theDTO;
     }

@@ -3,7 +3,6 @@ package com.lakindu.bangerandcobackend.entity;
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -49,7 +48,7 @@ public class Rental {
     @JoinColumn(name = "vehicle_id", nullable = true) //map the foreign key.
     private Vehicle vehicleOnRental;
 
-    @OneToMany(mappedBy = "theRentalInformation", cascade = {CascadeType.ALL}, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "theRentalInformation", cascade = {CascadeType.PERSIST, CascadeType.REFRESH, CascadeType.DETACH, CascadeType.REFRESH}, fetch = FetchType.LAZY)
     private List<RentalCustomization> rentalCustomizationList;
 
     public Rental() {

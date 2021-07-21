@@ -101,7 +101,6 @@ public class UserServiceImpl implements UserService {
             throw new ResourceNotFoundException("The username does not exist");
         } else {
             final byte[] decompressedImage = new ImageHandler().decompressImage(theUser.getProfilePicture());
-            theUser.setProfilePicture(decompressedImage);
 
             UserDTO theDTO = new UserDTO();
             theDTO.setFirstName(theUser.getFirstName());
@@ -109,7 +108,7 @@ public class UserServiceImpl implements UserService {
             theDTO.setUsername(theUser.getUsername());
             theDTO.setEmailAddress(theUser.getEmailAddress());
             //images are binary data (byte[])
-            theDTO.setProfilePicture(theUser.getProfilePicture()); //jackson will automatically convert byte[] to base64 via data binding
+            theDTO.setProfilePicture(decompressedImage); //jackson will automatically convert byte[] to base64 via data binding
             theDTO.setUserRole(theUser.getUserRole().getRoleName());
             theDTO.setDateOfBirth(theUser.getDateOfBirth());
             theDTO.setBlackListed(theUser.isBlackListed());

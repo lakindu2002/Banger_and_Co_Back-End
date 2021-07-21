@@ -28,11 +28,12 @@ public interface RentalService {
 
     /**
      * Method will get a list of all pending rentals from the database.
+     * A sort will be done to retrieve the vehicles with the soonest pickup date to be in the first.
      *
      * @param pageNumber The page number to query data for.
      * @return - The list of vehicles that are pending and the next page number token.
      */
-    HashMap<String, Object> getAllPendingRentals(int pageNumber) throws DataFormatException, IOException, ResourceNotFoundException;
+    HashMap<String, Object> getAllPendingRentals(int pageNumber) throws Exception;
 
     /**
      * Method will blacklist customers if they have a rental that they have not picked up.
