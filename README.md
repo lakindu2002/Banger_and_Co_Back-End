@@ -12,6 +12,7 @@ This project uses the following dependencies to interact with the Angular Front 
 - Image Compression
 - Java Mail
 - Bean Validation on DTOs to implement Server Side Validation
+- Pagination on the Server Side for Rental Viewing
 
 ### Set up the Project
 
