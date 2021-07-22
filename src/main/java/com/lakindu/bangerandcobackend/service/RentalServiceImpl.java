@@ -213,8 +213,9 @@ public class RentalServiceImpl implements RentalService {
         //sort the rentals to get the vehicles that need to be picked up earliest.
 
         Pageable thePage = PageRequest.of(pageNumber, ITEMS_PER_PAGE, Sort.by("pickupDate").ascending());
+        //all pending = isApproved = NULL
         List<Rental> allPendingRentals = rentalRepository.getAllByIsApprovedEquals(
-                false, thePage
+                thePage
         );
 
         List<RentalShowDTO> theRentalList = new ArrayList<>();
@@ -325,6 +326,7 @@ public class RentalServiceImpl implements RentalService {
     @Override
     public void rejectRental(Integer rentalId, String rejectedReason) throws ResourceNotFoundException {
         Rental rental = rentalRepository.findById(rentalId).orElseThrow(() -> new ResourceNotFoundException("The rental you are trying to reject does not exist at Banger and Co."));
+        //if the rental has already been rejected, do not reject it again.
     }
 
     /**
@@ -336,12 +338,11 @@ public class RentalServiceImpl implements RentalService {
     public void approveRental(Integer rentalId) throws ResourceNotFoundException, BadValuePassedException {
         Rental rental = rentalRepository.findById(rentalId).orElseThrow(() -> new ResourceNotFoundException("The rental you are trying to approve does not exist at Banger and Co."));
 
-        if (rental.getApproved()) {
+        if (rental.getApproved() != null && rental.getApproved()) {
             //rental has been already approved
             throw new BadValuePassedException("The rental you are trying to approve has already been approved");
         } else {
             User theCustomerRenting = rental.getTheCustomerRenting();
-
             //approve the rental
             //when approving -> isApproved is TRUE and isCollected is FALSE to indicate the rental has been approved but not yet been collected.
             rental.setApproved(true);

@@ -31,7 +31,7 @@ public class Rental {
     @Column(name = "is_returned", nullable = true)
     private Boolean isReturned;
 
-    @Column(name = "is_approved", nullable = false)
+    @Column(name = "is_approved", nullable = true)
     private Boolean isApproved;
 
     @Column(name = "is_collected", nullable = true)
@@ -64,7 +64,8 @@ public class Rental {
 
     @PrePersist
     public void initializeEntity() {
-        this.isApproved = false;
+        //when rental is being created, set to pending rental.
+        this.isApproved = null;
     }
 
     public int getRentalId() {

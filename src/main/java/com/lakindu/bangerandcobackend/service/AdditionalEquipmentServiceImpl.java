@@ -181,7 +181,7 @@ public class AdditionalEquipmentServiceImpl implements AdditionalEquipmentServic
         for (RentalCustomization eachCustomization : rentalHavingThisEquipment) {
             Rental eachRental = eachCustomization.getTheRentalInformation();
             //check if the rental is pending
-            if (!eachRental.getApproved()) {
+            if (eachRental.getApproved() == null) {
                 throw new ResourceCannotBeDeletedException("There are pending rentals that have this equipment added to it");
             }
             //check if the rental is approved but not collected

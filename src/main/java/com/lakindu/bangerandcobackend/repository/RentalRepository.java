@@ -20,10 +20,11 @@ public interface RentalRepository extends JpaRepository<Rental, Integer> {
 
     /**
      * Retrieve a list of the pending rentals.
+     * All pending rentals is where the isApproved attribute of the Rental is at NULL.
      *
-     * @param isApproved The boolean to indicate that the rental is not approved.
-     * @param pageable   The page to implement pagination.
+     * @param pageable The page to implement pagination.
      * @return The list of pending rentals fetched from the database.
      */
-    List<Rental> getAllByIsApprovedEquals(Boolean isApproved, Pageable pageable);
+    @Query("FROM Rental theRental WHERE theRental.isApproved is NULL")
+    List<Rental> getAllByIsApprovedEquals(Pageable pageable);
 }
