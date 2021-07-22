@@ -66,4 +66,45 @@ public interface RentalService {
      * @param rentalId The rental to approve.
      */
     void approveRental(Integer rentalId) throws ResourceNotFoundException, BadValuePassedException;
+
+    /**
+     * Method returns all the pending rentals for the customer. <br>
+     * isApproved - NULL
+     *
+     * @param username   The customer to get the rental information for
+     * @param pageNumber The page number to query the data for
+     * @return The object containing the next page token and the pending rentals for the customer.
+     */
+    HashMap<String, Object> getCustomerPendingRentals(String username, int pageNumber) throws Exception;
+
+    /**
+     * Method returns all the rentals that have been approved and can be collected from Banger and Co. <br>
+     * isApproved - TRUE & isCollected - FALSE
+     *
+     * @param username   The customer to get the can be collected rentals to
+     * @param pageNumber The page number to get paginated data
+     * @return The object containing the list of can be collected vehicles and the next page token.
+     */
+    HashMap<String, Object> getCustomerCanBeCollectedRentals(String username, Integer pageNumber) throws Exception;
+
+    /**
+     * Method will return a list of the rentals of the customer that have been returned (PAST RENTAL HISTORY) <br>
+     * isCollected - TRUE & isReturned - TRUE
+     *
+     * @param username   The customer to get the past rentals for
+     * @param pageNumber The page information
+     * @return The object containing next page information and the past rentals.
+     */
+    HashMap<String, Object> getCustomerCompletedRentals(String username, Integer pageNumber) throws Exception;
+
+    /**
+     * Method will get a list of on-going rentals for the customer <br>
+     * isApproved - TRUE & isCollected - TRUE & isReturned - FALSE
+     *
+     * @param username   The customer to get the on going rentals for
+     * @param pageNumber The page number
+     * @return The list of on going rentals
+     * @throws Exception Thrown during image de-compression
+     */
+    HashMap<String, Object> getCustomerOnGoingRentals(String username, Integer pageNumber) throws Exception;
 }

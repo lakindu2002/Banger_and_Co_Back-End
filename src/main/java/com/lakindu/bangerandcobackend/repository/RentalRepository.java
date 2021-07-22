@@ -1,6 +1,7 @@
 package com.lakindu.bangerandcobackend.repository;
 
 import com.lakindu.bangerandcobackend.entity.Rental;
+import com.lakindu.bangerandcobackend.entity.User;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -27,4 +28,38 @@ public interface RentalRepository extends JpaRepository<Rental, Integer> {
      */
     @Query("FROM Rental theRental WHERE theRental.isApproved is NULL")
     List<Rental> getAllByIsApprovedEquals(Pageable pageable);
+
+    /**
+     * Method will return a list of all pending rentals for the customer
+     *
+     * @param isApproved  NULL
+     * @param theCustomer The customer to get the data for
+     * @param pageable    The pagination information
+     * @return The data from the database.
+     */
+    List<Rental> getAllByIsApprovedEqualsAndTheCustomerRentingEquals(Boolean isApproved, User theCustomer, Pageable pageable);
+
+    /**
+     * Method will return a list of the vehicles that can be collected for a particular user
+     *
+     * @param isApproved  TRUE - RENTAL APPROVED
+     * @param isCollected FALSE - NOT YET COLLECTED
+     * @param theCustomer The customer to get the data from.
+     * @param pageable    The page information
+     * @return The information from the database
+     */
+    List<Rental> getAllByIsApprovedEqualsAndIsCollectedEqualsAndTheCustomerRentingEquals(Boolean isApproved, Boolean isCollected, User theCustomer, Pageable pageable);
+
+    /**
+     * Method will get a list of all completed rentals by the customer
+     *
+     * @param isApproved  TRUE
+     * @param isCollected TRUE
+     * @param isReturned  TRUE
+     * @param theCustomer The customer renting the vehicle
+     * @param pageable    The next page
+     * @return The database return
+     */
+    List<Rental> getAllByIsApprovedEqualsAndIsCollectedEqualsAndIsReturnedEqualsAndTheCustomerRentingEquals(Boolean isApproved, Boolean isCollected, Boolean isReturned, User theCustomer, Pageable pageable);
 }
+

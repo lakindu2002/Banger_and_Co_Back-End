@@ -114,4 +114,71 @@ public class RentalController {
                 HttpStatus.OK
         );
     }
+
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @GetMapping(path = "/find/pending/{username}")
+    public ResponseEntity<HashMap<String, Object>> getAllPendingRentalsForCustomer(
+            @PathVariable(name = "username") String username,
+            @RequestParam(name = "pageNumber") Integer pageNumber
+    ) throws Exception {
+        if (pageNumber == null) {
+            pageNumber = 0; //if passed page number is null, retrieve initial page results.
+        }
+        HashMap<String, Object> returnList = rentalService.getCustomerPendingRentals(username, pageNumber);
+        return new ResponseEntity<>(
+                returnList, HttpStatus.OK
+        );
+    }
+
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @GetMapping(path = "/find/readyToCollect/{username}")
+    public ResponseEntity<HashMap<String, Object>> getAllRentalsThatCanBeCollectedForCustomer(
+            @PathVariable(name = "username") String username,
+            @RequestParam(name = "pageNumber") Integer pageNumber) throws Exception {
+
+        //method executed by the customers to get a list of the rentals of theirs that can be collected.
+        if (pageNumber == null) {
+            pageNumber = 0; //if passed page number is null, retrieve initial page results.
+        }
+
+        HashMap<String, Object> returnList = rentalService.getCustomerCanBeCollectedRentals(username, pageNumber);
+        return new ResponseEntity<>(
+                returnList, HttpStatus.OK
+        );
+    }
+
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @GetMapping(path = "/find/completed/{username}")
+    public ResponseEntity<HashMap<String, Object>> getAllCompletedRentalsForCustomer(
+            @PathVariable(name = "username") String username,
+            @RequestParam(name = "pageNumber") Integer pageNumber) throws Exception {
+
+        //method executed by the customers to get a list of the rentals of theirs that have been returned.
+        if (pageNumber == null) {
+            pageNumber = 0; //if passed page number is null, retrieve initial page results.
+        }
+
+        HashMap<String, Object> returnList = rentalService.getCustomerCompletedRentals(username, pageNumber);
+        return new ResponseEntity<>(
+                returnList, HttpStatus.OK
+        );
+    }
+
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @GetMapping(path = "/find/onGoing/{username}")
+    public ResponseEntity<HashMap<String, Object>> getAllOnGoingRentalsForCustomer(
+            @PathVariable(name = "username") String username,
+            @RequestParam(name = "pageNumber") Integer pageNumber) throws Exception {
+
+        //method executed by the customers to get a list of the rentals of theirs that are ongoing.
+        if (pageNumber == null) {
+            pageNumber = 0; //if passed page number is null, retrieve initial page results.
+        }
+
+        HashMap<String, Object> returnList = rentalService.getCustomerOnGoingRentals(username, pageNumber);
+        return new ResponseEntity<>(
+                returnList, HttpStatus.OK
+        );
+    }
+
 }
