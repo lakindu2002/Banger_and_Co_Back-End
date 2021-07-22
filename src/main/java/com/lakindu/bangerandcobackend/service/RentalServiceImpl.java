@@ -333,7 +333,14 @@ public class RentalServiceImpl implements RentalService {
         } else {
             User theCustomerRenting = rental.getTheCustomerRenting();
             rental.setApproved(false); //reject the rental.
+            //update the rejected quantity back into the database of additional items
+
+            for (RentalCustomization eachAddOn : rental.getRentalCustomizationList()) {
+                additionalEquipmentService.addQuantityBackToItem(eachAddOn);
+            }
+
             rentalRepository.save(rental); //update the rental status in the database.
+
             //email the client to indicate that their rental has been rejected.
             try {
                 mailSender.sendRentalMail(
