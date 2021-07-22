@@ -317,6 +317,52 @@ public class RentalServiceImpl implements RentalService {
     }
 
     /**
+     * Method will reject the rental and will email the customer stating their rental was rejected.
+     *
+     * @param rentalId       The rental to reject.
+     * @param rejectedReason The reason the rental was rejected.
+     */
+    @Override
+    public void rejectRental(Integer rentalId, String rejectedReason) throws ResourceNotFoundException {
+        Rental rental = rentalRepository.findById(rentalId).orElseThrow(() -> new ResourceNotFoundException("The rental you are trying to reject does not exist at Banger and Co."));
+    }
+
+    /**
+     * Method will approve the rental and will inform the customer that their rental was approved via an email.
+     *
+     * @param rentalId The rental to approve.
+     */
+    @Override
+    public void approveRental(Integer rentalId) throws ResourceNotFoundException, BadValuePassedException {
+        Rental rental = rentalRepository.findById(rentalId).orElseThrow(() -> new ResourceNotFoundException("The rental you are trying to approve does not exist at Banger and Co."));
+
+        if (rental.getApproved()) {
+            //rental has been already approved
+            throw new BadValuePassedException("The rental you are trying to approve has already been approved");
+        } else {
+            User theCustomerRenting = rental.getTheCustomerRenting();
+
+            //approve the rental
+            //when approving -> isApproved is TRUE and isCollected is FALSE to indicate the rental has been approved but not yet been collected.
+            rental.setApproved(true);
+            rental.setCollected(false);
+            rentalRepository.save(rental); //save the changes in the database.
+
+            //send an email to the customer indicating that their vehicle can be picked up
+            try {
+                mailSender.sendRentalMail(
+                        new MailSenderHelper(
+                                theCustomerRenting, "Rental Has Been Approved", MailTemplateType.RENTAL_APPROVED
+                        ),
+                        rental
+                );
+            } catch (Exception ex) {
+                LOGGER.warning("APPROVE EMAIL NOT SENT");
+            }
+        }
+    }
+
+    /**
      * Calculates the total price of the vehicle for the duration of the rental.
      *
      * <p>Price calculated with price per hour.</p>

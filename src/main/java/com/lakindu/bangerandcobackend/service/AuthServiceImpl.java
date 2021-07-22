@@ -55,6 +55,8 @@ public class AuthServiceImpl implements AuthService {
         );
 
         if (userService._getUserRole(theAuthRequest.getUsername()).equalsIgnoreCase("administrator")) {
+            //retrieve the user name of the successfully authenticated user and check if they are an admin
+            //if so, call the blacklist method.
             rentalService.blacklistCustomers();
         }
 

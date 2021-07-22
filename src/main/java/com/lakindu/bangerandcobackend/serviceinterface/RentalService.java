@@ -51,4 +51,19 @@ public interface RentalService {
      * @return The rental object from the database.
      */
     RentalShowDTO getRentalById(Integer rentalId) throws Exception;
+
+    /**
+     * Method will reject the rental and will email the customer stating their rental was rejected.
+     *
+     * @param rentalId       The rental to reject.
+     * @param rejectedReason The reason the rental was rejected.
+     */
+    void rejectRental(Integer rentalId, String rejectedReason) throws ResourceNotFoundException;
+
+    /**
+     * Method will approve the rental and will inform the customer that their rental was approved via an email.
+     *
+     * @param rentalId The rental to approve.
+     */
+    void approveRental(Integer rentalId) throws ResourceNotFoundException, BadValuePassedException;
 }

@@ -62,4 +62,56 @@ public class RentalController {
         RentalShowDTO theRentalDTO = rentalService.getRentalById(rentalId);
         return new ResponseEntity<>(theRentalDTO, HttpStatus.OK);
     }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @PostMapping(path = "/handle/approve")
+    public ResponseEntity<BangerAndCoResponse> approveRental(@RequestBody HashMap<String, Integer> theRequestBody) throws BadValuePassedException, ResourceNotFoundException {
+        //method will be executed by the administrator to approve a rental.
+        //the rental id will be passed into the service method if there is a key and it is not null
+
+        if (theRequestBody.containsKey("rentalId") && theRequestBody.get("rentalId") != null) {
+            rentalService.approveRental(theRequestBody.get("rentalId"));
+        } else {
+            throw new BadValuePassedException("The rental ID was not present to approve the rental.");
+        }
+
+        return new ResponseEntity<>(
+                new BangerAndCoResponse("The rental has been approved successfully", HttpStatus.OK.value()),
+                HttpStatus.OK
+        );
+    }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @PostMapping(path = "/handle/reject")
+    public ResponseEntity<BangerAndCoResponse> rejectRental(@RequestBody HashMap<String, Object> theRequestBody) throws BadValuePassedException, ResourceNotFoundException {
+        //method will be used to reject a rental only if the rental id and the rejected reason is present in the request body.
+
+        if (theRequestBody.containsKey("rentalId") && theRequestBody.get("rentalId") != null) {
+            //rental id is present
+            if (theRequestBody.containsKey("rejectedReason") && theRequestBody.get("rejectedReason") != null) {
+                //rejected reason is present
+
+                if (theRequestBody.get("rejectedReason").toString().trim().length() > 0) {
+                    //if there is actual text and not a blank string
+                    //the rental id and the rejected reason will be passed into the service method.
+                    rentalService.rejectRental(
+                            Integer.parseInt(theRequestBody.get("rentalId").toString()),
+                            theRequestBody.get("rejectedReason").toString()
+                    );
+                } else {
+                    //reason is a blank string
+                    throw new BadValuePassedException("The rejected reason is not present in the request.");
+                }
+            } else {
+                throw new BadValuePassedException("The rejected reason is not present in the request.");
+            }
+        } else {
+            throw new BadValuePassedException("The rental ID was not present to reject the rental.");
+        }
+
+        return new ResponseEntity<>(
+                new BangerAndCoResponse("The rental has been rejected successfully", HttpStatus.OK.value()),
+                HttpStatus.OK
+        );
+    }
 }
