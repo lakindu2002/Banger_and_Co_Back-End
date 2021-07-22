@@ -58,7 +58,7 @@ public interface RentalService {
      * @param rentalId       The rental to reject.
      * @param rejectedReason The reason the rental was rejected.
      */
-    void rejectRental(Integer rentalId, String rejectedReason) throws ResourceNotFoundException;
+    void rejectRental(Integer rentalId, String rejectedReason) throws ResourceNotFoundException, BadValuePassedException;
 
     /**
      * Method will approve the rental and will inform the customer that their rental was approved via an email.

@@ -324,9 +324,26 @@ public class RentalServiceImpl implements RentalService {
      * @param rejectedReason The reason the rental was rejected.
      */
     @Override
-    public void rejectRental(Integer rentalId, String rejectedReason) throws ResourceNotFoundException {
+    public void rejectRental(Integer rentalId, String rejectedReason) throws ResourceNotFoundException, BadValuePassedException {
         Rental rental = rentalRepository.findById(rentalId).orElseThrow(() -> new ResourceNotFoundException("The rental you are trying to reject does not exist at Banger and Co."));
         //if the rental has already been rejected, do not reject it again.
+        if (rental.getApproved() != null && !rental.getApproved()) {
+            //rental is already rejected...
+            throw new BadValuePassedException("The rental you are trying to reject has already been rejected");
+        } else {
+            User theCustomerRenting = rental.getTheCustomerRenting();
+            rental.setApproved(false); //reject the rental.
+            rentalRepository.save(rental); //update the rental status in the database.
+            //email the client to indicate that their rental has been rejected.
+            try {
+                mailSender.sendRentalMail(
+                        new MailSenderHelper(theCustomerRenting, "Rental Has Been Rejected", MailTemplateType.RENTAL_REJECTED, rejectedReason),
+                        rental
+                );
+            } catch (Exception ex) {
+                LOGGER.warning("ERROR SENDING REJECT EMAIL");
+            }
+        }
     }
 
     /**

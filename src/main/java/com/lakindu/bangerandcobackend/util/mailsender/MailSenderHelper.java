@@ -13,6 +13,9 @@ public class MailSenderHelper {
     private Inquiry theInquiry;
     private String inquiryReply;
 
+    //THESE PROPERTIES ARE USED WHEN RENTAL IS REJECTED
+    private String rentalRejectionReason;
+
     public MailSenderHelper(User userToBeInformed, String subject, MailTemplateType templateName) {
         this.userToBeInformed = userToBeInformed;
         this.subject = subject;
@@ -20,6 +23,21 @@ public class MailSenderHelper {
     }
 
     public MailSenderHelper() {
+    }
+
+    public MailSenderHelper(User userToBeInformed, String subject, MailTemplateType templateName, String rentalRejectionReason) {
+        this.userToBeInformed = userToBeInformed;
+        this.subject = subject;
+        this.templateName = templateName;
+        this.rentalRejectionReason = rentalRejectionReason;
+    }
+
+    public String getRentalRejectionReason() {
+        return rentalRejectionReason;
+    }
+
+    public void setRentalRejectionReason(String rentalRejectionReason) {
+        this.rentalRejectionReason = rentalRejectionReason;
     }
 
     public void setUserToBeInformed(User userToBeInformed) {
