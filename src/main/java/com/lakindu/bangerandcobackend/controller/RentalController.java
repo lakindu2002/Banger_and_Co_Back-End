@@ -176,4 +176,21 @@ public class RentalController {
         );
     }
 
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @GetMapping(path = "/find/rejected/{username}")
+    public ResponseEntity<HashMap<String, Object>> getAllRejectedRentalsForTheCustomer(
+            @PathVariable(name = "username") String username,
+            @RequestParam(name = "pageNumber") Integer pageNumber) throws Exception {
+
+        //method executed by the customers to get a list of the rentals of theirs that are rejected.
+        if (pageNumber == null) {
+            pageNumber = 0; //if passed page number is null, retrieve initial page results.
+        }
+
+        HashMap<String, Object> returnList = rentalService.getCustomerRejectedRentals(username, pageNumber);
+        return new ResponseEntity<>(
+                returnList, HttpStatus.OK
+        );
+    }
+
 }

@@ -533,6 +533,44 @@ public class RentalServiceImpl implements RentalService {
     }
 
     /**
+     * Method will get a list of on-going rentals for the customer.
+     * <br> isApproved - FALSE
+     *
+     * @param username   The customer to get the rejected rentals for
+     * @param pageNumber The page number
+     * @return The list of rejected rentals along with the next page token.
+     */
+    @Override
+    public HashMap<String, Object> getCustomerRejectedRentals(String username, Integer pageNumber) throws Exception {
+        HashMap<String, Object> returnList = new HashMap<>();
+
+        User theCustomer = userService._getUserWithoutDecompression(username);
+        Pageable thePaginator = PageRequest.of(pageNumber, ITEMS_PER_PAGE, Sort.by("pickupDate").ascending());
+
+        //isApproved - false - rejected rental
+        List<Rental> allPendingCustomerRentals = rentalRepository.getAllByIsApprovedEqualsAndTheCustomerRentingEquals(
+                false, theCustomer, thePaginator
+        );
+
+        List<RentalShowDTO> theReturnDTOList = new ArrayList<>();
+        for (Rental eachRental : allPendingCustomerRentals) {
+            RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
+
+            VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
+            theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+            rentalShowDTO.setCustomerUsername(null); //no need customer information as the customer renting the vehicle is requesting data.
+
+            rentalShowDTO.setVehicleToBeRented(theVehicleToBeShown);
+            theReturnDTOList.add(rentalShowDTO);
+        }
+
+        returnList.put("nextPage", pageNumber + 1); //next page to query data from.
+        returnList.put("customerRejectedRentals", theReturnDTOList);
+
+        return returnList;
+    }
+
+    /**
      * Calculates the total price of the vehicle for the duration of the rental.
      *
      * <p>Price calculated with price per hour.</p>

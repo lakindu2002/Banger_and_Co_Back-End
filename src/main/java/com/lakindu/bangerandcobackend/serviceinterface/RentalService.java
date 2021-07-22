@@ -107,4 +107,14 @@ public interface RentalService {
      * @throws Exception Thrown during image de-compression
      */
     HashMap<String, Object> getCustomerOnGoingRentals(String username, Integer pageNumber) throws Exception;
+
+    /**
+     * Method will get a list of on-going rentals for the customer.
+     * <br> isApproved - FALSE
+     *
+     * @param username   The customer to get the rejected rentals for
+     * @param pageNumber The page number
+     * @return The list of rejected rentals along with the next page token.
+     */
+    HashMap<String, Object> getCustomerRejectedRentals(String username, Integer pageNumber) throws Exception;
 }
