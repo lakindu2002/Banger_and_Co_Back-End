@@ -2,7 +2,6 @@ package com.lakindu.bangerandcobackend.controller;
 
 import com.lakindu.bangerandcobackend.dto.RentalCreateDTO;
 import com.lakindu.bangerandcobackend.dto.RentalShowDTO;
-import com.lakindu.bangerandcobackend.dto.VehicleShowDTO;
 import com.lakindu.bangerandcobackend.serviceinterface.RentalService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
@@ -16,12 +15,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.io.IOException;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.zip.DataFormatException;
 
 @RestController
 @RequestMapping(path = "/api/rental")
