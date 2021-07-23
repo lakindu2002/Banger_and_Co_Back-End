@@ -476,7 +476,7 @@ public class RentalServiceImpl implements RentalService {
         HashMap<String, Object> returnList = new HashMap<>();
 
         User theCustomer = userService._getUserWithoutDecompression(username);
-        Pageable thePaginator = PageRequest.of(pageNumber, ITEMS_PER_PAGE, Sort.by("pickupDate").ascending());
+        Pageable thePaginator = PageRequest.of(pageNumber, ITEMS_PER_PAGE, Sort.by("returnDate").descending());
 
         List<Rental> allPendingCustomerRentals = rentalRepository.getAllByIsApprovedEqualsAndIsCollectedEqualsAndIsReturnedEqualsAndTheCustomerRentingEquals(
                 true, true, true, theCustomer, thePaginator
@@ -514,7 +514,7 @@ public class RentalServiceImpl implements RentalService {
         HashMap<String, Object> returnList = new HashMap<>();
 
         User theCustomer = userService._getUserWithoutDecompression(username);
-        Pageable thePaginator = PageRequest.of(pageNumber, ITEMS_PER_PAGE, Sort.by("pickupDate").ascending());
+        Pageable thePaginator = PageRequest.of(pageNumber, ITEMS_PER_PAGE, Sort.by("returnDate").descending());
 
         //is returned - false & isCollected - true means rental is ongoing
         List<Rental> allPendingCustomerRentals = rentalRepository.getAllByIsApprovedEqualsAndIsCollectedEqualsAndIsReturnedEqualsAndTheCustomerRentingEquals(
@@ -552,7 +552,7 @@ public class RentalServiceImpl implements RentalService {
         HashMap<String, Object> returnList = new HashMap<>();
 
         User theCustomer = userService._getUserWithoutDecompression(username);
-        Pageable thePaginator = PageRequest.of(pageNumber, ITEMS_PER_PAGE, Sort.by("pickupDate").ascending());
+        Pageable thePaginator = PageRequest.of(pageNumber, ITEMS_PER_PAGE, Sort.by("pickupDate").descending());
 
         //isApproved - false - rejected rental
         List<Rental> allPendingCustomerRentals = rentalRepository.getAllByIsApprovedEqualsAndTheCustomerRentingEquals(
