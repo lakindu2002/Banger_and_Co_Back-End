@@ -333,7 +333,14 @@ public class RentalServiceImpl implements RentalService {
         } else {
             User theCustomerRenting = rental.getTheCustomerRenting();
             rental.setApproved(false); //reject the rental.
+            //update the rejected quantity back into the database of additional items
+
+            for (RentalCustomization eachAddOn : rental.getRentalCustomizationList()) {
+                additionalEquipmentService.addQuantityBackToItem(eachAddOn);
+            }
+
             rentalRepository.save(rental); //update the rental status in the database.
+
             //email the client to indicate that their rental has been rejected.
             try {
                 mailSender.sendRentalMail(
@@ -378,6 +385,196 @@ public class RentalServiceImpl implements RentalService {
                 LOGGER.warning("APPROVE EMAIL NOT SENT");
             }
         }
+    }
+
+    /**
+     * Method returns all the pending rentals for the customer. <br>
+     * isApproved - NULL
+     *
+     * @param username The customer to get the rental information for
+     * @return The object containing the next page token and the pending rentals for the customer.
+     */
+    @Override
+    public HashMap<String, Object> getCustomerPendingRentals(String username, int pageNumber) throws Exception {
+        HashMap<String, Object> returnList = new HashMap<>();
+
+        User theCustomer = userService._getUserWithoutDecompression(username);
+        Pageable thePaginator = PageRequest.of(pageNumber, ITEMS_PER_PAGE, Sort.by("pickupDate").ascending());
+
+        //null - pending rental
+        List<Rental> allPendingCustomerRentals = rentalRepository.getAllByIsApprovedEqualsAndTheCustomerRentingEquals(
+                null, theCustomer, thePaginator
+        );
+
+        List<RentalShowDTO> theReturnDTOList = new ArrayList<>();
+        for (Rental eachRental : allPendingCustomerRentals) {
+            RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
+
+            VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
+            theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+            rentalShowDTO.setCustomerUsername(null); //no need customer information as the customer renting the vehicle is requesting data.
+
+            rentalShowDTO.setVehicleToBeRented(theVehicleToBeShown);
+            theReturnDTOList.add(rentalShowDTO);
+        }
+
+        returnList.put("nextPage", pageNumber + 1); //next page to query data from.
+        returnList.put("customerPendingRentals", theReturnDTOList);
+
+        return returnList;
+    }
+
+    /**
+     * Method returns all the rentals that have been approved and can be collected from Banger and Co. <br>
+     * isApproved - TRUE & isCollected - FALSE
+     *
+     * @param username   The customer to get the can be collected rentals to
+     * @param pageNumber The page number to get paginated data
+     * @return The object containing the list of can be collected vehicles and the next page token.
+     */
+    @Override
+    public HashMap<String, Object> getCustomerCanBeCollectedRentals(String username, Integer pageNumber) throws Exception {
+        HashMap<String, Object> returnList = new HashMap<>();
+
+        User theCustomer = userService._getUserWithoutDecompression(username);
+        Pageable thePaginator = PageRequest.of(pageNumber, ITEMS_PER_PAGE, Sort.by("pickupDate").ascending());
+
+        //true - approved rental, false - not yet collected.
+        //when rental starts - isCollected - true & isReturned - false.
+        List<Rental> allPendingCustomerRentals = rentalRepository.getAllByIsApprovedEqualsAndIsCollectedEqualsAndTheCustomerRentingEquals(
+                true, false, theCustomer, thePaginator
+        );
+
+        List<RentalShowDTO> theReturnDTOList = new ArrayList<>();
+        for (Rental eachRental : allPendingCustomerRentals) {
+            RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
+
+            VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
+            theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+            rentalShowDTO.setCustomerUsername(null); //no need customer information as the customer renting the vehicle is requesting data.
+
+            rentalShowDTO.setVehicleToBeRented(theVehicleToBeShown);
+            theReturnDTOList.add(rentalShowDTO);
+        }
+
+        returnList.put("nextPage", pageNumber + 1); //next page to query data from.
+        returnList.put("customerCanBeCollectedRentals", theReturnDTOList);
+
+        return returnList;
+    }
+
+    /**
+     * Method will return a list of the rentals of the customer that have been returned (PAST RENTAL HISTORY) <br>
+     * isCollected - TRUE & isReturned - TRUE
+     *
+     * @param username   The customer to get the past rentals for
+     * @param pageNumber The page information
+     * @return The object containing next page information and the past rentals.
+     */
+    @Override
+    public HashMap<String, Object> getCustomerCompletedRentals(String username, Integer pageNumber) throws Exception {
+        HashMap<String, Object> returnList = new HashMap<>();
+
+        User theCustomer = userService._getUserWithoutDecompression(username);
+        Pageable thePaginator = PageRequest.of(pageNumber, ITEMS_PER_PAGE, Sort.by("returnDate").descending());
+
+        List<Rental> allPendingCustomerRentals = rentalRepository.getAllByIsApprovedEqualsAndIsCollectedEqualsAndIsReturnedEqualsAndTheCustomerRentingEquals(
+                true, true, true, theCustomer, thePaginator
+        );
+
+        List<RentalShowDTO> theReturnDTOList = new ArrayList<>();
+        for (Rental eachRental : allPendingCustomerRentals) {
+            RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
+
+            VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
+            theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+            rentalShowDTO.setCustomerUsername(null); //no need customer information as the customer renting the vehicle is requesting data.
+
+            rentalShowDTO.setVehicleToBeRented(theVehicleToBeShown);
+            theReturnDTOList.add(rentalShowDTO);
+        }
+
+        returnList.put("nextPage", pageNumber + 1); //next page to query data from.
+        returnList.put("customerCompletedRentals", theReturnDTOList);
+
+        return returnList;
+    }
+
+    /**
+     * Method will get a list of on-going rentals for the customer <br>
+     * isApproved - TRUE & isCollected - TRUE & isReturned - FALSE
+     *
+     * @param username   The customer to get the on going rentals for
+     * @param pageNumber The page number
+     * @return The list of on going rentals
+     * @throws Exception Thrown during image de-compression
+     */
+    @Override
+    public HashMap<String, Object> getCustomerOnGoingRentals(String username, Integer pageNumber) throws Exception {
+        HashMap<String, Object> returnList = new HashMap<>();
+
+        User theCustomer = userService._getUserWithoutDecompression(username);
+        Pageable thePaginator = PageRequest.of(pageNumber, ITEMS_PER_PAGE, Sort.by("returnDate").descending());
+
+        //is returned - false & isCollected - true means rental is ongoing
+        List<Rental> allPendingCustomerRentals = rentalRepository.getAllByIsApprovedEqualsAndIsCollectedEqualsAndIsReturnedEqualsAndTheCustomerRentingEquals(
+                true, true, false, theCustomer, thePaginator
+        );
+
+        List<RentalShowDTO> theReturnDTOList = new ArrayList<>();
+        for (Rental eachRental : allPendingCustomerRentals) {
+            RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
+
+            VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
+            theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+            rentalShowDTO.setCustomerUsername(null); //no need customer information as the customer renting the vehicle is requesting data.
+
+            rentalShowDTO.setVehicleToBeRented(theVehicleToBeShown);
+            theReturnDTOList.add(rentalShowDTO);
+        }
+
+        returnList.put("nextPage", pageNumber + 1); //next page to query data from.
+        returnList.put("customerOnGoingRentals", theReturnDTOList);
+
+        return returnList;
+    }
+
+    /**
+     * Method will get a list of on-going rentals for the customer.
+     * <br> isApproved - FALSE
+     *
+     * @param username   The customer to get the rejected rentals for
+     * @param pageNumber The page number
+     * @return The list of rejected rentals along with the next page token.
+     */
+    @Override
+    public HashMap<String, Object> getCustomerRejectedRentals(String username, Integer pageNumber) throws Exception {
+        HashMap<String, Object> returnList = new HashMap<>();
+
+        User theCustomer = userService._getUserWithoutDecompression(username);
+        Pageable thePaginator = PageRequest.of(pageNumber, ITEMS_PER_PAGE, Sort.by("pickupDate").descending());
+
+        //isApproved - false - rejected rental
+        List<Rental> allPendingCustomerRentals = rentalRepository.getAllByIsApprovedEqualsAndTheCustomerRentingEquals(
+                false, theCustomer, thePaginator
+        );
+
+        List<RentalShowDTO> theReturnDTOList = new ArrayList<>();
+        for (Rental eachRental : allPendingCustomerRentals) {
+            RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
+
+            VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
+            theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+            rentalShowDTO.setCustomerUsername(null); //no need customer information as the customer renting the vehicle is requesting data.
+
+            rentalShowDTO.setVehicleToBeRented(theVehicleToBeShown);
+            theReturnDTOList.add(rentalShowDTO);
+        }
+
+        returnList.put("nextPage", pageNumber + 1); //next page to query data from.
+        returnList.put("customerRejectedRentals", theReturnDTOList);
+
+        return returnList;
     }
 
     /**
