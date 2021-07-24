@@ -737,21 +737,26 @@ public class RentalServiceImpl implements RentalService {
             if (eachEquipment.getQuantitySelectedForRental() > 3) {
                 throw new ResourceNotCreatedException("The equipment " + eachEquipment.getEquipmentName() + " exceed more than 3, therefore rental cannot be made. Maximum addon quantity should be 3.");
             } else {
-                if (eachEquipment.getQuantitySelectedForRental() != 0) {
-                    AdditionalEquipment item = additionalEquipmentService._getAdditionalEquipmentById(eachEquipment.getEquipmentId());
-                    //calculate total price for rental and reduce equipment quantity as rental is made.
-                    item.setEquipmentQuantity(item.getEquipmentQuantity() - eachEquipment.getQuantitySelectedForRental());
+                AdditionalEquipment item = additionalEquipmentService._getAdditionalEquipmentById(eachEquipment.getEquipmentId());
+                //calculate total price for rental and reduce equipment quantity as rental is made.
+                item.setEquipmentQuantity(item.getEquipmentQuantity() - eachEquipment.getQuantitySelectedForRental());
 
-                    RentalCustomization eachCustomization = new RentalCustomization();
-                    eachCustomization.setTheRentalInformation(theRentalToBeMade);
-                    eachCustomization.setEquipmentAddedToRental(item);
-                    eachCustomization.setQuantityAddedForEquipmentInRental(eachEquipment.getQuantitySelectedForRental());
+                RentalCustomization eachCustomization = new RentalCustomization();
+                eachCustomization.setTheRentalInformation(theRentalToBeMade);
+                eachCustomization.setEquipmentAddedToRental(item);
+                eachCustomization.setQuantityAddedForEquipmentInRental(eachEquipment.getQuantitySelectedForRental());
 
-                    addedCustomization.add(eachCustomization);
+                //calculate the price per hour by getting price per day / 24
+                double pricePerHourForEachItem = item.getPricePerDay() / PRICE_PER_DAY_DIVISOR;
 
-                    double costForEachEquipment = item.getPricePerDay() / PRICE_PER_DAY_DIVISOR;
-                    totalPriceForEquipments += costForEachEquipment * rentalPeriodInHours;
-                }
+                //calculate total price for equipment by price per hour * period in hours * quantity added to rental
+                double costForEachEquipment = pricePerHourForEachItem * rentalPeriodInHours * eachEquipment.getQuantitySelectedForRental();
+
+                //set the total price for the entity
+                eachCustomization.setTotalPriceForEquipment(costForEachEquipment); //set the total price of each equipment
+                addedCustomization.add(eachCustomization); //add it to the equipments array added to the rental.
+
+                totalPriceForEquipments += costForEachEquipment; //get the total sum
             }
         }
         supporter.setRentalCustomizationList(addedCustomization);

@@ -25,11 +25,20 @@ public class AdditionalEquipmentDTO {
     @Digits(integer = 5, fraction = 3, message = "Please provide a maximum of 5 numerics and 3 decimals for the price per day.")
     private String pricePerDay;
 
+    //-------VARIABLES USED IN RENTAL VIEWING----------//
     private int quantitySelectedForRental;
+    private double totalCostOfEquipmentInRental;
 
     public AdditionalEquipmentDTO() {
     }
 
+    public double getTotalCostOfEquipmentInRental() {
+        return totalCostOfEquipmentInRental;
+    }
+
+    public void setTotalCostOfEquipmentInRental(double totalCostOfEquipmentInRental) {
+        this.totalCostOfEquipmentInRental = totalCostOfEquipmentInRental;
+    }
 
     public int getQuantitySelectedForRental() {
         return quantitySelectedForRental;

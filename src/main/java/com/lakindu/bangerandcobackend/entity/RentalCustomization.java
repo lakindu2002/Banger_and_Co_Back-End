@@ -21,7 +21,18 @@ public class RentalCustomization {
     @Column(name = "added_quantity", nullable = false)
     private int quantityAddedForEquipmentInRental;
 
+    @Column(name = "total_price_for_equipment", nullable = false)
+    private double totalPriceForEquipment;
+
     public RentalCustomization() {
+    }
+
+    public double getTotalPriceForEquipment() {
+        return totalPriceForEquipment;
+    }
+
+    public void setTotalPriceForEquipment(double totalPriceForEquipment) {
+        this.totalPriceForEquipment = totalPriceForEquipment;
     }
 
     public int getRentalCustomizationId() {

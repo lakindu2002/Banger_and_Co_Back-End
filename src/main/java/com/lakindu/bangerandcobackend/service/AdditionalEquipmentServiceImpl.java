@@ -220,14 +220,14 @@ public class AdditionalEquipmentServiceImpl implements AdditionalEquipmentServic
             //iterate over the list
             AdditionalEquipment eachEquipmentAdded = eachCustomization.getEquipmentAddedToRental(); //retrieve the item added
             int quantityAddedForTheRental = eachCustomization.getQuantityAddedForEquipmentInRental(); //retrieve quantity of item added in the rental
-
+            double costOfItemInRental = eachCustomization.getTotalPriceForEquipment();
             //construct a dto
             AdditionalEquipmentDTO theDTO = new AdditionalEquipmentDTO();
             theDTO.setEquipmentId(eachEquipmentAdded.getEquipmentId());
             theDTO.setEquipmentName(eachEquipmentAdded.getEquipmentName());
-            theDTO.setEquipmentQuantity(eachEquipmentAdded.getEquipmentQuantity());
             theDTO.setLKR(eachEquipmentAdded.getPricePerDay());
             theDTO.setQuantitySelectedForRental(quantityAddedForTheRental); //set the quantity added for the rental in the dto
+            theDTO.setTotalCostOfEquipmentInRental(costOfItemInRental);
 
             returnDTOs.add(theDTO); //add the dto to the return list.
         }
