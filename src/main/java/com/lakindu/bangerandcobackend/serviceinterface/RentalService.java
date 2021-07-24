@@ -117,4 +117,36 @@ public interface RentalService {
      * @return The list of rejected rentals along with the next page token.
      */
     HashMap<String, Object> getCustomerRejectedRentals(String username, Integer pageNumber) throws Exception;
+
+    /**
+     * Method returns a list of the rejected rentals at Banger and Co.
+     *
+     * @param pageNumber The page number to get the data for
+     * @return The object containing the rejected rentals and the next page number.
+     */
+    HashMap<String, Object> getAllRejectedRentals(Integer pageNumber) throws Exception;
+
+    /**
+     * Method will get a list of all the approved rentals that can be collected from Banger and Co.
+     *
+     * @param pageNumber The page number to query the data for
+     * @return The object consisting of all the approved rentals along with the next page token
+     */
+    HashMap<String, Object> getAllApprovedRentals(Integer pageNumber) throws Exception;
+
+    /**
+     * Method will get a list of all on-going rentals for the given page number
+     *
+     * @param pageNumber The page number to get the data for
+     * @return The list containing the on-going rentals and the next page number.
+     */
+    HashMap<String, Object> getAllOnGoingRentals(Integer pageNumber) throws Exception;
+
+    /**
+     * Method will return a list of all completed/past rentals at Banger and Co.
+     *
+     * @param pageNumber The page number to get the data for
+     * @return The list containing all past rentals and the next page number.
+     */
+    HashMap<String, Object> getAllCompletedRentals(Integer pageNumber) throws Exception;
 }

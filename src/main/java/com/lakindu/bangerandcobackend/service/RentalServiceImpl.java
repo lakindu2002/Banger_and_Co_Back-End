@@ -441,12 +441,12 @@ public class RentalServiceImpl implements RentalService {
 
         //true - approved rental, false - not yet collected.
         //when rental starts - isCollected - true & isReturned - false.
-        List<Rental> allPendingCustomerRentals = rentalRepository.getAllByIsApprovedEqualsAndIsCollectedEqualsAndTheCustomerRentingEquals(
+        List<Rental> allCustomerCanBeCollectedRentals = rentalRepository.getAllByIsApprovedEqualsAndIsCollectedEqualsAndTheCustomerRentingEquals(
                 true, false, theCustomer, thePaginator
         );
 
         List<RentalShowDTO> theReturnDTOList = new ArrayList<>();
-        for (Rental eachRental : allPendingCustomerRentals) {
+        for (Rental eachRental : allCustomerCanBeCollectedRentals) {
             RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
 
             VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
@@ -478,12 +478,12 @@ public class RentalServiceImpl implements RentalService {
         User theCustomer = userService._getUserWithoutDecompression(username);
         Pageable thePaginator = PageRequest.of(pageNumber, ITEMS_PER_PAGE, Sort.by("returnDate").descending());
 
-        List<Rental> allPendingCustomerRentals = rentalRepository.getAllByIsApprovedEqualsAndIsCollectedEqualsAndIsReturnedEqualsAndTheCustomerRentingEquals(
+        List<Rental> allCustomerCompletedRentals = rentalRepository.getAllByIsApprovedEqualsAndIsCollectedEqualsAndIsReturnedEqualsAndTheCustomerRentingEquals(
                 true, true, true, theCustomer, thePaginator
         );
 
         List<RentalShowDTO> theReturnDTOList = new ArrayList<>();
-        for (Rental eachRental : allPendingCustomerRentals) {
+        for (Rental eachRental : allCustomerCompletedRentals) {
             RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
 
             VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
@@ -517,12 +517,12 @@ public class RentalServiceImpl implements RentalService {
         Pageable thePaginator = PageRequest.of(pageNumber, ITEMS_PER_PAGE, Sort.by("returnDate").descending());
 
         //is returned - false & isCollected - true means rental is ongoing
-        List<Rental> allPendingCustomerRentals = rentalRepository.getAllByIsApprovedEqualsAndIsCollectedEqualsAndIsReturnedEqualsAndTheCustomerRentingEquals(
+        List<Rental> allOnGoingCustomerRentals = rentalRepository.getAllByIsApprovedEqualsAndIsCollectedEqualsAndIsReturnedEqualsAndTheCustomerRentingEquals(
                 true, true, false, theCustomer, thePaginator
         );
 
         List<RentalShowDTO> theReturnDTOList = new ArrayList<>();
-        for (Rental eachRental : allPendingCustomerRentals) {
+        for (Rental eachRental : allOnGoingCustomerRentals) {
             RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
 
             VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
@@ -573,6 +573,128 @@ public class RentalServiceImpl implements RentalService {
 
         returnList.put("nextPage", pageNumber + 1); //next page to query data from.
         returnList.put("customerRejectedRentals", theReturnDTOList);
+
+        return returnList;
+    }
+
+    /**
+     * Method returns a list of the rejected rentals at Banger and Co.
+     *
+     * @param pageNumber The page number to get the data for
+     * @return The object containing the rejected rentals and the next page number.
+     */
+    @Override
+    public HashMap<String, Object> getAllRejectedRentals(Integer pageNumber) throws Exception {
+        HashMap<String, Object> returnList = new HashMap<>();
+        Pageable theNextPage = PageRequest.of(pageNumber, ITEMS_PER_PAGE, Sort.by("pickupDate").descending());
+        List<Rental> rejectedRentals = rentalRepository.getAllRejectedRentals(theNextPage);
+
+        List<RentalShowDTO> theRejectedDTOList = new ArrayList<>();
+
+        for (Rental eachRental : rejectedRentals) {
+            RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
+
+            VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
+            theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+
+            rentalShowDTO.setVehicleToBeRented(theVehicleToBeShown);
+            theRejectedDTOList.add(rentalShowDTO);
+        }
+
+        returnList.put("nextPage", pageNumber + 1);
+        returnList.put("rejectedRentals", theRejectedDTOList);
+
+        return returnList;
+    }
+
+    /**
+     * Method will get a list of all the approved rentals that can be collected from Banger and Co.
+     *
+     * @param pageNumber The page number to query the data for
+     * @return The object consisting of all the approved rentals along with the next page token
+     */
+    @Override
+    public HashMap<String, Object> getAllApprovedRentals(Integer pageNumber) throws Exception {
+        HashMap<String, Object> returnList = new HashMap<>();
+        Pageable nextPage = PageRequest.of(pageNumber, ITEMS_PER_PAGE, Sort.by("pickupDate").ascending());
+        //when rental is approved and is collected is false, the rental can be collected.
+        List<Rental> rentalList = rentalRepository.getAllCanBeCollectedRentals(true, false, nextPage);
+
+        List<RentalShowDTO> theApprovedRentalList = new ArrayList<>();
+
+        for (Rental eachRental : rentalList) {
+            RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
+
+            VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
+            theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+
+            rentalShowDTO.setVehicleToBeRented(theVehicleToBeShown);
+            theApprovedRentalList.add(rentalShowDTO);
+        }
+
+        returnList.put("nextPage", pageNumber + 1);
+        returnList.put("rejectedRentals", theApprovedRentalList);
+
+        return returnList;
+    }
+
+    /**
+     * Method will get a list of all on-going rentals for the given page number
+     *
+     * @param pageNumber The page number to get the data for
+     * @return The list containing the on-going rentals and the next page number.
+     */
+    @Override
+    public HashMap<String, Object> getAllOnGoingRentals(Integer pageNumber) throws Exception {
+        HashMap<String, Object> returnList = new HashMap<>();
+        Pageable theNextPage = PageRequest.of(pageNumber, ITEMS_PER_PAGE, Sort.by("returnDate").ascending());
+
+        List<Rental> allOnGoingRentals = rentalRepository.getAllOnGoingRentals();
+
+        List<RentalShowDTO> allOnGoingDTOs = new ArrayList<>();
+
+        for (Rental eachRental : allOnGoingRentals) {
+            RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
+
+            VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
+            theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+
+            rentalShowDTO.setVehicleToBeRented(theVehicleToBeShown);
+            allOnGoingDTOs.add(rentalShowDTO);
+        }
+
+        returnList.put("nextPage", pageNumber + 1);
+        returnList.put("allOnGoingRentals", allOnGoingDTOs);
+        return returnList;
+    }
+
+    /**
+     * Method will return a list of all completed/past rentals at Banger and Co.
+     *
+     * @param pageNumber The page number to get the data for
+     * @return The list containing all past rentals and the next page number.
+     */
+    @Override
+    public HashMap<String, Object> getAllCompletedRentals(Integer pageNumber) throws Exception {
+        //get with most recent returned rental on first.
+        Pageable theNextPage = PageRequest.of(pageNumber, ITEMS_PER_PAGE, Sort.by("returnDate").descending());
+        HashMap<String, Object> returnList = new HashMap<>();
+        List<RentalShowDTO> returnDTOList = new ArrayList<>();
+
+        List<Rental> completedRentals = rentalRepository.getAllCompletedRentals(theNextPage);
+
+        for (Rental eachRental : completedRentals) {
+            RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
+
+            VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
+            theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+
+            rentalShowDTO.setVehicleToBeRented(theVehicleToBeShown);
+            returnDTOList.add(rentalShowDTO);
+        }
+
+        returnList.put("nextPage", pageNumber + 1);
+        returnList.put("allCompleted", returnDTOList);
 
         return returnList;
     }

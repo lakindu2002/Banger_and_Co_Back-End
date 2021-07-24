@@ -61,5 +61,56 @@ public interface RentalRepository extends JpaRepository<Rental, Integer> {
      * @return The database return
      */
     List<Rental> getAllByIsApprovedEqualsAndIsCollectedEqualsAndIsReturnedEqualsAndTheCustomerRentingEquals(Boolean isApproved, Boolean isCollected, Boolean isReturned, User theCustomer, Pageable pageable);
+
+    /**
+     * Method will return a list of all rejected rentals at Banger and Co. <br>
+     * Rejected - isApproved FALSE
+     *
+     * @param theNextPage The page to get the data for
+     * @return The rental list for the given page.
+     */
+    @Query("FROM Rental theRental WHERE theRental.isApproved=false")
+    List<Rental> getAllRejectedRentals(Pageable theNextPage);
+
+    /**
+     * Method will get a list of all vehicles that can be collected from Banger and Co.
+     *
+     * @param isApproved  - TRUE
+     * @param isCollected - FALSE
+     * @param nextPage    Page to get data for
+     * @return Rental list for given page.
+     */
+    @Query("FROM Rental theRental WHERE theRental.isApproved=:isApproved AND theRental.isCollected=:isCollected")
+    List<Rental> getAllCanBeCollectedRentals(boolean isApproved, boolean isCollected, Pageable nextPage);
+
+    /**
+     * Method will get a list of all on-going rentals at Banger and Co.
+     * <br> For a rental to be on-going
+     * <ul>
+     *     <li>IsApproved = true</li>
+     *     <li>IsCollected = true</li>
+     *     <li>IsReturned = false</li>
+     * </ul>
+     * <br>Means that the rental has been collected but not yet returned - hence, on-going.
+     *
+     * @return
+     */
+    @Query("FROM Rental theRental WHERE theRental.isApproved=true AND theRental.isCollected=true AND theRental.isReturned=false")
+    List<Rental> getAllOnGoingRentals();
+
+    /**
+     * Method will return a list of all completed rentals at Banger and Co.
+     * <br> For a rental to be completed
+     * <ul>
+     *     <li>isApproved - true</li>
+     *     <li>isCollected - true</li>
+     *     <li>isReturned - true</li>
+     * </ul>
+     *
+     * @param theNextPage The page to get the results for
+     * @return The completed rentals from the database.
+     */
+    @Query("FROM Rental theRental WHERE theRental.isApproved=true AND theRental.isCollected=true AND theRental.isReturned=true")
+    List<Rental> getAllCompletedRentals(Pageable theNextPage);
 }
 

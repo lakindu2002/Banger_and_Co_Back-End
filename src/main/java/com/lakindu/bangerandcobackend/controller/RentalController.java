@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -49,6 +50,53 @@ public class RentalController {
         }
         HashMap<String, Object> allPendingRentalsWithPageToken = rentalService.getAllPendingRentals(pageNumber);
         return new ResponseEntity<>(allPendingRentalsWithPageToken, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/find/allRejected")
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    public ResponseEntity<HashMap<String, Object>> getAllRejectedRentals(@RequestParam(name = "pageNumber") Integer pageNumber) throws Exception {
+        //method used to get all the rejected rentals at banger and co.
+        if (pageNumber == null) {
+            pageNumber = 0;
+        }
+        HashMap<String, Object> returnResults = rentalService.getAllRejectedRentals(pageNumber);
+        return new ResponseEntity<>(returnResults, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/find/allApproved")
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    public ResponseEntity<HashMap<String, Object>> getAllApprovedRentals(@RequestParam(name = "pageNumber") Integer pageNumber) throws Exception {
+        //method used to get all approved rentals
+        //all approved rentals means all the rentals that have been approved and can be collected from Banger and Co.
+        if (pageNumber == null) {
+            pageNumber = 0;
+        }
+        HashMap<String, Object> returnResults = rentalService.getAllApprovedRentals(pageNumber);
+        return new ResponseEntity<>(returnResults, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/find/allCompleted")
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    public ResponseEntity<HashMap<String, Object>> getAllCompletedRentalsPastRentals(@RequestParam(name = "pageNumber") Integer pageNumber) throws Exception {
+        //method will get all the past rentals at banger and co to show the completed rentals
+        //to be a past rental - isApproved, isCollected and isReturned has to be true.
+        if (pageNumber == null) {
+            pageNumber = 0;
+        }
+        HashMap<String, Object> returnResults = rentalService.getAllCompletedRentals(pageNumber);
+        return new ResponseEntity<>(returnResults, HttpStatus.OK);
+    }
+
+    @GetMapping(path = "/find/allOnGoing")
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    public ResponseEntity<HashMap<String, Object>> getAllOnGoingRentals(@RequestParam(name = "pageNumber") Integer pageNumber) throws Exception {
+        //method used to get all the on-going rentals at Banger and Co.
+        //when a rental is on-going; isApprove - TRUE, isCollected - TRUE and isReturned - FALSE;
+        if (pageNumber == null) {
+            pageNumber = 0;
+        }
+        HashMap<String, Object> returnResults = rentalService.getAllOnGoingRentals(pageNumber);
+        return new ResponseEntity<>(returnResults, HttpStatus.OK);
     }
 
     @PreAuthorize("hasAuthority('CUSTOMER') or hasAuthority('ADMINISTRATOR')")
