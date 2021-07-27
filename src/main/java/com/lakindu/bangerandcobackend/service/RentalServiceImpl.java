@@ -327,9 +327,9 @@ public class RentalServiceImpl implements RentalService {
     public void rejectRental(Integer rentalId, String rejectedReason) throws ResourceNotFoundException, BadValuePassedException {
         Rental rental = rentalRepository.findById(rentalId).orElseThrow(() -> new ResourceNotFoundException("The rental you are trying to reject does not exist at Banger and Co."));
         //if the rental has already been rejected, do not reject it again.
-        if (rental.getApproved() != null && !rental.getApproved()) {
-            //rental is already rejected...
-            throw new BadValuePassedException("The rental you are trying to reject has already been rejected");
+        if (rental.getApproved() != null) {
+            //rental is already handled
+            throw new BadValuePassedException("The rental you are trying to reject has already been handled");
         } else {
             User theCustomerRenting = rental.getTheCustomerRenting();
             rental.setApproved(false); //reject the rental.
@@ -362,9 +362,9 @@ public class RentalServiceImpl implements RentalService {
     public void approveRental(Integer rentalId) throws ResourceNotFoundException, BadValuePassedException {
         Rental rental = rentalRepository.findById(rentalId).orElseThrow(() -> new ResourceNotFoundException("The rental you are trying to approve does not exist at Banger and Co."));
 
-        if (rental.getApproved() != null && rental.getApproved()) {
-            //rental has been already approved
-            throw new BadValuePassedException("The rental you are trying to approve has already been approved");
+        if (rental.getApproved() != null) {
+            //rental was already handled
+            throw new BadValuePassedException("The rental you are trying to approve has already been handled");
         } else {
             User theCustomerRenting = rental.getTheCustomerRenting();
             //approve the rental
@@ -616,6 +616,7 @@ public class RentalServiceImpl implements RentalService {
     @Override
     public HashMap<String, Object> getAllApprovedRentals(Integer pageNumber) throws Exception {
         HashMap<String, Object> returnList = new HashMap<>();
+        //sort by ascending pickup date so the vehicle soonest to get picked up is shown on top.
         Pageable nextPage = PageRequest.of(pageNumber, ITEMS_PER_PAGE, Sort.by("pickupDate").ascending());
         //when rental is approved and is collected is false, the rental can be collected.
         List<Rental> rentalList = rentalRepository.getAllCanBeCollectedRentals(true, false, nextPage);
@@ -633,7 +634,7 @@ public class RentalServiceImpl implements RentalService {
         }
 
         returnList.put("nextPage", pageNumber + 1);
-        returnList.put("rejectedRentals", theApprovedRentalList);
+        returnList.put("approvedRentals", theApprovedRentalList);
 
         return returnList;
     }
