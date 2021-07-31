@@ -219,15 +219,15 @@ public class VehicleServiceImpl implements VehicleService {
 
                 ) {
                     //The filtering Pickup DATE_TIME or Return DATE_TIME is between a rental.
-                    //check if that rental has been returned, if returned, can rent again.
-                    if (eachRental.getApproved() == null || eachRental.getApproved()) {
-                        //if the rental has been rejected it can be rented again.
-                        //if the rental is approved or pending, check if it returned
-                        if (eachRental.getReturned() != null && eachRental.getReturned()) {
-                            canBeAdded = true;
-                        } else {
-                            canBeAdded = false;
-                        }
+                    if (eachRental.getApproved() != null && !eachRental.getApproved()) {
+                        //rental has been returned, therefore, can be rented again
+                        canBeAdded = true;
+                    } else if (eachRental.getApproved() != null && eachRental.getReturned()) {
+                        //vehicle has been returned, can be rented again
+                        canBeAdded = true;
+                    } else if (eachRental.getApproved() == null) {
+                        //vehicle is pending, cannot be rented
+                        canBeAdded = false;
                     }
                 } else {
                     //The filtering Pickup DATE_TIME or Return DATE_TIME is not between a rental.
@@ -235,13 +235,16 @@ public class VehicleServiceImpl implements VehicleService {
                     //there may be rentals present between passed PICKUP Date_Time AND RETURN Date_Time
                     if (eachRentalPickupDateTime.isAfter(pickupDateTime) && eachRentalReturnDateTime.isBefore(returnDateTime)) {
                         //the rental in database is between the passed Pickup-Date_Time and Return Date_Time
-                        if (eachRental.getApproved() == null || eachRental.getApproved()) {
-                            if (eachRental.getReturned() != null && eachRental.getReturned()) {
-                                //if the vehicle for those rentals are returned, vehicle can be rented again.
-                                canBeAdded = true;
-                            } else {
-                                canBeAdded = false;
-                            }
+                        //The filtering Pickup DATE_TIME or Return DATE_TIME is between a rental.
+                        if (eachRental.getApproved() != null && !eachRental.getApproved()) {
+                            //rental has been returned, therefore, can be rented again
+                            canBeAdded = true;
+                        } else if (eachRental.getApproved() != null && eachRental.getReturned()) {
+                            //vehicle has been returned, can be rented again
+                            canBeAdded = true;
+                        } else if (eachRental.getApproved() == null) {
+                            //vehicle is pending, cannot be rented
+                            canBeAdded = false;
                         }
                     } else {
                         //the rental in database is not between passed Pickup-Date_Time and Return Date_Time
