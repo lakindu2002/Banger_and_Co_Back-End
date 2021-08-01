@@ -112,5 +112,13 @@ public interface RentalRepository extends JpaRepository<Rental, Integer> {
      */
     @Query("FROM Rental theRental WHERE theRental.isApproved=true AND theRental.isCollected=true AND theRental.isReturned=true")
     List<Rental> getAllCompletedRentals(Pageable theNextPage);
+
+    /**
+     * Get All the rentals for the given customer
+     *
+     * @param theCustomer The customer to get the rentals for
+     * @return The database result containing the rentals for the customer
+     */
+    List<Rental> getAllByTheCustomerRentingEquals(User theCustomer);
 }
 

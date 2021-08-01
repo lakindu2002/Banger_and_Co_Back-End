@@ -3,6 +3,8 @@ package com.lakindu.bangerandcobackend.serviceinterface;
 import com.lakindu.bangerandcobackend.dto.RentalCreateDTO;
 import com.lakindu.bangerandcobackend.dto.RentalShowDTO;
 import com.lakindu.bangerandcobackend.dto.VehicleRentalFilterDTO;
+import com.lakindu.bangerandcobackend.entity.User;
+import com.lakindu.bangerandcobackend.entity.Vehicle;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotCreatedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
@@ -10,6 +12,7 @@ import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.Re
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.zip.DataFormatException;
 
@@ -159,4 +162,14 @@ public interface RentalService {
      * @param rentalId The rental to start
      */
     void startRental(Integer rentalId) throws ResourceNotFoundException, BadValuePassedException, ResourceNotUpdatedException;
+
+    /**
+     * Method will check if the customer has any on-going, pending, approved rentals for the given time period.
+     *
+     * @param theCustomer    The customer that is renting
+     * @param pickupDateTime The start time period
+     * @param returnDateTime The end time period
+     */
+    void isCustomerHavingPendingOnGoingApprovedRentalsForPeriod(User theCustomer, LocalDateTime pickupDateTime, LocalDateTime returnDateTime) throws ResourceNotCreatedException;
+
 }

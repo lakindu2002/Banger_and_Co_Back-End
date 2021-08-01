@@ -192,7 +192,7 @@ public class AdditionalEquipmentServiceImpl implements AdditionalEquipmentServic
                 throw new ResourceCannotBeDeletedException("There are vehicles having this equipment added to it in rentals that are not yet collected");
             }
             //check if collected, but not returned
-            if ((eachRental.getCollected() != null && eachRental.getCollected()) && !eachRental.getReturned()) {
+            if ((eachRental.getCollected() != null && eachRental.getCollected()) && (eachRental.getReturned() != null && !eachRental.getReturned())) {
                 throw new ResourceCannotBeDeletedException("There are vehicles that are currently on rental that are having this equipment added to it.");
             }
 

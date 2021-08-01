@@ -220,9 +220,9 @@ public class VehicleServiceImpl implements VehicleService {
                 ) {
                     //The filtering Pickup DATE_TIME or Return DATE_TIME is between a rental.
                     if (eachRental.getApproved() != null && !eachRental.getApproved()) {
-                        //rental has been returned, therefore, can be rented again
+                        //rental has been rejected, therefore, can be rented again
                         canBeAdded = true;
-                    } else if (eachRental.getApproved() != null && eachRental.getReturned()) {
+                    } else if (eachRental.getApproved() != null && (eachRental.getReturned() != null && eachRental.getReturned())) {
                         //vehicle has been returned, can be rented again
                         canBeAdded = true;
                     } else if (eachRental.getApproved() == null) {
@@ -237,9 +237,9 @@ public class VehicleServiceImpl implements VehicleService {
                         //the rental in database is between the passed Pickup-Date_Time and Return Date_Time
                         //The filtering Pickup DATE_TIME or Return DATE_TIME is between a rental.
                         if (eachRental.getApproved() != null && !eachRental.getApproved()) {
-                            //rental has been returned, therefore, can be rented again
+                            //rental has been rejected, therefore, can be rented again
                             canBeAdded = true;
-                        } else if (eachRental.getApproved() != null && eachRental.getReturned()) {
+                        } else if (eachRental.getApproved() != null && (eachRental.getReturned() != null && eachRental.getReturned())) {
                             //vehicle has been returned, can be rented again
                             canBeAdded = true;
                         } else if (eachRental.getApproved() == null) {

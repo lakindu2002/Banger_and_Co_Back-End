@@ -169,9 +169,12 @@ public class RentalServiceImpl implements RentalService {
         }
 
         boolean isVehicleAvailable = vehicleService.isVehicleAvailableOnGivenDates(theVehicle, pickupDateTime, returnDateTime);
+        //exceptions will be thrown during validation for customer having pending,on-going,approved rentals
+        isCustomerHavingPendingOnGoingApprovedRentalsForPeriod(theCustomer, pickupDateTime, returnDateTime);
+
         if (isVehicleAvailable) {
             double costForVehicle = calculateCostForVehicle(rentalPeriodInHours, theVehicle);
-            //vehicle can be rented.
+            //vehicle can be rented and customer does not have pending, on-going, approved rentals for given period.
             //if rental has additional equipment, get the total and reduce quantity from database.
             if (theRental.getEquipmentsAddedToRental().isEmpty()) {
                 //no additional equipment, directly create rental.
@@ -198,10 +201,71 @@ public class RentalServiceImpl implements RentalService {
                 ex.printStackTrace();
                 LOGGER.warning("EMAIL NOT SENT DURING RENTAL: " + ex.getMessage());
             }
+
         } else {
             throw new ResourceNotCreatedException("The rental could not be created because the vehicle was not available for the specified pickup and return duration");
         }
 
+    }
+
+    /**
+     * Method will check if the customer has any on-going, pending, approved rentals for the given time period.
+     *
+     * @param theCustomer    The customer that is renting
+     * @param pickupDateTime The start time period
+     * @param returnDateTime The end time period
+     */
+    @Override
+    public void isCustomerHavingPendingOnGoingApprovedRentalsForPeriod(User theCustomer, LocalDateTime pickupDateTime, LocalDateTime returnDateTime) throws ResourceNotCreatedException {
+        //get rentals for the customer
+        List<Rental> allByTheCustomerRentingEquals = rentalRepository.getAllByTheCustomerRentingEquals(theCustomer);
+
+        for (Rental eachRental : allByTheCustomerRentingEquals) {
+            //retrieve LocalDateTime of the Rental Pickup - Date, Time and Return - Date, Time.
+            LocalDateTime eachRentalPickupDateTime = LocalDateTime.of(eachRental.getPickupDate(), eachRental.getPickupTime());
+            LocalDateTime eachRentalReturnDateTime = LocalDateTime.of(eachRental.getReturnDate(), eachRental.getReturnTime());
+
+            //if filtering Pickup DATE_TIME is between RENTAL Pickup DATE_TIME and Return DATE_TIME
+            //OR
+            //if filtering Return DATE_TIME is between RENTAL Pickup DATE_TIME and Return DATE_TIME
+            if (
+                    ((pickupDateTime.isAfter(eachRentalPickupDateTime) || pickupDateTime.equals(eachRentalPickupDateTime)) && (pickupDateTime.isBefore(eachRentalReturnDateTime) || pickupDateTime.equals(eachRentalReturnDateTime)))
+                            ||
+                            ((returnDateTime.isAfter(eachRentalPickupDateTime) || returnDateTime.equals(eachRentalPickupDateTime)) && (returnDateTime.isBefore(eachRentalReturnDateTime) || returnDateTime.equals(eachRentalPickupDateTime)))
+
+            ) {
+                //The filtering Pickup DATE_TIME or Return DATE_TIME is between a rental.
+                //customer cannot rent if he has ongoing, pending, approved rentals
+                if (eachRental.getApproved() == null) {
+                    //pending rentals are present
+                    throw new ResourceNotCreatedException("You have pending rentals during this period, therefore this rental cannot be made");
+                } else if (eachRental.getApproved() != null && eachRental.getApproved() && (eachRental.getCollected() != null && !eachRental.getCollected())) {
+                    //approved, can be collected rentals are present
+                    throw new ResourceNotCreatedException("You have rentals that can be collected during this period, therefore this rental cannot be made");
+                } else if ((eachRental.getCollected() != null && eachRental.getCollected()) && eachRental.getReturned() != null && !eachRental.getReturned()) {
+                    //collected rentals, ongoing rentals are present, not yet returned
+                    throw new ResourceNotCreatedException("You have rentals that can be on-going during this period, therefore this rental cannot be made");
+                }
+            } else {
+                //The filtering Pickup DATE_TIME or Return DATE_TIME is not between a rental.
+                //BUT
+                //there may be rentals present between passed PICKUP Date_Time AND RETURN Date_Time
+                if (eachRentalPickupDateTime.isAfter(pickupDateTime) && eachRentalReturnDateTime.isBefore(returnDateTime)) {
+                    //the rental in database is between the passed Pickup-Date_Time and Return Date_Time
+                    //The filtering Pickup DATE_TIME or Return DATE_TIME is between a rental.
+                    if (eachRental.getApproved() == null) {
+                        //pending rentals are present
+                        throw new ResourceNotCreatedException("You have pending rentals during this period, therefore this rental cannot be made");
+                    } else if (eachRental.getApproved() != null && eachRental.getApproved() && (eachRental.getCollected() != null && !eachRental.getCollected())) {
+                        //approved, can be collected rentals are present
+                        throw new ResourceNotCreatedException("You have rentals that can be collected during this period, therefore this rental cannot be made");
+                    } else if ((eachRental.getCollected() != null && eachRental.getCollected()) && eachRental.getReturned() != null && !eachRental.getReturned()) {
+                        //collected rentals, ongoing rentals are present, not yet returned
+                        throw new ResourceNotCreatedException("You have rentals that can be on-going during this period, therefore this rental cannot be made");
+                    }
+                }
+            }
+        }
     }
 
     /**
