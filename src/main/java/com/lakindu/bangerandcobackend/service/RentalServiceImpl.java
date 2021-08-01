@@ -10,6 +10,7 @@ import com.lakindu.bangerandcobackend.serviceinterface.VehicleService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotCreatedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotUpdatedException;
 import com.lakindu.bangerandcobackend.util.mailsender.MailSender;
 import com.lakindu.bangerandcobackend.util.mailsender.MailSenderHelper;
 import com.lakindu.bangerandcobackend.util.mailsender.MailTemplateType;
@@ -703,17 +704,21 @@ public class RentalServiceImpl implements RentalService {
     }
 
     /**
-     * Method will start the rental if it exists and has not been started before
+     * Method will start the rental if it exists and has not been started before and if the customer is not blacklisted
      * <br>
      * When collecting - isApproved - true && isCollected - true && isReturned - false
      *
      * @param rentalId The rental to start
      */
     @Override
-    public void startRental(Integer rentalId) throws ResourceNotFoundException, BadValuePassedException {
+    public void startRental(Integer rentalId) throws ResourceNotFoundException, BadValuePassedException, ResourceNotUpdatedException {
         Rental theRentalToBeStarted = rentalRepository.findById(rentalId).orElseThrow(() -> new ResourceNotFoundException("The rental that you are trying to start does not exist at Banger and Co."));
         if (theRentalToBeStarted.getCollected() != null && !theRentalToBeStarted.getCollected()) {
             //rental has not yet been collected
+            if (theRentalToBeStarted.getTheCustomerRenting().isBlackListed()) {
+                //customer is blacklisted, do not allow rental to be started.
+                throw new ResourceNotUpdatedException("The rental could not be started because this customer is already blacklisted. Whitelist the customer to start this rental");
+            }
             //when collecting - isCollected = true && isReturned = false
             theRentalToBeStarted.setCollected(true);
             theRentalToBeStarted.setReturned(false);

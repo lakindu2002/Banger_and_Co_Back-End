@@ -6,6 +6,7 @@ import com.lakindu.bangerandcobackend.dto.VehicleRentalFilterDTO;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotCreatedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotUpdatedException;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -151,11 +152,11 @@ public interface RentalService {
     HashMap<String, Object> getAllCompletedRentals(Integer pageNumber) throws Exception;
 
     /**
-     * Method will start the rental if it exists and has not been started before
+     * Method will start the rental if it exists and has not been started before and if the customer is not blacklisted
      * <br>
      * When collecting - isApproved - true && isCollected - true && isReturned - false
      *
      * @param rentalId The rental to start
      */
-    void startRental(Integer rentalId) throws ResourceNotFoundException, BadValuePassedException;
+    void startRental(Integer rentalId) throws ResourceNotFoundException, BadValuePassedException, ResourceNotUpdatedException;
 }

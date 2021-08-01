@@ -7,6 +7,7 @@ import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotCreatedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotUpdatedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -160,7 +161,7 @@ public class RentalController {
 
     @PreAuthorize("hasAuthority('ADMINISTRATOR')")
     @PutMapping(path = "/handle/startRental")
-    public ResponseEntity<BangerAndCoResponse> startRental(@RequestBody HashMap<String, Integer> theRentalId) throws BadValuePassedException, ResourceNotFoundException {
+    public ResponseEntity<BangerAndCoResponse> startRental(@RequestBody HashMap<String, Integer> theRentalId) throws BadValuePassedException, ResourceNotFoundException, ResourceNotUpdatedException {
         //method will be exuected by an admin to start a rental when the customer picks the vehicle up
         if (theRentalId.containsKey("rentalId") && theRentalId.get("rentalId") != null) {
             rentalService.startRental(theRentalId.get("rentalId"));
