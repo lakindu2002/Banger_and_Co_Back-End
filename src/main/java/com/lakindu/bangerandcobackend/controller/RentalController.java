@@ -160,7 +160,7 @@ public class RentalController {
     }
 
     @PreAuthorize("hasAuthority('ADMINISTRATOR')")
-    @PutMapping(path = "/handle/startRental")
+    @PostMapping(path = "/handle/startRental")
     public ResponseEntity<BangerAndCoResponse> startRental(@RequestBody HashMap<String, Integer> theRentalId) throws BadValuePassedException, ResourceNotFoundException, ResourceNotUpdatedException {
         //method will be exuected by an admin to start a rental when the customer picks the vehicle up
         if (theRentalId.containsKey("rentalId") && theRentalId.get("rentalId") != null) {
