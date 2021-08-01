@@ -158,6 +158,22 @@ public class RentalController {
         );
     }
 
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @PutMapping(path = "/handle/startRental")
+    public ResponseEntity<BangerAndCoResponse> startRental(@RequestBody HashMap<String, Integer> theRentalId) throws BadValuePassedException, ResourceNotFoundException {
+        //method will be exuected by an admin to start a rental when the customer picks the vehicle up
+        if (theRentalId.containsKey("rentalId") && theRentalId.get("rentalId") != null) {
+            rentalService.startRental(theRentalId.get("rentalId"));
+        } else {
+            //either the rental ID is not in request body, or its there as null, therefore its a bad value.
+            throw new BadValuePassedException("The rental ID is not present, therefore, the rental could not be started");
+        }
+        return new ResponseEntity<>(
+                new BangerAndCoResponse("The rental has been started successfully", HttpStatus.OK.value()),
+                HttpStatus.OK
+        );
+    }
+
     @PreAuthorize("hasAuthority('CUSTOMER')")
     @GetMapping(path = "/find/pending/{username}")
     public ResponseEntity<HashMap<String, Object>> getAllPendingRentalsForCustomer(
@@ -240,5 +256,4 @@ public class RentalController {
                 returnList, HttpStatus.OK
         );
     }
-
 }

@@ -149,4 +149,13 @@ public interface RentalService {
      * @return The list containing all past rentals and the next page number.
      */
     HashMap<String, Object> getAllCompletedRentals(Integer pageNumber) throws Exception;
+
+    /**
+     * Method will start the rental if it exists and has not been started before
+     * <br>
+     * When collecting - isApproved - true && isCollected - true && isReturned - false
+     *
+     * @param rentalId The rental to start
+     */
+    void startRental(Integer rentalId) throws ResourceNotFoundException, BadValuePassedException;
 }

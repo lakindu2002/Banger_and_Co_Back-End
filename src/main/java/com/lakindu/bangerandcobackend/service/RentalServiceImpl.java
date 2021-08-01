@@ -19,7 +19,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import javax.mail.MessagingException;
 import javax.transaction.Transactional;
+import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
@@ -698,6 +700,37 @@ public class RentalServiceImpl implements RentalService {
         returnList.put("allCompleted", returnDTOList);
 
         return returnList;
+    }
+
+    /**
+     * Method will start the rental if it exists and has not been started before
+     * <br>
+     * When collecting - isApproved - true && isCollected - true && isReturned - false
+     *
+     * @param rentalId The rental to start
+     */
+    @Override
+    public void startRental(Integer rentalId) throws ResourceNotFoundException, BadValuePassedException {
+        Rental theRentalToBeStarted = rentalRepository.findById(rentalId).orElseThrow(() -> new ResourceNotFoundException("The rental that you are trying to start does not exist at Banger and Co."));
+        if (theRentalToBeStarted.getCollected() != null && !theRentalToBeStarted.getCollected()) {
+            //rental has not yet been collected
+            //when collecting - isCollected = true && isReturned = false
+            theRentalToBeStarted.setCollected(true);
+            theRentalToBeStarted.setReturned(false);
+
+            Rental startedRental = rentalRepository.save(theRentalToBeStarted);//update rental information to indicate it is collected, and not yet returned
+            try {
+                mailSender.sendRentalMail(
+                        new MailSenderHelper(startedRental.getTheCustomerRenting(), "Rental Has Started", MailTemplateType.RENTAL_STARTED),
+                        startedRental
+                );
+            } catch (IOException | MessagingException e) {
+                LOGGER.warning("ERROR SENDING RENTAL START EMAIL");
+            }
+        } else {
+            //the rental is either pending or has been collected.
+            throw new BadValuePassedException("The rental you are trying to start is currently pending, or has been collected already");
+        }
     }
 
     /**

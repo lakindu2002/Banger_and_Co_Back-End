@@ -278,6 +278,21 @@ public class MailSender {
                 dynamicData.clear(); //clear hashmap contents after formatting template
                 return formattedTemplate;
             }
+            case RENTAL_STARTED: {
+                dynamicData.put("firstName", theHelper.getUserToBeInformed().getFirstName());
+                dynamicData.put("lastName", theHelper.getUserToBeInformed().getLastName());
+                dynamicData.put("vehicleName", rentalMade.getVehicleOnRental().getVehicleName());
+                dynamicData.put("pickupTime", rentalMade.getPickupTime().toString());
+                dynamicData.put("startedDate", new Date().toString());
+                dynamicData.put("returnTime", rentalMade.getReturnTime().toString());
+                dynamicData.put("pickupDate", rentalMade.getPickupDate().format(DateTimeFormatter.ISO_DATE));
+                dynamicData.put("returnDate", rentalMade.getPickupDate().format(DateTimeFormatter.ISO_DATE));
+
+                Template rentalStarted = handlebars.compile("RentalStarted");
+                String formattedData = rentalStarted.apply(dynamicData);
+                dynamicData.clear();
+                return formattedData;
+            }
             default: {
                 return null;
             }
