@@ -352,6 +352,21 @@ public class RentalServiceImpl implements RentalService {
         return chartReturns;
     }
 
+    @Override
+    public List<ChartReturn> getProfitsForLast12Months() throws Exception {
+        List<ChartReturn> completedRentalsForPast12Months = getCompletedRentalsForPast12Months();
+        for (ChartReturn eachMonth : completedRentalsForPast12Months) {
+            double total = 0;
+            List<RentalShowDTO> rentalsForMonth = eachMonth.getRentals();
+            for (RentalShowDTO rentalShowDTO : rentalsForMonth) {
+                total = total + rentalShowDTO.getTotalCostForRental();
+            }
+            eachMonth.setTotalForTheMonth(total);
+            eachMonth.setRentals(null);
+        }
+        return completedRentalsForPast12Months;
+    }
+
     private List<ChartReturn> fillEmptyMonths(List<ChartReturn> formattedDBData, Calendar dateTime12MonthsAgo) {
         List<String> monthList = new ArrayList<>();
         DateFormatSymbols monthProvider = new DateFormatSymbols(); //used to provide month names

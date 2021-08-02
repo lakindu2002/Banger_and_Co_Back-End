@@ -286,4 +286,13 @@ public class RentalController {
 
         return new ResponseEntity<>(completedRentalsForPast12Months, HttpStatus.OK);
     }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @GetMapping(path = "/statistics/yearlyProfits")
+    public ResponseEntity<List<ChartReturn>> getProfitsForLast12Months() throws Exception {
+
+        List<ChartReturn> profitsForLast12Months = rentalService.getProfitsForLast12Months();
+
+        return new ResponseEntity<>(profitsForLast12Months, HttpStatus.OK);
+    }
 }

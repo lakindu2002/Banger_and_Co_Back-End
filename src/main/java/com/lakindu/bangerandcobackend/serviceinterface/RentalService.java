@@ -186,4 +186,6 @@ public interface RentalService {
     void completeRental(Integer rentalId) throws ResourceNotFoundException, ResourceNotUpdatedException;
 
     List<ChartReturn> getCompletedRentalsForPast12Months() throws Exception;
+
+    List<ChartReturn> getProfitsForLast12Months() throws Exception;
 }
