@@ -356,13 +356,13 @@ public class RentalServiceImpl implements RentalService {
     public List<ChartReturn> getProfitsForLast12Months() throws Exception {
         List<ChartReturn> completedRentalsForPast12Months = getCompletedRentalsForPast12Months();
         for (ChartReturn eachMonth : completedRentalsForPast12Months) {
-            double total = 0;
+            double total = 0; //variable to keep track of total earnings per month
             List<RentalShowDTO> rentalsForMonth = eachMonth.getRentals();
             for (RentalShowDTO rentalShowDTO : rentalsForMonth) {
                 total = total + rentalShowDTO.getTotalCostForRental();
             }
-            eachMonth.setTotalForTheMonth(total);
-            eachMonth.setRentals(null);
+            eachMonth.setTotalForTheMonth(total); //calculate total cost
+            eachMonth.setRentals(null); //no need to show rentals in return
         }
         return completedRentalsForPast12Months;
     }
@@ -370,14 +370,14 @@ public class RentalServiceImpl implements RentalService {
     @Override
     public List<RentalShowDTO> getVehiclesToBeCollectedForMonth() throws Exception {
         Calendar endOfMonth = Calendar.getInstance();
-        int maximumDate = endOfMonth.getActualMaximum(Calendar.DATE);
+        int maximumDate = endOfMonth.getActualMaximum(Calendar.DATE); //get the last date of the month
         endOfMonth.set(Calendar.DATE, maximumDate);
 
         Calendar beginningOfMonth = Calendar.getInstance();
-        beginningOfMonth.set(Calendar.DATE, 1);
+        beginningOfMonth.set(Calendar.DATE, 1); //first date of the month
 
 
-        List<Rental> vehiclesToBeCollected = rentalRepository.getAllByIsApprovedEqualsAndIsCollectedEqualsAndPickupDateGreaterThanEqualAndReturnDateLessThanEqual(
+        List<Rental> vehiclesToBeCollected = rentalRepository.getAllByIsApprovedEqualsAndIsCollectedEqualsAndPickupDateGreaterThanEqualAndPickupDateLessThanEqual(
                 true, false,
                 beginningOfMonth.toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
                 endOfMonth.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
@@ -386,6 +386,7 @@ public class RentalServiceImpl implements RentalService {
         List<RentalShowDTO> showingRentals = new ArrayList<>();
 
         for (Rental eachRental : vehiclesToBeCollected) {
+            //covert to dto list
             RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
 
             VehicleShowDTO vehicleShowDTO = rentalShowDTO.getVehicleToBeRented();

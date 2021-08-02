@@ -137,6 +137,17 @@ public interface RentalRepository extends JpaRepository<Rental, Integer> {
     )
     List<Rental> getAllCompletedRentalsForPast12Months(LocalDate startDate);
 
-    List<Rental> getAllByIsApprovedEqualsAndIsCollectedEqualsAndPickupDateGreaterThanEqualAndReturnDateLessThanEqual(boolean isApproved, boolean isCollected, LocalDate startDate, LocalDate endDate);
+    /**
+     * Method will return a list of vehicles that needs to be collected within the given month
+     * <br>
+     * Criteria - PICKUP DATE >= 1 and PICKUP DATE <= LAST DAY OF MONTH
+     *
+     * @param isApproved  Indicate rental being approved
+     * @param isCollected Should be false
+     * @param startDate   First date of the month
+     * @param endDate     Last date of the month
+     * @return Rentals that can be collected for given month
+     */
+    List<Rental> getAllByIsApprovedEqualsAndIsCollectedEqualsAndPickupDateGreaterThanEqualAndPickupDateLessThanEqual(boolean isApproved, boolean isCollected, LocalDate startDate, LocalDate endDate);
 }
 
