@@ -2,12 +2,15 @@ package com.lakindu.bangerandcobackend.repository;
 
 import com.lakindu.bangerandcobackend.entity.Rental;
 import com.lakindu.bangerandcobackend.entity.User;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 @Repository
@@ -96,7 +99,7 @@ public interface RentalRepository extends JpaRepository<Rental, Integer> {
      * @return
      */
     @Query("FROM Rental theRental WHERE theRental.isApproved=true AND theRental.isCollected=true AND theRental.isReturned=false")
-    List<Rental> getAllOnGoingRentals();
+    List<Rental> getAllOnGoingRentals(Pageable pageRequest);
 
     /**
      * Method will return a list of all completed rentals at Banger and Co.
@@ -120,5 +123,37 @@ public interface RentalRepository extends JpaRepository<Rental, Integer> {
      * @return The database result containing the rentals for the customer
      */
     List<Rental> getAllByTheCustomerRentingEquals(User theCustomer);
+
+    /**
+     * Method will return the completed rentals for the past 12 months
+     *
+     * @param startDate The start date = current date - 12 months
+     * @return The list of rentals over the past 12 months
+     */
+    @Query(
+            "FROM Rental theRental WHERE " +
+                    "(theRental.isCollected=true AND theRental.isReturned=true) AND " +
+                    "(theRental.pickupDate>=:startDate)"
+    )
+    List<Rental> getAllCompletedRentalsForPast12Months(LocalDate startDate);
+
+    /**
+     * Method will return a list of vehicles that needs to be collected within the given month
+     * <br>
+     * Criteria - PICKUP DATE >= 1 and PICKUP DATE <= LAST DAY OF MONTH
+     *
+     * @param isApproved  Indicate rental being approved
+     * @param isCollected Should be false
+     * @param startDate   First date of the month
+     * @param endDate     Last date of the month
+     * @return Rentals that can be collected for given month
+     */
+    List<Rental> getAllByIsApprovedEqualsAndIsCollectedEqualsAndPickupDateGreaterThanEqualAndPickupDateLessThanEqual(boolean isApproved, boolean isCollected, LocalDate startDate, LocalDate endDate);
+
+    List<Rental> findAllByIsApprovedEquals(Boolean isApproved);
+
+    List<Rental> findAllByIsApprovedEqualsAndIsCollectedEqualsAndIsReturnedEquals(
+            Boolean isApproved, Boolean isCollected, Boolean isReturned
+    );
 }
 

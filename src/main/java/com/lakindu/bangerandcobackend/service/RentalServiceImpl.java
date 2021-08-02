@@ -23,13 +23,13 @@ import org.springframework.stereotype.Service;
 import javax.mail.MessagingException;
 import javax.transaction.Transactional;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.DateFormatSymbols;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 
 @Service
@@ -316,6 +316,228 @@ public class RentalServiceImpl implements RentalService {
 
     }
 
+    @Override
+    public List<ChartReturn> getCompletedRentalsForPast12Months() throws Exception {
+        //method will be executed by the administrator to get the completed rentals for the past 12 months for the chart.
+        Calendar dateTime12MonthsAgo = Calendar.getInstance();
+
+        dateTime12MonthsAgo.set(Calendar.HOUR, 0); //set to midnight
+        dateTime12MonthsAgo.set(Calendar.MINUTE, 0); //set to exactly 0th minute
+        dateTime12MonthsAgo.set(Calendar.SECOND, 0); //set to 0 seconds
+        dateTime12MonthsAgo.add(Calendar.MONTH, -12); //reduce 12 months from the current dateTime
+
+        LocalDate startDate = LocalDate.from(dateTime12MonthsAgo.toInstant().atZone(ZoneId.systemDefault()).toLocalDate());
+
+        //get all completed rentals between these 12 months ago and current date time
+        List<Rental> completedPast12MonthsRentals = rentalRepository.getAllCompletedRentalsForPast12Months(startDate);
+        List<ChartReturn> formattedDBData = compileInToMonthsAndCount(completedPast12MonthsRentals);
+
+        List<ChartReturn> chartReturns = fillEmptyMonths(formattedDBData, dateTime12MonthsAgo);
+
+        //sort to order the months from oldest (12 months ago) to current month
+        chartReturns.sort((chart01, chart02) -> {
+            DateFormat simpleDateFormat = new SimpleDateFormat("MMMM - yyyy"); //parse date in MONTH - year
+            try {
+                Date firstDate = simpleDateFormat.parse(chart01.getMonth()); //first month parsed in given format
+                Date secondDate = simpleDateFormat.parse(chart02.getMonth()); //second month parsed in given format
+
+                //(0) - same, (-1) - first < second, (1) first > second
+                return firstDate.compareTo(secondDate);
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
+            return 0;
+        });
+
+        return chartReturns;
+    }
+
+    @Override
+    public List<ChartReturn> getProfitsForLast12Months() throws Exception {
+        List<ChartReturn> completedRentalsForPast12Months = getCompletedRentalsForPast12Months();
+        for (ChartReturn eachMonth : completedRentalsForPast12Months) {
+            double total = 0; //variable to keep track of total earnings per month
+            List<RentalShowDTO> rentalsForMonth = eachMonth.getRentals();
+            for (RentalShowDTO rentalShowDTO : rentalsForMonth) {
+                total = total + rentalShowDTO.getTotalCostForRental();
+            }
+            eachMonth.setTotalForTheMonth(total); //calculate total cost
+            eachMonth.setRentals(null); //no need to show rentals in return
+        }
+        return completedRentalsForPast12Months;
+    }
+
+    @Override
+    public List<RentalShowDTO> getVehiclesToBeCollectedForMonth() throws Exception {
+        Calendar endOfMonth = Calendar.getInstance();
+        int maximumDate = endOfMonth.getActualMaximum(Calendar.DATE); //get the last date of the month
+        endOfMonth.set(Calendar.DATE, maximumDate);
+
+        Calendar beginningOfMonth = Calendar.getInstance();
+        beginningOfMonth.set(Calendar.DATE, 1); //first date of the month
+
+
+        List<Rental> vehiclesToBeCollected = rentalRepository.getAllByIsApprovedEqualsAndIsCollectedEqualsAndPickupDateGreaterThanEqualAndPickupDateLessThanEqual(
+                true, false,
+                beginningOfMonth.toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
+                endOfMonth.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+        );
+
+        List<RentalShowDTO> showingRentals = new ArrayList<>();
+
+        for (Rental eachRental : vehiclesToBeCollected) {
+            //covert to dto list
+            RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
+
+            VehicleShowDTO vehicleShowDTO = rentalShowDTO.getVehicleToBeRented();
+            vehicleShowDTO.setVehicleImage(null);
+
+            UserDTO customerUsername = rentalShowDTO.getCustomerUsername();
+            customerUsername.setProfilePicture(null);
+            customerUsername.setOtherIdentity(null);
+            customerUsername.setLicensePic(null);
+
+            rentalShowDTO.setCustomerUsername(customerUsername);
+            rentalShowDTO.setVehicleToBeRented(vehicleShowDTO);
+            showingRentals.add(rentalShowDTO);
+        }
+        return showingRentals;
+    }
+
+    @Override
+    public List<RentalShowDTO> getAllPendingRentalsForStatistics() throws Exception {
+        List<Rental> allPendingRentals = rentalRepository.findAllByIsApprovedEquals(
+                null
+        );
+
+        List<RentalShowDTO> theRentalList = new ArrayList<>();
+
+        for (Rental eachRental : allPendingRentals) {
+            RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
+
+            VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
+            theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+
+            UserDTO theCustomer = rentalShowDTO.getCustomerUsername();
+            theCustomer.setLicensePic(null);
+            theCustomer.setOtherIdentity(null);
+            theCustomer.setProfilePicture(null);
+
+            rentalShowDTO.setCustomerUsername(theCustomer);
+
+            rentalShowDTO.setVehicleToBeRented(theVehicleToBeShown);
+            theRentalList.add(rentalShowDTO);
+        }
+        return theRentalList;
+    }
+
+    @Override
+    public List<RentalShowDTO> getAllOnGoingRentalsForChart() throws Exception {
+        List<Rental> allOngoingRentals = rentalRepository.findAllByIsApprovedEqualsAndIsCollectedEqualsAndIsReturnedEquals(
+                true, true, false
+        );
+
+        List<RentalShowDTO> theRentalList = new ArrayList<>();
+
+        for (Rental eachRental : allOngoingRentals) {
+            RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
+
+            VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
+            theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+
+            UserDTO theCustomer = rentalShowDTO.getCustomerUsername();
+            theCustomer.setLicensePic(null);
+            theCustomer.setOtherIdentity(null);
+            theCustomer.setProfilePicture(null);
+
+            rentalShowDTO.setCustomerUsername(theCustomer);
+
+            rentalShowDTO.setVehicleToBeRented(theVehicleToBeShown);
+            theRentalList.add(rentalShowDTO);
+        }
+        return theRentalList;
+    }
+
+    private List<ChartReturn> fillEmptyMonths(List<ChartReturn> formattedDBData, Calendar dateTime12MonthsAgo) {
+        List<String> monthList = new ArrayList<>();
+        DateFormatSymbols monthProvider = new DateFormatSymbols(); //used to provide month names
+        String[] monthArray = monthProvider.getMonths();  //get months will return the list of months
+        while (dateTime12MonthsAgo.getTimeInMillis() < Calendar.getInstance().getTimeInMillis()) {
+            //fill up months from 12 months ago till current time
+            //passing the index will return the month to add
+            monthList.add(monthArray[dateTime12MonthsAgo.get(Calendar.MONTH)].toUpperCase() + " - " + dateTime12MonthsAgo.get(Calendar.YEAR));
+            dateTime12MonthsAgo.add(Calendar.MONTH, 1); //add one more month
+        }
+
+        for (String eachMonth : monthList) {
+            int monthInReturn = isMonthInReturn(eachMonth, formattedDBData);
+            if (monthInReturn == -1) {
+                //-1 = not present
+                //insert empty data to fill past 12 month gap, if not present
+                formattedDBData.add(new ChartReturn(eachMonth));
+            }
+        }
+
+        return formattedDBData;
+    }
+
+    private List<ChartReturn> compileInToMonthsAndCount(List<Rental> completedPast12MonthsRentals) throws Exception {
+        List<ChartReturn> chartData = new ArrayList<>();
+
+        for (Rental eachRental : completedPast12MonthsRentals) {
+            String monthName = eachRental.getPickupDate().getMonth().toString();
+            int year = eachRental.getPickupDate().getYear();
+            monthName = monthName + " - " + year; //combine month and year
+
+            RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
+
+            VehicleShowDTO vehicleToBeRented = rentalShowDTO.getVehicleToBeRented();
+            vehicleToBeRented.setVehicleImage(null); //remove vehicle image
+
+            UserDTO customerRenting = rentalShowDTO.getCustomerUsername();
+            customerRenting.setLicensePic(null);
+            customerRenting.setOtherIdentity(null);
+            customerRenting.setProfilePicture(null); //remove images from customer as well
+
+            rentalShowDTO.setVehicleToBeRented(vehicleToBeRented); //assign vehicle with no image
+            rentalShowDTO.setCustomerUsername(customerRenting); //assign customer with no images.
+
+            int isPresent = isMonthInReturn(monthName, chartData);
+
+            if (isPresent != -1) {
+                //month already added to list
+
+                ChartReturn chartReturn = chartData.get(isPresent);
+
+                chartReturn.setCount(chartReturn.getCount() + 1); //update the count for the month
+                chartReturn.addRental(rentalShowDTO); //add the new rental to the array
+
+                chartData.set(isPresent, chartReturn); //update the data for the existing month
+            } else {
+                //month is new
+                ChartReturn chartReturn = new ChartReturn();
+                chartReturn.setMonth(monthName);
+                chartReturn.setCount(1);
+                chartReturn.addRental(rentalShowDTO);
+
+                chartData.add(chartReturn); //insert the data for new month
+            }
+        }
+
+        return chartData;
+    }
+
+    private int isMonthInReturn(String month, List<ChartReturn> checker) {
+        int index = 0;
+        for (ChartReturn eachCheck : checker) {
+            if (eachCheck.getMonth().equals(month)) {
+                return index;
+            }
+            index = index + 1;
+        }
+        return -1; //not found
+    }
+
     /**
      * Method will get a list of all pending rentals from the database.
      * A sort will be done to retrieve the vehicles with the soonest pickup date to be in the first.
@@ -324,7 +546,7 @@ public class RentalServiceImpl implements RentalService {
      */
     @Override
     public HashMap<String, Object> getAllPendingRentals(int pageNumber) throws Exception {
-        HashMap<String, Object> returnList = new HashMap<String, Object>();
+        HashMap<String, Object> returnList = new HashMap<>();
         //sort the rentals to get the vehicles that need to be picked up earliest.
 
         Pageable thePage = PageRequest.of(pageNumber, ITEMS_PER_PAGE, Sort.by("pickupDate").ascending());
@@ -340,6 +562,13 @@ public class RentalServiceImpl implements RentalService {
 
             VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
             theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+
+            UserDTO theCustomer = rentalShowDTO.getCustomerUsername();
+            theCustomer.setLicensePic(null);
+            theCustomer.setOtherIdentity(null);
+            theCustomer.setProfilePicture(null);
+
+            rentalShowDTO.setCustomerUsername(theCustomer);
 
             rentalShowDTO.setVehicleToBeRented(theVehicleToBeShown);
             theRentalList.add(rentalShowDTO);
@@ -712,6 +941,13 @@ public class RentalServiceImpl implements RentalService {
             VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
             theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
 
+            UserDTO theCustomer = rentalShowDTO.getCustomerUsername();
+            theCustomer.setLicensePic(null);
+            theCustomer.setOtherIdentity(null);
+            theCustomer.setProfilePicture(null);
+
+            rentalShowDTO.setCustomerUsername(theCustomer);
+
             rentalShowDTO.setVehicleToBeRented(theVehicleToBeShown);
             theRejectedDTOList.add(rentalShowDTO);
         }
@@ -744,6 +980,13 @@ public class RentalServiceImpl implements RentalService {
             VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
             theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
 
+            UserDTO theCustomer = rentalShowDTO.getCustomerUsername();
+            theCustomer.setLicensePic(null);
+            theCustomer.setOtherIdentity(null);
+            theCustomer.setProfilePicture(null);
+
+            rentalShowDTO.setCustomerUsername(theCustomer);
+
             rentalShowDTO.setVehicleToBeRented(theVehicleToBeShown);
             theApprovedRentalList.add(rentalShowDTO);
         }
@@ -765,7 +1008,7 @@ public class RentalServiceImpl implements RentalService {
         HashMap<String, Object> returnList = new HashMap<>();
         Pageable theNextPage = PageRequest.of(pageNumber, ITEMS_PER_PAGE, Sort.by("returnDate").ascending());
 
-        List<Rental> allOnGoingRentals = rentalRepository.getAllOnGoingRentals();
+        List<Rental> allOnGoingRentals = rentalRepository.getAllOnGoingRentals(theNextPage);
 
         List<RentalShowDTO> allOnGoingDTOs = new ArrayList<>();
 
@@ -774,6 +1017,13 @@ public class RentalServiceImpl implements RentalService {
 
             VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
             theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+
+            UserDTO theCustomer = rentalShowDTO.getCustomerUsername();
+            theCustomer.setLicensePic(null);
+            theCustomer.setOtherIdentity(null);
+            theCustomer.setProfilePicture(null);
+
+            rentalShowDTO.setCustomerUsername(theCustomer);
 
             rentalShowDTO.setVehicleToBeRented(theVehicleToBeShown);
             allOnGoingDTOs.add(rentalShowDTO);
@@ -804,6 +1054,13 @@ public class RentalServiceImpl implements RentalService {
 
             VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
             theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+
+            UserDTO theCustomer = rentalShowDTO.getCustomerUsername();
+            theCustomer.setLicensePic(null);
+            theCustomer.setOtherIdentity(null);
+            theCustomer.setProfilePicture(null);
+
+            rentalShowDTO.setCustomerUsername(theCustomer);
 
             rentalShowDTO.setVehicleToBeRented(theVehicleToBeShown);
             returnDTOList.add(rentalShowDTO);
@@ -873,7 +1130,7 @@ public class RentalServiceImpl implements RentalService {
      *
      * @param equipmentsAddedToRental The equipments customer want in the rental
      * @param rentalPeriodInHours     The duration of the rental in hours.
-     * @param theRentalToBeMade
+     * @param theRentalToBeMade       The rental that is going to be created
      * @return The object consisting of total cost for rental and equipments in the rental.
      * @throws ResourceNotFoundException   Thrown when the equipments cannot be found
      * @throws ResourceNotCreatedException Thrown when the equipment quantity exceeds three.

@@ -1,5 +1,6 @@
 package com.lakindu.bangerandcobackend.controller;
 
+import com.lakindu.bangerandcobackend.dto.ChartReturn;
 import com.lakindu.bangerandcobackend.dto.RentalCreateDTO;
 import com.lakindu.bangerandcobackend.dto.RentalShowDTO;
 import com.lakindu.bangerandcobackend.serviceinterface.RentalService;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.text.ParseException;
 import java.util.HashMap;
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "/api/rental")
@@ -274,5 +276,50 @@ public class RentalController {
         return new ResponseEntity<>(
                 returnList, HttpStatus.OK
         );
+    }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @GetMapping(path = "/statistics/completedPast12Months")
+    public ResponseEntity<List<ChartReturn>> getCompletedRentalsForPast12Months() throws Exception {
+
+        List<ChartReturn> completedRentalsForPast12Months = rentalService.getCompletedRentalsForPast12Months();
+
+        return new ResponseEntity<>(completedRentalsForPast12Months, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @GetMapping(path = "/statistics/yearlyProfits")
+    public ResponseEntity<List<ChartReturn>> getProfitsForLast12Months() throws Exception {
+
+        List<ChartReturn> profitsForLast12Months = rentalService.getProfitsForLast12Months();
+
+        return new ResponseEntity<>(profitsForLast12Months, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @GetMapping(path = "/statistics/vehiclesToBeCollectedForMonth")
+    public ResponseEntity<List<RentalShowDTO>> getVehiclesToBeCollectedForMonth() throws Exception {
+
+        List<RentalShowDTO> vehiclesToBeCollectedForMonth = rentalService.getVehiclesToBeCollectedForMonth();
+
+        return new ResponseEntity<>(vehiclesToBeCollectedForMonth, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @GetMapping(path = "/statistics/allPendingRentals")
+    public ResponseEntity<List<RentalShowDTO>> getAllPendingRentalsForChart() throws Exception {
+
+        List<RentalShowDTO> allPendingRentalsForStatistics = rentalService.getAllPendingRentalsForStatistics();
+
+        return new ResponseEntity<>(allPendingRentalsForStatistics, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @GetMapping(path = "/statistics/allOnGoingRentals")
+    public ResponseEntity<List<RentalShowDTO>> getAllOnGoingRentalsForChart() throws Exception {
+
+        List<RentalShowDTO> allOnGoingRentalsForChart = rentalService.getAllOnGoingRentalsForChart();
+
+        return new ResponseEntity<>(allOnGoingRentalsForChart, HttpStatus.OK);
     }
 }

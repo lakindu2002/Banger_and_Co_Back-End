@@ -1,5 +1,6 @@
 package com.lakindu.bangerandcobackend.serviceinterface;
 
+import com.lakindu.bangerandcobackend.dto.ChartReturn;
 import com.lakindu.bangerandcobackend.dto.RentalCreateDTO;
 import com.lakindu.bangerandcobackend.dto.RentalShowDTO;
 import com.lakindu.bangerandcobackend.dto.VehicleRentalFilterDTO;
@@ -14,6 +15,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.zip.DataFormatException;
 
 public interface RentalService {
@@ -182,4 +184,14 @@ public interface RentalService {
      * @param rentalId The rental to complete
      */
     void completeRental(Integer rentalId) throws ResourceNotFoundException, ResourceNotUpdatedException;
+
+    List<ChartReturn> getCompletedRentalsForPast12Months() throws Exception;
+
+    List<ChartReturn> getProfitsForLast12Months() throws Exception;
+
+    List<RentalShowDTO> getVehiclesToBeCollectedForMonth() throws Exception;
+
+    List<RentalShowDTO> getAllPendingRentalsForStatistics() throws Exception;
+
+    List<RentalShowDTO> getAllOnGoingRentalsForChart() throws Exception;
 }
