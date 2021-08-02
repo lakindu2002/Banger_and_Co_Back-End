@@ -404,6 +404,60 @@ public class RentalServiceImpl implements RentalService {
         return showingRentals;
     }
 
+    @Override
+    public List<RentalShowDTO> getAllPendingRentalsForStatistics() throws Exception {
+        List<Rental> allPendingRentals = rentalRepository.findAllByIsApprovedEquals(
+                null
+        );
+
+        List<RentalShowDTO> theRentalList = new ArrayList<>();
+
+        for (Rental eachRental : allPendingRentals) {
+            RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
+
+            VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
+            theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+
+            UserDTO theCustomer = rentalShowDTO.getCustomerUsername();
+            theCustomer.setLicensePic(null);
+            theCustomer.setOtherIdentity(null);
+            theCustomer.setProfilePicture(null);
+
+            rentalShowDTO.setCustomerUsername(theCustomer);
+
+            rentalShowDTO.setVehicleToBeRented(theVehicleToBeShown);
+            theRentalList.add(rentalShowDTO);
+        }
+        return theRentalList;
+    }
+
+    @Override
+    public List<RentalShowDTO> getAllOnGoingRentalsForChart() throws Exception {
+        List<Rental> allOngoingRentals = rentalRepository.findAllByIsApprovedEqualsAndIsCollectedEqualsAndIsReturnedEquals(
+                true, true, false
+        );
+
+        List<RentalShowDTO> theRentalList = new ArrayList<>();
+
+        for (Rental eachRental : allOngoingRentals) {
+            RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
+
+            VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
+            theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+
+            UserDTO theCustomer = rentalShowDTO.getCustomerUsername();
+            theCustomer.setLicensePic(null);
+            theCustomer.setOtherIdentity(null);
+            theCustomer.setProfilePicture(null);
+
+            rentalShowDTO.setCustomerUsername(theCustomer);
+
+            rentalShowDTO.setVehicleToBeRented(theVehicleToBeShown);
+            theRentalList.add(rentalShowDTO);
+        }
+        return theRentalList;
+    }
+
     private List<ChartReturn> fillEmptyMonths(List<ChartReturn> formattedDBData, Calendar dateTime12MonthsAgo) {
         List<String> monthList = new ArrayList<>();
         DateFormatSymbols monthProvider = new DateFormatSymbols(); //used to provide month names

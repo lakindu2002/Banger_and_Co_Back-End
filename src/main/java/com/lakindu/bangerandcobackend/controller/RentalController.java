@@ -304,4 +304,22 @@ public class RentalController {
 
         return new ResponseEntity<>(vehiclesToBeCollectedForMonth, HttpStatus.OK);
     }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @GetMapping(path = "/statistics/allPendingRentals")
+    public ResponseEntity<List<RentalShowDTO>> getAllPendingRentalsForChart() throws Exception {
+
+        List<RentalShowDTO> allPendingRentalsForStatistics = rentalService.getAllPendingRentalsForStatistics();
+
+        return new ResponseEntity<>(allPendingRentalsForStatistics, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @GetMapping(path = "/statistics/allOnGoingRentals")
+    public ResponseEntity<List<RentalShowDTO>> getAllOnGoingRentalsForChart() throws Exception {
+
+        List<RentalShowDTO> allOnGoingRentalsForChart = rentalService.getAllOnGoingRentalsForChart();
+
+        return new ResponseEntity<>(allOnGoingRentalsForChart, HttpStatus.OK);
+    }
 }

@@ -149,5 +149,11 @@ public interface RentalRepository extends JpaRepository<Rental, Integer> {
      * @return Rentals that can be collected for given month
      */
     List<Rental> getAllByIsApprovedEqualsAndIsCollectedEqualsAndPickupDateGreaterThanEqualAndPickupDateLessThanEqual(boolean isApproved, boolean isCollected, LocalDate startDate, LocalDate endDate);
+
+    List<Rental> findAllByIsApprovedEquals(Boolean isApproved);
+
+    List<Rental> findAllByIsApprovedEqualsAndIsCollectedEqualsAndIsReturnedEquals(
+            Boolean isApproved, Boolean isCollected, Boolean isReturned
+    );
 }
 
