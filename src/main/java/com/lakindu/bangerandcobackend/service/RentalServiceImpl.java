@@ -367,6 +367,42 @@ public class RentalServiceImpl implements RentalService {
         return completedRentalsForPast12Months;
     }
 
+    @Override
+    public List<RentalShowDTO> getVehiclesToBeCollectedForMonth() throws Exception {
+        Calendar endOfMonth = Calendar.getInstance();
+        int maximumDate = endOfMonth.getActualMaximum(Calendar.DATE);
+        endOfMonth.set(Calendar.DATE, maximumDate);
+
+        Calendar beginningOfMonth = Calendar.getInstance();
+        beginningOfMonth.set(Calendar.DATE, 1);
+
+
+        List<Rental> vehiclesToBeCollected = rentalRepository.getAllByIsApprovedEqualsAndIsCollectedEqualsAndPickupDateGreaterThanEqualAndReturnDateLessThanEqual(
+                true, false,
+                beginningOfMonth.toInstant().atZone(ZoneId.systemDefault()).toLocalDate(),
+                endOfMonth.toInstant().atZone(ZoneId.systemDefault()).toLocalDate()
+        );
+
+        List<RentalShowDTO> showingRentals = new ArrayList<>();
+
+        for (Rental eachRental : vehiclesToBeCollected) {
+            RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
+
+            VehicleShowDTO vehicleShowDTO = rentalShowDTO.getVehicleToBeRented();
+            vehicleShowDTO.setVehicleImage(null);
+
+            UserDTO customerUsername = rentalShowDTO.getCustomerUsername();
+            customerUsername.setProfilePicture(null);
+            customerUsername.setOtherIdentity(null);
+            customerUsername.setLicensePic(null);
+
+            rentalShowDTO.setCustomerUsername(customerUsername);
+            rentalShowDTO.setVehicleToBeRented(vehicleShowDTO);
+            showingRentals.add(rentalShowDTO);
+        }
+        return showingRentals;
+    }
+
     private List<ChartReturn> fillEmptyMonths(List<ChartReturn> formattedDBData, Calendar dateTime12MonthsAgo) {
         List<String> monthList = new ArrayList<>();
         DateFormatSymbols monthProvider = new DateFormatSymbols(); //used to provide month names
@@ -471,6 +507,13 @@ public class RentalServiceImpl implements RentalService {
 
             VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
             theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+
+            UserDTO theCustomer = rentalShowDTO.getCustomerUsername();
+            theCustomer.setLicensePic(null);
+            theCustomer.setOtherIdentity(null);
+            theCustomer.setProfilePicture(null);
+
+            rentalShowDTO.setCustomerUsername(theCustomer);
 
             rentalShowDTO.setVehicleToBeRented(theVehicleToBeShown);
             theRentalList.add(rentalShowDTO);
@@ -843,6 +886,13 @@ public class RentalServiceImpl implements RentalService {
             VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
             theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
 
+            UserDTO theCustomer = rentalShowDTO.getCustomerUsername();
+            theCustomer.setLicensePic(null);
+            theCustomer.setOtherIdentity(null);
+            theCustomer.setProfilePicture(null);
+
+            rentalShowDTO.setCustomerUsername(theCustomer);
+
             rentalShowDTO.setVehicleToBeRented(theVehicleToBeShown);
             theRejectedDTOList.add(rentalShowDTO);
         }
@@ -875,6 +925,13 @@ public class RentalServiceImpl implements RentalService {
             VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
             theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
 
+            UserDTO theCustomer = rentalShowDTO.getCustomerUsername();
+            theCustomer.setLicensePic(null);
+            theCustomer.setOtherIdentity(null);
+            theCustomer.setProfilePicture(null);
+
+            rentalShowDTO.setCustomerUsername(theCustomer);
+
             rentalShowDTO.setVehicleToBeRented(theVehicleToBeShown);
             theApprovedRentalList.add(rentalShowDTO);
         }
@@ -906,6 +963,13 @@ public class RentalServiceImpl implements RentalService {
             VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
             theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
 
+            UserDTO theCustomer = rentalShowDTO.getCustomerUsername();
+            theCustomer.setLicensePic(null);
+            theCustomer.setOtherIdentity(null);
+            theCustomer.setProfilePicture(null);
+
+            rentalShowDTO.setCustomerUsername(theCustomer);
+
             rentalShowDTO.setVehicleToBeRented(theVehicleToBeShown);
             allOnGoingDTOs.add(rentalShowDTO);
         }
@@ -935,6 +999,13 @@ public class RentalServiceImpl implements RentalService {
 
             VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
             theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+
+            UserDTO theCustomer = rentalShowDTO.getCustomerUsername();
+            theCustomer.setLicensePic(null);
+            theCustomer.setOtherIdentity(null);
+            theCustomer.setProfilePicture(null);
+
+            rentalShowDTO.setCustomerUsername(theCustomer);
 
             rentalShowDTO.setVehicleToBeRented(theVehicleToBeShown);
             returnDTOList.add(rentalShowDTO);

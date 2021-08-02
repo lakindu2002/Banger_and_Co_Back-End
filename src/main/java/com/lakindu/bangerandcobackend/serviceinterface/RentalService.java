@@ -188,4 +188,6 @@ public interface RentalService {
     List<ChartReturn> getCompletedRentalsForPast12Months() throws Exception;
 
     List<ChartReturn> getProfitsForLast12Months() throws Exception;
+
+    List<RentalShowDTO> getVehiclesToBeCollectedForMonth() throws Exception;
 }

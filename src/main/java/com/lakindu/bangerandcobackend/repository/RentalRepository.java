@@ -136,5 +136,7 @@ public interface RentalRepository extends JpaRepository<Rental, Integer> {
                     "(theRental.pickupDate>=:startDate)"
     )
     List<Rental> getAllCompletedRentalsForPast12Months(LocalDate startDate);
+
+    List<Rental> getAllByIsApprovedEqualsAndIsCollectedEqualsAndPickupDateGreaterThanEqualAndReturnDateLessThanEqual(boolean isApproved, boolean isCollected, LocalDate startDate, LocalDate endDate);
 }
 

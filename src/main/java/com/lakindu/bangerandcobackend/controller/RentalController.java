@@ -295,4 +295,13 @@ public class RentalController {
 
         return new ResponseEntity<>(profitsForLast12Months, HttpStatus.OK);
     }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @GetMapping(path = "/statistics/vehiclesToBeCollectedForMonth")
+    public ResponseEntity<List<RentalShowDTO>> getVehiclesToBeCollectedForMonth() throws Exception {
+
+        List<RentalShowDTO> vehiclesToBeCollectedForMonth = rentalService.getVehiclesToBeCollectedForMonth();
+
+        return new ResponseEntity<>(vehiclesToBeCollectedForMonth, HttpStatus.OK);
+    }
 }
