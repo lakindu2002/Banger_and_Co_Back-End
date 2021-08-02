@@ -1,5 +1,6 @@
 package com.lakindu.bangerandcobackend.controller;
 
+import com.lakindu.bangerandcobackend.dto.ChartReturn;
 import com.lakindu.bangerandcobackend.dto.RentalCreateDTO;
 import com.lakindu.bangerandcobackend.dto.RentalShowDTO;
 import com.lakindu.bangerandcobackend.serviceinterface.RentalService;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.text.ParseException;
 import java.util.HashMap;
+import java.util.List;
 
 @RestController
 @RequestMapping(path = "/api/rental")
@@ -274,5 +276,14 @@ public class RentalController {
         return new ResponseEntity<>(
                 returnList, HttpStatus.OK
         );
+    }
+
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @GetMapping(path = "/statistics/completedPast12Months")
+    public ResponseEntity<List<ChartReturn>> getCompletedRentalsForPast12Months() throws Exception {
+
+        List<ChartReturn> completedRentalsForPast12Months = rentalService.getCompletedRentalsForPast12Months();
+
+        return new ResponseEntity<>(completedRentalsForPast12Months, HttpStatus.OK);
     }
 }
