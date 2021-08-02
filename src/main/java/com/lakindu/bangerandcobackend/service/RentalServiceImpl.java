@@ -269,6 +269,54 @@ public class RentalServiceImpl implements RentalService {
     }
 
     /**
+     * Method will be used to complete the rental only if it collected by the customer.
+     *
+     * <br>
+     * <p>
+     * After returning the rental, add the equipment stock back to the original quantity
+     *
+     * @param rentalId The rental to complete
+     */
+    @Override
+    public void completeRental(Integer rentalId) throws ResourceNotFoundException, ResourceNotUpdatedException {
+        Rental theRentalToBeReturned = rentalRepository.findById(rentalId).orElseThrow(() -> new ResourceNotFoundException("The rental you are trying to return cannot be found"));
+        //check if the rental to be returned has been collected,
+        //if the rental has been collected, check if it already returned, if so do not return again.
+
+        boolean isRentalCollected = theRentalToBeReturned.getCollected() != null && theRentalToBeReturned.getCollected();
+        boolean isRentalReturned = theRentalToBeReturned.getReturned() != null && theRentalToBeReturned.getReturned();
+
+        if (isRentalCollected && isRentalReturned) {
+            throw new ResourceNotUpdatedException("The rental has already been returned.");
+        }
+
+        if (!isRentalCollected) {
+            //rental has not yet been collected
+            throw new ResourceNotUpdatedException("The rental has not yet been collected. Therefore, it cannot be returned");
+        }
+        //validation have passed, return the rental
+        theRentalToBeReturned.setReturned(true);
+
+        //update quantity back
+        for (RentalCustomization eachAddOn : theRentalToBeReturned.getRentalCustomizationList()) {
+            additionalEquipmentService.addQuantityBackToItem(eachAddOn);
+        }
+
+        Rental returnedRental = rentalRepository.save(theRentalToBeReturned);//update the rental
+
+        //send an email to the customer indicating rental has been collected.
+        try {
+            mailSender.sendRentalMail(
+                    new MailSenderHelper(returnedRental.getTheCustomerRenting(), "Rental Completed", MailTemplateType.RENTAL_RETURNED),
+                    returnedRental
+            );
+        } catch (IOException | MessagingException e) {
+            LOGGER.warning("ERROR SENDING RETURNED EMAIl");
+        }
+
+    }
+
+    /**
      * Method will get a list of all pending rentals from the database.
      * A sort will be done to retrieve the vehicles with the soonest pickup date to be in the first.
      *

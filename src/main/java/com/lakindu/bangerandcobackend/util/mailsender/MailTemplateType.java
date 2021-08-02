@@ -1,5 +1,7 @@
 package com.lakindu.bangerandcobackend.util.mailsender;
 
+import com.lakindu.bangerandcobackend.entity.Rental;
+
 public enum MailTemplateType {
     SIGNUP,
     UPDATEACCOUNT,
@@ -12,5 +14,6 @@ public enum MailTemplateType {
     ADMIN_BULK_BLACKLIST,
     RENTAL_APPROVED,
     RENTAL_REJECTED,
-    RENTAL_STARTED;
+    RENTAL_STARTED,
+    RENTAL_RETURNED;
 }

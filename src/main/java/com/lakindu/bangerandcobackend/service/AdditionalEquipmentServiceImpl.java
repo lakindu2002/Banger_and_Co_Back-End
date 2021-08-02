@@ -201,6 +201,8 @@ public class AdditionalEquipmentServiceImpl implements AdditionalEquipmentServic
     }
 
     @Override
+    @Transactional(rollbackOn = Exception.class)
+    //add a roll back so when error occurs, entire transaction is propagated.
     public void addQuantityBackToItem(RentalCustomization rentalCustomization) {
         AdditionalEquipment equipmentAddedToRental = rentalCustomization.getEquipmentAddedToRental();
         int quantityAddedForEquipmentInRental = rentalCustomization.getQuantityAddedForEquipmentInRental();

@@ -293,6 +293,23 @@ public class MailSender {
                 dynamicData.clear();
                 return formattedData;
             }
+            case RENTAL_RETURNED: {
+                dynamicData.put("firstName", theHelper.getUserToBeInformed().getFirstName());
+                dynamicData.put("lastName", theHelper.getUserToBeInformed().getLastName());
+                dynamicData.put("vehicleName", rentalMade.getVehicleOnRental().getVehicleName());
+                dynamicData.put("pickupTime", rentalMade.getPickupTime().toString());
+                dynamicData.put("returnedDate", new Date().toString());
+                dynamicData.put("returnTime", rentalMade.getReturnTime().toString());
+                dynamicData.put("pickupDate", rentalMade.getPickupDate().format(DateTimeFormatter.ISO_DATE));
+                dynamicData.put("returnDate", rentalMade.getPickupDate().format(DateTimeFormatter.ISO_DATE));
+
+                Template theTemplate = handlebars.compile("RentalReturned");
+                String formattedData = theTemplate.apply(dynamicData);
+
+                dynamicData.clear();
+
+                return formattedData;
+            }
             default: {
                 return null;
             }

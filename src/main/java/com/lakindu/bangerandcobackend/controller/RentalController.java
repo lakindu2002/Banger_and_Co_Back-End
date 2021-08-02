@@ -175,6 +175,24 @@ public class RentalController {
         );
     }
 
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @PostMapping(path = "/handle/completeRental")
+    public ResponseEntity<BangerAndCoResponse> completeRental(@RequestBody HashMap<String, Integer> theBody) throws BadValuePassedException, ResourceNotFoundException, ResourceNotUpdatedException {
+        //method will be executed by the admin whenever the customer returns the vehicle.
+        if (theBody.containsKey("rentalId") && theBody.get("rentalId") != null) {
+            //request body is valid, the rental can be attempted to be returned
+
+            rentalService.completeRental(theBody.get("rentalId"));
+
+            return new ResponseEntity<>(
+                    new BangerAndCoResponse("The vehicle has been returned to Banger and Co. and the rental has been completed successfully", HttpStatus.OK.value()),
+                    HttpStatus.OK
+            );
+        } else {
+            throw new BadValuePassedException("The rental is invalid, therefore, the rental could not be returned");
+        }
+    }
+
     @PreAuthorize("hasAuthority('CUSTOMER')")
     @GetMapping(path = "/find/pending/{username}")
     public ResponseEntity<HashMap<String, Object>> getAllPendingRentalsForCustomer(

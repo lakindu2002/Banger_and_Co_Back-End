@@ -172,4 +172,14 @@ public interface RentalService {
      */
     void isCustomerHavingPendingOnGoingApprovedRentalsForPeriod(User theCustomer, LocalDateTime pickupDateTime, LocalDateTime returnDateTime) throws ResourceNotCreatedException;
 
+    /**
+     * Method will be used to complete the rental only if it collected by the customer.
+     *
+     * <br>
+     * <p>
+     * After returning the rental, add the equipment stock back to the original quantity
+     *
+     * @param rentalId The rental to complete
+     */
+    void completeRental(Integer rentalId) throws ResourceNotFoundException, ResourceNotUpdatedException;
 }
