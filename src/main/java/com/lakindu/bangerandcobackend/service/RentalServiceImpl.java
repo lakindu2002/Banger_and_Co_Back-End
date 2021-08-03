@@ -477,11 +477,6 @@ public class RentalServiceImpl implements RentalService {
             throw new BadValuePassedException("The rental that is trying to returned late was not made by you");
         }
 
-        if (rentalForLateRequest.getLateReturnRequested()) {
-            //rental already being late returned
-            throw new ResourceNotUpdatedException("This rental has already been provided a late request");
-        }
-
         //check if rental is on-going
         if ((rentalForLateRequest.getCollected() != null && rentalForLateRequest.getCollected()) && (rentalForLateRequest.getReturned() != null && !rentalForLateRequest.getReturned())) {
             //get set of completed rentals for the customer
@@ -492,23 +487,28 @@ public class RentalServiceImpl implements RentalService {
 
             if (customerRentals.size() > 0) {
                 //customer has completed rentals and is a returning customer
-                rentalForLateRequest.setLateReturnRequested(true); //rental will be late returned
-                Rental lateReturningRental = rentalRepository.save(rentalForLateRequest);
 
-                //send email to admin and customers regarding late return
-                try {
-                    //email customer
-                    mailSender.sendRentalMail(
-                            new MailSenderHelper(customerRenting, "Late Return Notified", MailTemplateType.LATE_RETURN_CUSTOMER),
-                            lateReturningRental
-                    );
+                if (rentalForLateRequest.getLateReturnRequested() == null) {
+                    rentalForLateRequest.setLateReturnRequested(true); //rental will be late returned
+                    Rental lateReturningRental = rentalRepository.save(rentalForLateRequest);
 
-                    //email admins
-                    mailSender.sendBulkRentalEmails(
-                            userService._getAllAdminEmails(), "Late Return Notification", null, MailTemplateType.LATE_RETURN_ADMINS, lateReturningRental
-                    );
-                } catch (Exception ex) {
-                    LOGGER.warning("ERROR SENDING LATE RETURN EMAIL");
+                    //send email to admin and customers regarding late return
+                    try {
+                        //email customer
+                        mailSender.sendRentalMail(
+                                new MailSenderHelper(customerRenting, "Late Return Notified", MailTemplateType.LATE_RETURN_CUSTOMER),
+                                lateReturningRental
+                        );
+
+                        //email admins
+                        mailSender.sendBulkRentalEmails(
+                                userService._getAllAdminEmails(), "Late Return Notification", null, MailTemplateType.LATE_RETURN_ADMINS, lateReturningRental
+                        );
+                    } catch (Exception ex) {
+                        LOGGER.warning("ERROR SENDING LATE RETURN EMAIL");
+                    }
+                } else if (rentalForLateRequest.getLateReturnRequested()) {
+                    throw new ResourceNotUpdatedException("The rental has already been marked as late return");
                 }
 
             } else {
