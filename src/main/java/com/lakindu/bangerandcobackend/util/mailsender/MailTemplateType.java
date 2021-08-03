@@ -1,7 +1,5 @@
 package com.lakindu.bangerandcobackend.util.mailsender;
 
-import com.lakindu.bangerandcobackend.entity.Rental;
-
 public enum MailTemplateType {
     SIGNUP,
     UPDATEACCOUNT,

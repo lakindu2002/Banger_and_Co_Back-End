@@ -150,8 +150,22 @@ public interface RentalRepository extends JpaRepository<Rental, Integer> {
      */
     List<Rental> getAllByIsApprovedEqualsAndIsCollectedEqualsAndPickupDateGreaterThanEqualAndPickupDateLessThanEqual(boolean isApproved, boolean isCollected, LocalDate startDate, LocalDate endDate);
 
+    /**
+     * Method used to get all the pending rentals for the statistics panel for the admin
+     *
+     * @param isApproved = NULL
+     * @return The pending rentals
+     */
     List<Rental> findAllByIsApprovedEquals(Boolean isApproved);
 
+    /**
+     * Method used to get all on-going rentals for the statistics panel for the admin
+     *
+     * @param isApproved  TRUE
+     * @param isCollected TRUE
+     * @param isReturned  FALSE
+     * @return All on-going rentals in the DB
+     */
     List<Rental> findAllByIsApprovedEqualsAndIsCollectedEqualsAndIsReturnedEquals(
             Boolean isApproved, Boolean isCollected, Boolean isReturned
     );

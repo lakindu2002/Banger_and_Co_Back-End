@@ -5,18 +5,15 @@ import com.lakindu.bangerandcobackend.dto.RentalCreateDTO;
 import com.lakindu.bangerandcobackend.dto.RentalShowDTO;
 import com.lakindu.bangerandcobackend.dto.VehicleRentalFilterDTO;
 import com.lakindu.bangerandcobackend.entity.User;
-import com.lakindu.bangerandcobackend.entity.Vehicle;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotCreatedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotUpdatedException;
 
-import java.io.IOException;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
-import java.util.zip.DataFormatException;
 
 public interface RentalService {
     /**
@@ -31,6 +28,15 @@ public interface RentalService {
      */
     void validateRentalFilters(VehicleRentalFilterDTO theFilterDTO) throws BadValuePassedException;
 
+    /**
+     * Method used to create a rental at Banger and Co.
+     *
+     * @param theRental The rental to be made
+     * @throws ParseException              Thrown during date time conversion
+     * @throws BadValuePassedException     Thrown when user sends invalid data
+     * @throws ResourceNotFoundException   Thrown when the vehicle to be rented cannot be found
+     * @throws ResourceNotCreatedException Thrown when the rental is not made due to an exception in the flow.
+     */
     void makeRental(RentalCreateDTO theRental) throws ParseException, BadValuePassedException, ResourceNotFoundException, ResourceNotCreatedException;
 
     /**
@@ -185,13 +191,52 @@ public interface RentalService {
      */
     void completeRental(Integer rentalId) throws ResourceNotFoundException, ResourceNotUpdatedException;
 
+    /**
+     * Method will get a list of all completed rentals in the past 12 months.
+     * <br>
+     * Criteria: If the rental is made in the current month and finishes during next month, the rental will be counted as completed for current month as it was made in current month
+     *
+     * @return The chart object containing chart data
+     * @throws Exception Thrown during iterating over rental list
+     */
     List<ChartReturn> getCompletedRentalsForPast12Months() throws Exception;
 
+    /**
+     * Method will get all money made (profit) for past 12 months.
+     * <br>
+     * Criteria: If the rental is made in the current month and finishes during next month, the rental will be counted as completed for current month as it was made in current month
+     *
+     * @return The chart object containing chart data
+     * @throws Exception Thrown during iterating over rental list
+     */
     List<ChartReturn> getProfitsForLast12Months() throws Exception;
 
+    /**
+     * Method will get a list of all vehicles that need to be collected for current month.
+     * <br>
+     * Min Date - 1st
+     * Max Date - Last date of month
+     * <br>
+     * Criteria: Pickup date falls between first and last date of the month
+     *
+     * @return The list of rentals needed to be collected within the month
+     * @throws Exception The exception thrown when creating the DTO List
+     */
     List<RentalShowDTO> getVehiclesToBeCollectedForMonth() throws Exception;
 
+    /**
+     * Method will return a list of all pending rentals
+     *
+     * @return All Pending Rentals
+     * @throws Exception The exception thrown when creating the DTO List
+     */
     List<RentalShowDTO> getAllPendingRentalsForStatistics() throws Exception;
 
+    /**
+     * Method will return a list of all on-going rentals
+     *
+     * @return All On-Going Rentals
+     * @throws Exception The exception thrown when creating the DTO List
+     */
     List<RentalShowDTO> getAllOnGoingRentalsForChart() throws Exception;
 }
