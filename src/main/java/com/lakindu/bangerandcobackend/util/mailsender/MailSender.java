@@ -384,4 +384,52 @@ public class MailSender {
         }
         return theEmailAddresses.toArray(new Address[adminList.size()]);
     }
+
+    @Async
+    public void notifyAllAdminsAboutNewRental(List<String> adminList, String subject, Rental madeRental, MailTemplateType adminBulkRentalMade) throws MessagingException, IOException {
+        MimeMessage theMessage = new MimeMessage(theMailSession);
+        String formattedTemplate = getTemplateForNewRental(madeRental);
+        theMessage.setSentDate(new Date()); //set current date is sent date
+        theMessage.setFrom(new InternetAddress(cooperateEmailAddress)); //set the sender
+        theMessage.setSubject(subject); //set the Subject for the Mail
+        theMessage.setContent(formattedTemplate, mailType);
+        theMessage.addRecipients(Message.RecipientType.TO, getAddressList(adminList));
+
+        Transport.send(theMessage);
+
+        LOGGER.info("AN EMAIL WAS SENT");
+        LOGGER.info(String.format("THE MAIL OF TYPE: %s WAS SENT", adminBulkRentalMade.toString().toUpperCase()));
+    }
+
+    private String getTemplateForNewRental(Rental rentalMade) throws IOException {
+        TemplateLoader configurer = new ClassPathTemplateLoader(); //load templates from classpath
+        configurer.setPrefix("/templates"); //template has "/templates" path as prefix
+        configurer.setSuffix(".html"); //templates are of html
+
+        Handlebars handlebars = new Handlebars(configurer); //create a Handlebars class with current loader used to load templates
+
+        Template theTemplate = handlebars.compile("AdminRentalMadeNotification");
+
+        dynamicData.put("pickupDate", rentalMade.getPickupDate().format(DateTimeFormatter.ISO_DATE));
+        dynamicData.put("pickupTime", rentalMade.getPickupTime().toString());
+        dynamicData.put("returnDate", rentalMade.getReturnDate().format(DateTimeFormatter.ISO_DATE));
+        dynamicData.put("returnTime", rentalMade.getReturnTime().toString());
+        dynamicData.put("vehicleName", rentalMade.getVehicleOnRental().getVehicleName());
+        dynamicData.put("totalCostForRental", String.valueOf(rentalMade.getTotalCost()));
+
+        StringBuilder theBuilder = new StringBuilder();
+        if (rentalMade.getRentalCustomizationList() == null || rentalMade.getRentalCustomizationList().size() == 0) {
+            dynamicData.put("equipmentList", "None");
+        } else {
+            for (RentalCustomization eachCustomization : rentalMade.getRentalCustomizationList()) {
+                AdditionalEquipment equipment = eachCustomization.getEquipmentAddedToRental();
+                theBuilder.append(equipment.getEquipmentName()).append(", ");
+            }
+            dynamicData.put("equipmentList", theBuilder.toString().trim());
+        }
+        String formattedContent = theTemplate.apply(dynamicData);
+        dynamicData.clear();
+
+        return formattedContent;
+    }
 }

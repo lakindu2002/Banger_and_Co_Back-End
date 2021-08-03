@@ -194,9 +194,11 @@ public class RentalServiceImpl implements RentalService {
             theRentalToBeMade.setTheCustomerRenting(theCustomer);
 
             Rental madeRental = rentalRepository.save(theRentalToBeMade); //create the rental.
-            //email the client.
+            //email the client indicating rental was made.
+            //email the admins indicating a rental was made
             try {
                 mailSender.sendRentalMail(new MailSenderHelper(theCustomer, "Rental Made Successfully", MailTemplateType.RENTAL_MADE), madeRental);
+                mailSender.notifyAllAdminsAboutNewRental(userService._getAllAdminEmails(), "A New Rental Was Made",madeRental,MailTemplateType.ADMIN_BULK_RENTAL_MADE);
             } catch (Exception ex) {
                 ex.printStackTrace();
                 LOGGER.warning("EMAIL NOT SENT DURING RENTAL: " + ex.getMessage());
