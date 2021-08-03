@@ -18,6 +18,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
@@ -198,7 +199,7 @@ public class RentalServiceImpl implements RentalService {
             //email the admins indicating a rental was made
             try {
                 mailSender.sendRentalMail(new MailSenderHelper(theCustomer, "Rental Made Successfully", MailTemplateType.RENTAL_MADE), madeRental);
-                mailSender.notifyAllAdminsAboutNewRental(userService._getAllAdminEmails(), "A New Rental Was Made",madeRental,MailTemplateType.ADMIN_BULK_RENTAL_MADE);
+                mailSender.notifyAllAdminsAboutNewRental(userService._getAllAdminEmails(), "A New Rental Was Made", madeRental, MailTemplateType.ADMIN_BULK_RENTAL_MADE);
             } catch (Exception ex) {
                 ex.printStackTrace();
                 LOGGER.warning("EMAIL NOT SENT DURING RENTAL: " + ex.getMessage());
@@ -460,6 +461,60 @@ public class RentalServiceImpl implements RentalService {
         return theRentalList;
     }
 
+    /**
+     * Method will create a late return for the rental
+     * <br>
+     * The rental can be late returned only if the customer is a returning customer and if the rental has been collected and not returned.
+     *
+     * @param rentalId The rental for late request
+     */
+    @Override
+    public void createLateReturnForRental(Integer rentalId, Authentication loggedInUser) throws ResourceNotFoundException, ResourceNotUpdatedException, BadValuePassedException {
+        Rental rentalForLateRequest = rentalRepository.findById(rentalId).orElseThrow(() -> new ResourceNotFoundException("The rental you are trying to create the late return for does not exist at Banger and Co."));
+        User customerRenting = rentalForLateRequest.getTheCustomerRenting();
+
+        if (!loggedInUser.getName().equalsIgnoreCase(customerRenting.getUsername())) {
+            throw new BadValuePassedException("The rental that is trying to returned late was not made by you");
+        }
+
+        //check if rental is on-going
+        if ((rentalForLateRequest.getCollected() != null && rentalForLateRequest.getCollected()) && (rentalForLateRequest.getReturned() != null && !rentalForLateRequest.getReturned())) {
+            //get set of completed rentals for the customer
+            //null - no pagination
+            List<Rental> customerRentals = rentalRepository.getAllByIsApprovedEqualsAndIsCollectedEqualsAndIsReturnedEqualsAndTheCustomerRentingEquals(
+                    true, true, true, customerRenting, null
+            );
+
+            if (customerRentals.size() > 0) {
+                //customer has completed rentals and is a returning customer
+                rentalForLateRequest.setLateReturnRequested(true); //rental will be late returned
+                Rental lateReturningRental = rentalRepository.save(rentalForLateRequest);
+
+                //send email to admin and customers regarding late return
+                try {
+                    //email customer
+                    mailSender.sendRentalMail(
+                            new MailSenderHelper(customerRenting, "Late Return Notified", MailTemplateType.LATE_RETURN_CUSTOMER),
+                            lateReturningRental
+                    );
+
+                    //email admins
+                    mailSender.sendBulkRentalEmails(
+                            userService._getAllAdminEmails(), "Late Return Notification", null, MailTemplateType.LATE_RETURN_ADMINS, lateReturningRental
+                    );
+                } catch (Exception ex) {
+                    LOGGER.warning("ERROR SENDING LATE RETURN EMAIL");
+                }
+
+            } else {
+                throw new ResourceNotUpdatedException("You cannot have a late return because you do not have any past completed rentals. Only returning customers are allowed to request for a late return");
+            }
+        } else {
+            //rental is not on-going
+            throw new ResourceNotUpdatedException("The rental in not an on-going rental. Therefore you cannot perform a late return for this rental");
+        }
+    }
+
     private List<ChartReturn> fillEmptyMonths(List<ChartReturn> formattedDBData, Calendar dateTime12MonthsAgo) {
         List<String> monthList = new ArrayList<>();
         DateFormatSymbols monthProvider = new DateFormatSymbols(); //used to provide month names
@@ -634,7 +689,7 @@ public class RentalServiceImpl implements RentalService {
             List<String> adminList = userService._getAllAdminEmails();
             try {
                 mailSender.sendBulkRentalEmails(
-                        adminList, "Blacklist Job Report", blacklistedUsers, MailTemplateType.ADMIN_BULK_BLACKLIST
+                        adminList, "Blacklist Job Report", blacklistedUsers, MailTemplateType.ADMIN_BULK_BLACKLIST, null
                 );
             } catch (Exception ex) {
                 LOGGER.warning("EMAIL NOT SENT DURING BLACKLIST");

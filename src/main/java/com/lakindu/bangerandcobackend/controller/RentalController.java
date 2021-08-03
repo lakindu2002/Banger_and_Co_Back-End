@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
@@ -321,5 +322,26 @@ public class RentalController {
         List<RentalShowDTO> allOnGoingRentalsForChart = rentalService.getAllOnGoingRentalsForChart();
 
         return new ResponseEntity<>(allOnGoingRentalsForChart, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @PutMapping(path = "/createLateReturn")
+    public ResponseEntity<BangerAndCoResponse> createLateReturn(@RequestBody HashMap<String, Integer> requestBody, Authentication loggedInUser) throws BadValuePassedException, ResourceNotFoundException, ResourceNotUpdatedException {
+        //late return can be made by rentals with previous completed rentals
+        //in order to make a late request, the rental must be on-going.
+        if (requestBody.containsKey("rentalId") && requestBody.get("rentalId") != null) {
+
+            rentalService.createLateReturnForRental(requestBody.get("rentalId"), loggedInUser);
+
+            return new ResponseEntity<>(
+                    new BangerAndCoResponse(
+                            "Late Return Has Been Successfully Made",
+                            HttpStatus.OK.value()
+                    ),
+                    HttpStatus.OK
+            );
+        } else {
+            throw new BadValuePassedException("The rental ID was not present in the request body");
+        }
     }
 }

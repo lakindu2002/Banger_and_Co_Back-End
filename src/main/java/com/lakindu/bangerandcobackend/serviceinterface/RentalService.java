@@ -9,6 +9,7 @@ import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.Ba
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotCreatedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotUpdatedException;
+import org.springframework.security.core.Authentication;
 
 import java.text.ParseException;
 import java.time.LocalDateTime;
@@ -239,4 +240,13 @@ public interface RentalService {
      * @throws Exception The exception thrown when creating the DTO List
      */
     List<RentalShowDTO> getAllOnGoingRentalsForChart() throws Exception;
+
+    /**
+     * Method will create a late return for the rental
+     * <br>
+     * The rental can be late returned only if the customer is a returning customer and if the rental has been collected and not returned.
+     *
+     * @param rentalId The rental for late request
+     */
+    void createLateReturnForRental(Integer rentalId, Authentication loggedInUser) throws ResourceNotFoundException, ResourceNotUpdatedException, BadValuePassedException;
 }
