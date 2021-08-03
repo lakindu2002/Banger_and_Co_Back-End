@@ -90,7 +90,7 @@ public class RentalServiceImpl implements RentalService {
         //validations required on filter logic to ensure business rules are met
 
         //1. Pickup and return dates must fall between 8:00am to 6:00pm
-        //2. Check if return date is before pickup date
+        //2. Check if return date is after pickup date
         //2. Maximum Rental Duration is 14 days
         //3. If the rental day is one day, minimum duration is 5 hours
 
@@ -119,7 +119,7 @@ public class RentalServiceImpl implements RentalService {
         }
 
         if (returnDate.isBefore(pickupDate)) {
-            //if return date is before pickup time
+            //if return date is before pickup date
             throw new BadValuePassedException("Return date cannot be before Pickup Date");
         }
 
