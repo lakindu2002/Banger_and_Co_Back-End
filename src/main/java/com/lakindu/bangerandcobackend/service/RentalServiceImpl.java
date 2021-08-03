@@ -477,6 +477,11 @@ public class RentalServiceImpl implements RentalService {
             throw new BadValuePassedException("The rental that is trying to returned late was not made by you");
         }
 
+        if (rentalForLateRequest.getLateReturnRequested()) {
+            //rental already being late returned
+            throw new ResourceNotUpdatedException("This rental has already been provided a late request");
+        }
+
         //check if rental is on-going
         if ((rentalForLateRequest.getCollected() != null && rentalForLateRequest.getCollected()) && (rentalForLateRequest.getReturned() != null && !rentalForLateRequest.getReturned())) {
             //get set of completed rentals for the customer
