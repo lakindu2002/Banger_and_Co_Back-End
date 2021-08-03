@@ -90,7 +90,7 @@ public class RentalServiceImpl implements RentalService {
         //validations required on filter logic to ensure business rules are met
 
         //1. Pickup and return dates must fall between 8:00am to 6:00pm
-        //2. Check if return date is before pickup date
+        //2. Check if return date is after pickup date
         //2. Maximum Rental Duration is 14 days
         //3. If the rental day is one day, minimum duration is 5 hours
 
@@ -119,7 +119,7 @@ public class RentalServiceImpl implements RentalService {
         }
 
         if (returnDate.isBefore(pickupDate)) {
-            //if return date is before pickup time
+            //if return date is before pickup date
             throw new BadValuePassedException("Return date cannot be before Pickup Date");
         }
 
@@ -194,9 +194,11 @@ public class RentalServiceImpl implements RentalService {
             theRentalToBeMade.setTheCustomerRenting(theCustomer);
 
             Rental madeRental = rentalRepository.save(theRentalToBeMade); //create the rental.
-            //email the client.
+            //email the client indicating rental was made.
+            //email the admins indicating a rental was made
             try {
                 mailSender.sendRentalMail(new MailSenderHelper(theCustomer, "Rental Made Successfully", MailTemplateType.RENTAL_MADE), madeRental);
+                mailSender.notifyAllAdminsAboutNewRental(userService._getAllAdminEmails(), "A New Rental Was Made",madeRental,MailTemplateType.ADMIN_BULK_RENTAL_MADE);
             } catch (Exception ex) {
                 ex.printStackTrace();
                 LOGGER.warning("EMAIL NOT SENT DURING RENTAL: " + ex.getMessage());
