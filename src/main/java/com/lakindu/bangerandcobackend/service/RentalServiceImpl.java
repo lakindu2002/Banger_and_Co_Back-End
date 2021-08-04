@@ -520,6 +520,57 @@ public class RentalServiceImpl implements RentalService {
         }
     }
 
+    /**
+     * Method will cancel a late return for a rental
+     * <br>
+     * In order to cancel a late return the rental must be on late return in the first place
+     *
+     * @param rentalId     The rental to cancel the late return for
+     * @param loggedInUser The user logged in to the system == to the customer on rental being cancelled for late return
+     */
+    @Override
+    public void cancelLateReturn(Integer rentalId, Authentication loggedInUser) throws ResourceNotFoundException, ResourceNotUpdatedException {
+        Rental theRentalToCancelLateReturnFor = rentalRepository.findById(rentalId).orElseThrow(() -> new ResourceNotFoundException("The rental you are trying to cancel the late return for does not exist at Banger and Co."));
+        if (theRentalToCancelLateReturnFor.getTheCustomerRenting().getUsername().equalsIgnoreCase(loggedInUser.getName())) {
+            //customer is the same customer on rental
+            if (theRentalToCancelLateReturnFor.getLateReturnRequested() != null && theRentalToCancelLateReturnFor.getLateReturnRequested()) {
+                theRentalToCancelLateReturnFor.setLateReturnRequested(null); //when inserting, is set as NULL as no late return
+                //so set it back to null again to cancel late return
+                Rental cancelledLateRequestRental = rentalRepository.save(theRentalToCancelLateReturnFor);
+
+                try {
+                    //notify the customer with their cancel request being success
+                    mailSender.sendRentalMail(
+                            new MailSenderHelper(
+                                    theRentalToCancelLateReturnFor.getTheCustomerRenting(),
+                                    "Late Return Cancelled Successfully",
+                                    MailTemplateType.LATE_RETURN_CANCELLED_CUSTOMER
+                            ),
+                            cancelledLateRequestRental
+                    );
+
+                    //notify the administrators regarding this cancel
+                    mailSender.sendBulkRentalEmails(
+                            userService._getAllAdminEmails(),
+                            "Late Return Cancelled",
+                            null,
+                            MailTemplateType.LATE_RETURN_CANCELLED_ADMIN_BULK,
+                            cancelledLateRequestRental
+                    );
+                } catch (IOException | MessagingException e) {
+                    LOGGER.warning("ERROR SENDING EMAIL DURING LATE RETURN CANCEL");
+                }
+
+            } else {
+                //rental not on late return
+                throw new ResourceNotUpdatedException("This rental is not on late return, therefore, you cannot cancel the late return");
+            }
+        } else {
+            throw new ResourceNotUpdatedException("The rental you are trying to cancel the late return for does not belong to you");
+        }
+
+    }
+
     private List<ChartReturn> fillEmptyMonths(List<ChartReturn> formattedDBData, Calendar dateTime12MonthsAgo) {
         List<String> monthList = new ArrayList<>();
         DateFormatSymbols monthProvider = new DateFormatSymbols(); //used to provide month names

@@ -249,4 +249,14 @@ public interface RentalService {
      * @param rentalId The rental for late request
      */
     void createLateReturnForRental(Integer rentalId, Authentication loggedInUser) throws ResourceNotFoundException, ResourceNotUpdatedException, BadValuePassedException;
+
+    /**
+     * Method will cancel a late return for a rental
+     * <br>
+     * In order to cancel a late return the rental must be on late return in the first place
+     *
+     * @param rentalId     The rental to cancel the late return for
+     * @param loggedInUser The user logged in to the system == to the customer on rental being cancelled for late return
+     */
+    void cancelLateReturn(Integer rentalId, Authentication loggedInUser) throws ResourceNotFoundException, ResourceNotUpdatedException;
 }

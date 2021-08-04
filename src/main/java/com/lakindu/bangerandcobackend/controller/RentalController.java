@@ -344,4 +344,23 @@ public class RentalController {
             throw new BadValuePassedException("The rental ID was not present in the request body");
         }
     }
+
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @PutMapping(path = "/cancelLateReturn")
+    public ResponseEntity<BangerAndCoResponse> cancelLateReturn(@RequestBody HashMap<String, Integer> requestBody, Authentication loggedInUser) throws BadValuePassedException, ResourceNotUpdatedException, ResourceNotFoundException {
+        if (requestBody.containsKey("rentalId") && requestBody.get("rentalId") != null) {
+
+            rentalService.cancelLateReturn(requestBody.get("rentalId"),loggedInUser);
+
+            return new ResponseEntity<>(
+                    new BangerAndCoResponse(
+                            "The rental has been cancelled for a late return",
+                            (HttpStatus.OK.value())
+                    ),
+                    HttpStatus.OK
+            );
+        } else {
+            throw new BadValuePassedException("The rental ID is not present in the request");
+        }
+    }
 }

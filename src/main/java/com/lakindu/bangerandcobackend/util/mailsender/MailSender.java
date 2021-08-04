@@ -309,7 +309,15 @@ public class MailSender {
 
                 return formattedData;
             }
+            case LATE_RETURN_CANCELLED_CUSTOMER:
             case LATE_RETURN_CUSTOMER: {
+                Template theTemplate = null;
+                if (theType == MailTemplateType.LATE_RETURN_CUSTOMER) {
+                    theTemplate = handlebars.compile("LateReturnCustomer");
+                } else {
+                    theTemplate = handlebars.compile("LateReturnCancelledCustomer");
+                }
+
                 dynamicData.put("firstName", theHelper.getUserToBeInformed().getFirstName());
                 dynamicData.put("lastName", theHelper.getUserToBeInformed().getLastName());
                 dynamicData.put("vehicleName", rentalMade.getVehicleOnRental().getVehicleName());
@@ -317,7 +325,6 @@ public class MailSender {
                 dynamicData.put("pickupDate", rentalMade.getPickupDate().format(DateTimeFormatter.ISO_DATE));
                 dynamicData.put("returnDate", rentalMade.getPickupDate().format(DateTimeFormatter.ISO_DATE));
 
-                Template theTemplate = handlebars.compile("LateReturnCustomer");
                 String formattedData = theTemplate.apply(dynamicData);
 
                 dynamicData.clear();
@@ -388,8 +395,13 @@ public class MailSender {
             dynamicData.clear();
 
             return formattedContent;
-        } else if (theType == MailTemplateType.LATE_RETURN_ADMINS) {
-            Template theTemplate = handlebars.compile("LateReturnAdmin");
+        } else if (theType == MailTemplateType.LATE_RETURN_ADMINS || theType == MailTemplateType.LATE_RETURN_CANCELLED_ADMIN_BULK) {
+            Template theTemplate = null;
+            if (theType == MailTemplateType.LATE_RETURN_ADMINS) {
+                theTemplate = handlebars.compile("LateReturnAdmin");
+            } else {
+                theTemplate = handlebars.compile("LateReturnCancelledAdmin");
+            }
 
             dynamicData.put("vehicleName", madeRental.getVehicleOnRental().getVehicleName());
             dynamicData.put("returnTime", madeRental.getReturnTime().toString());
