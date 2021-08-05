@@ -21,18 +21,18 @@ public class RentalShowDTO {
     private Boolean isCollected;
     private Boolean isLateReturnRequested;
 
-    private String timeLeftForRental; //will comprise of an output string to display on customer dashboard to indicate time left on their rental
+    private String timeLeft; //will comprise of an output string to display on customer dashboard to indicate time left on their rental
 
     public RentalShowDTO() {
     }
 
 
-    public void setTimeLeftForRental(String timeLeftForRental) {
-        this.timeLeftForRental = timeLeftForRental;
+    public String getTimeLeft() {
+        return timeLeft;
     }
 
-    public String getTimeLeftForRental() {
-        return timeLeftForRental;
+    public void setTimeLeft(String timeLeft) {
+        this.timeLeft = timeLeft;
     }
 
     public void calculateTimeLeftForRental() {
@@ -42,10 +42,10 @@ public class RentalShowDTO {
 
         if (returnDate.equals(now)) {
             //return date is today
-            this.timeLeftForRental = currentDateTime.until(returnExact, ChronoUnit.HOURS) + " Hour(s) Left";
+            this.timeLeft = currentDateTime.until(returnExact, ChronoUnit.HOURS) + " Hour(s) Left";
         } else {
             //get in days
-            this.timeLeftForRental = currentDateTime.until(returnExact, ChronoUnit.DAYS) + " Day(s) Left";
+            this.timeLeft = currentDateTime.until(returnExact, ChronoUnit.DAYS) + " Day(s) Left";
         }
     }
 

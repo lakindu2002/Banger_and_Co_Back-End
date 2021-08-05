@@ -32,6 +32,7 @@ import java.time.*;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.zip.DataFormatException;
 
 @Service
 public class RentalServiceImpl implements RentalService {
@@ -597,6 +598,39 @@ public class RentalServiceImpl implements RentalService {
             rentalShowDTOS.add(rentalShowDTO);
         }
         return rentalShowDTOS;
+    }
+
+    @Override
+    public HashMap<String, Integer> countCustomerPendingRentals(String username) throws DataFormatException, IOException, ResourceNotFoundException {
+        List<Rental> allCustomerCanBeCollectedRentals = rentalRepository.getAllByIsApprovedEqualsAndTheCustomerRentingEquals(
+                null, userService._getUserWithImageDecompression(username), null
+        );
+
+        HashMap<String, Integer> pendingCount = new HashMap<>();
+        pendingCount.put("count", allCustomerCanBeCollectedRentals.size());
+        return pendingCount;
+    }
+
+    @Override
+    public HashMap<String, Integer> countCustomerPastRentals(String username) throws DataFormatException, IOException, ResourceNotFoundException {
+        List<Rental> allPastRentals = rentalRepository.getAllByIsApprovedEqualsAndIsCollectedEqualsAndIsReturnedEqualsAndTheCustomerRentingEquals(
+                true, true, true, userService._getUserWithImageDecompression(username), null
+        );
+
+        HashMap<String, Integer> pastCount = new HashMap<>();
+        pastCount.put("count", allPastRentals.size());
+        return pastCount;
+    }
+
+    @Override
+    public HashMap<String, Integer> countCustomerRejectedRentals(String username) throws DataFormatException, IOException, ResourceNotFoundException {
+        List<Rental> rejectedRentalsCustomer = rentalRepository.getAllByIsApprovedEqualsAndTheCustomerRentingEquals(
+                false, userService._getUserWithImageDecompression(username), null
+        );
+
+        HashMap<String, Integer> rejectedCount = new HashMap<>();
+        rejectedCount.put("count", rejectedRentalsCustomer.size());
+        return rejectedCount;
     }
 
     private List<ChartReturn> fillEmptyMonths(List<ChartReturn> formattedDBData, Calendar dateTime12MonthsAgo) {
@@ -1221,11 +1255,20 @@ public class RentalServiceImpl implements RentalService {
      * @param rentalId The rental to start
      */
     @Override
-    public void startRental(Integer rentalId) throws ResourceNotFoundException, BadValuePassedException, ResourceNotUpdatedException {
+    public void startRental(Integer rentalId) throws Exception {
         Rental theRentalToBeStarted = rentalRepository.findById(rentalId).orElseThrow(() -> new ResourceNotFoundException("The rental that you are trying to start does not exist at Banger and Co."));
+
+        //does customer have any other on-going rentals, if so, cannot start
+        User theCustomerRenting = theRentalToBeStarted.getTheCustomerRenting();
+        List<RentalShowDTO> customerOnGoingRentals = getCustomerOnGoingRentals(theCustomerRenting.getUsername());
+
+        if (customerOnGoingRentals.size() > 0) {
+            throw new ResourceNotUpdatedException("This customer already has on-going rentals, therefore, this new rental cannot be started until previous on-going rentals are returned");
+        }
+
         if (theRentalToBeStarted.getCollected() != null && !theRentalToBeStarted.getCollected()) {
             //rental has not yet been collected
-            if (theRentalToBeStarted.getTheCustomerRenting().isBlackListed()) {
+            if (theCustomerRenting.isBlackListed()) {
                 //customer is blacklisted, do not allow rental to be started.
                 throw new ResourceNotUpdatedException("The rental could not be started because this customer is already blacklisted. Whitelist the customer to start this rental");
             }

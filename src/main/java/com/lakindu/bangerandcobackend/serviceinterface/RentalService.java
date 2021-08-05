@@ -11,10 +11,12 @@ import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.Re
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotUpdatedException;
 import org.springframework.security.core.Authentication;
 
+import java.io.IOException;
 import java.text.ParseException;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
+import java.util.zip.DataFormatException;
 
 public interface RentalService {
     /**
@@ -170,7 +172,7 @@ public interface RentalService {
      *
      * @param rentalId The rental to start
      */
-    void startRental(Integer rentalId) throws ResourceNotFoundException, BadValuePassedException, ResourceNotUpdatedException;
+    void startRental(Integer rentalId) throws Exception;
 
     /**
      * Method will check if the customer has any on-going, pending, approved rentals for the given time period.
@@ -266,4 +268,11 @@ public interface RentalService {
      * @param name The customer username
      */
     List<RentalShowDTO> getCustomerOnGoingRentals(String name) throws Exception;
+
+    HashMap<String, Integer> countCustomerPendingRentals(String username) throws DataFormatException, IOException, ResourceNotFoundException;
+
+    HashMap<String, Integer> countCustomerPastRentals(String username) throws DataFormatException, IOException, ResourceNotFoundException;
+
+    HashMap<String, Integer> countCustomerRejectedRentals(String username) throws DataFormatException, IOException, ResourceNotFoundException;
+
 }

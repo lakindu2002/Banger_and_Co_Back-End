@@ -19,9 +19,11 @@ import org.springframework.security.core.parameters.P;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.zip.DataFormatException;
 
 @RestController
 @RequestMapping(path = "/api/rental")
@@ -164,7 +166,7 @@ public class RentalController {
 
     @PreAuthorize("hasAuthority('ADMINISTRATOR')")
     @PostMapping(path = "/handle/startRental")
-    public ResponseEntity<BangerAndCoResponse> startRental(@RequestBody HashMap<String, Integer> theRentalId) throws BadValuePassedException, ResourceNotFoundException, ResourceNotUpdatedException {
+    public ResponseEntity<BangerAndCoResponse> startRental(@RequestBody HashMap<String, Integer> theRentalId) throws Exception {
         //method will be exuected by an admin to start a rental when the customer picks the vehicle up
         if (theRentalId.containsKey("rentalId") && theRentalId.get("rentalId") != null) {
             rentalService.startRental(theRentalId.get("rentalId"));
@@ -370,5 +372,29 @@ public class RentalController {
 
         List<RentalShowDTO> customerOnGoingRentals = rentalService.getCustomerOnGoingRentals(loggedInUser.getName());
         return new ResponseEntity<>(customerOnGoingRentals, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @GetMapping(path = "/count/pending")
+    public ResponseEntity<HashMap<String, Integer>> countPending(Authentication loggedInUser) throws DataFormatException, IOException, ResourceNotFoundException {
+
+        HashMap<String, Integer> pendingCount = rentalService.countCustomerPendingRentals(loggedInUser.getName());
+        return new ResponseEntity<>(pendingCount, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @GetMapping(path = "/count/past")
+    public ResponseEntity<HashMap<String, Integer>> countPast(Authentication loggedInUser) throws DataFormatException, IOException, ResourceNotFoundException {
+
+        HashMap<String, Integer> pastCount = rentalService.countCustomerPastRentals(loggedInUser.getName());
+        return new ResponseEntity<>(pastCount, HttpStatus.OK);
+    }
+
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @GetMapping(path = "/count/rejected")
+    public ResponseEntity<HashMap<String, Integer>> countRejected(Authentication loggedInUser) throws DataFormatException, IOException, ResourceNotFoundException {
+
+        HashMap<String, Integer> rejectedCount = rentalService.countCustomerRejectedRentals(loggedInUser.getName());
+        return new ResponseEntity<>(rejectedCount, HttpStatus.OK);
     }
 }
