@@ -350,7 +350,7 @@ public class RentalController {
     public ResponseEntity<BangerAndCoResponse> cancelLateReturn(@RequestBody HashMap<String, Integer> requestBody, Authentication loggedInUser) throws BadValuePassedException, ResourceNotUpdatedException, ResourceNotFoundException {
         if (requestBody.containsKey("rentalId") && requestBody.get("rentalId") != null) {
 
-            rentalService.cancelLateReturn(requestBody.get("rentalId"),loggedInUser);
+            rentalService.cancelLateReturn(requestBody.get("rentalId"), loggedInUser);
 
             return new ResponseEntity<>(
                     new BangerAndCoResponse(
@@ -362,5 +362,13 @@ public class RentalController {
         } else {
             throw new BadValuePassedException("The rental ID is not present in the request");
         }
+    }
+
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    @GetMapping(path = "/ongoing/time_left")
+    public ResponseEntity<List<RentalShowDTO>> getTimeLeftOnGoingRental(Authentication loggedInUser) throws Exception {
+
+        List<RentalShowDTO> customerOnGoingRentals = rentalService.getCustomerOnGoingRentals(loggedInUser.getName());
+        return new ResponseEntity<>(customerOnGoingRentals, HttpStatus.OK);
     }
 }

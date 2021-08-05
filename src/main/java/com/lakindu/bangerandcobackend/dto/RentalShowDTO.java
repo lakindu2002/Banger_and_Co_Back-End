@@ -1,7 +1,9 @@
 package com.lakindu.bangerandcobackend.dto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 public class RentalShowDTO {
@@ -19,7 +21,32 @@ public class RentalShowDTO {
     private Boolean isCollected;
     private Boolean isLateReturnRequested;
 
+    private String timeLeftForRental; //will comprise of an output string to display on customer dashboard to indicate time left on their rental
+
     public RentalShowDTO() {
+    }
+
+
+    public void setTimeLeftForRental(String timeLeftForRental) {
+        this.timeLeftForRental = timeLeftForRental;
+    }
+
+    public String getTimeLeftForRental() {
+        return timeLeftForRental;
+    }
+
+    public void calculateTimeLeftForRental() {
+        LocalDate now = LocalDate.now();
+        LocalDateTime currentDateTime = LocalDateTime.of(now, LocalTime.now());
+        LocalDateTime returnExact = LocalDateTime.of(returnDate, returnTime);
+
+        if (returnDate.equals(now)) {
+            //return date is today
+            this.timeLeftForRental = currentDateTime.until(returnExact, ChronoUnit.HOURS) + " Hour(s) Left";
+        } else {
+            //get in days
+            this.timeLeftForRental = currentDateTime.until(returnExact, ChronoUnit.DAYS) + " Day(s) Left";
+        }
     }
 
     public int getRentalId() {

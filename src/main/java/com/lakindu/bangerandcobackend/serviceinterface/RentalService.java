@@ -259,4 +259,11 @@ public interface RentalService {
      * @param loggedInUser The user logged in to the system == to the customer on rental being cancelled for late return
      */
     void cancelLateReturn(Integer rentalId, Authentication loggedInUser) throws ResourceNotFoundException, ResourceNotUpdatedException;
+
+    /**
+     * Method will get customer on-going rentals without any pagination.
+     *
+     * @param name The customer username
+     */
+    List<RentalShowDTO> getCustomerOnGoingRentals(String name) throws Exception;
 }

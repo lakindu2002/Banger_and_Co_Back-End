@@ -571,6 +571,34 @@ public class RentalServiceImpl implements RentalService {
 
     }
 
+    /**
+     * Method will get customer on-going rentals without any pagination.
+     *
+     * @param name The customer username
+     */
+    @Override
+    public List<RentalShowDTO> getCustomerOnGoingRentals(String name) throws Exception {
+        List<Rental> on_goingRentals = rentalRepository.getAllByIsApprovedEqualsAndIsCollectedEqualsAndIsReturnedEqualsAndTheCustomerRentingEquals(
+                true, true, false, userService._getUserWithoutDecompression(name), null
+        );
+
+        List<RentalShowDTO> rentalShowDTOS = new ArrayList<>();
+
+        for (Rental eachRental : on_goingRentals) {
+            RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
+
+            VehicleShowDTO vehicleToBeRented = rentalShowDTO.getVehicleToBeRented();
+            vehicleToBeRented.setVehicleImage(null); //remove vehicle image
+
+            rentalShowDTO.setVehicleToBeRented(vehicleToBeRented); //assign vehicle with no image
+            rentalShowDTO.setCustomerUsername(null); //remove customer information.
+
+            rentalShowDTO.calculateTimeLeftForRental();
+            rentalShowDTOS.add(rentalShowDTO);
+        }
+        return rentalShowDTOS;
+    }
+
     private List<ChartReturn> fillEmptyMonths(List<ChartReturn> formattedDBData, Calendar dateTime12MonthsAgo) {
         List<String> monthList = new ArrayList<>();
         DateFormatSymbols monthProvider = new DateFormatSymbols(); //used to provide month names
