@@ -397,4 +397,18 @@ public class RentalController {
         HashMap<String, Integer> rejectedCount = rentalService.countCustomerRejectedRentals(loggedInUser.getName());
         return new ResponseEntity<>(rejectedCount, HttpStatus.OK);
     }
+
+    @PutMapping(path = "/updateReturnTime")
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    public ResponseEntity<BangerAndCoResponse> updateRentalReturnTime(@Valid @RequestBody RentalCreateDTO theUpdateRental) throws BadValuePassedException, ResourceNotCreatedException, ParseException, ResourceNotFoundException, ResourceNotUpdatedException {
+        if (theUpdateRental.getRentalId() == null) {
+            throw new BadValuePassedException("Please provide a rental to update");
+        }
+
+        rentalService.updateRentalReturnTime(theUpdateRental);
+
+        return new ResponseEntity<>(new BangerAndCoResponse(
+                "The rental return time has been updated successfully", HttpStatus.OK.value()
+        ), HttpStatus.OK);
+    }
 }

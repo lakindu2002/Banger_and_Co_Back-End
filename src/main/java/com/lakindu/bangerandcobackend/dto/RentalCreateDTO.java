@@ -7,6 +7,8 @@ import java.util.ArrayList;
 public class RentalCreateDTO {
     private ArrayList<AdditionalEquipmentDTO> equipmentsAddedToRental;
 
+    private Integer rentalId;
+
     @NotBlank(message = "Please provide a valid pickup date")
     private String pickupDate;
 
@@ -38,6 +40,14 @@ public class RentalCreateDTO {
 
     public void setEquipmentsAddedToRental(ArrayList<AdditionalEquipmentDTO> equipmentsAddedToRental) {
         this.equipmentsAddedToRental = equipmentsAddedToRental;
+    }
+
+    public Integer getRentalId() {
+        return rentalId;
+    }
+
+    public void setRentalId(Integer rentalId) {
+        this.rentalId = rentalId;
     }
 
     public String getCustomerUsername() {

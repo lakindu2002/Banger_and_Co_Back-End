@@ -169,5 +169,10 @@ public interface RentalRepository extends JpaRepository<Rental, Integer> {
     List<Rental> findAllByIsApprovedEqualsAndIsCollectedEqualsAndIsReturnedEquals(
             Boolean isApproved, Boolean isCollected, Boolean isReturned
     );
+
+    @Query(
+            "FROM Rental theRental WHERE theRental.pickupDate >=:updatingReturnDate"
+    )
+    List<Rental> findRentalsFromToday(LocalDate updatingReturnDate);
 }
 

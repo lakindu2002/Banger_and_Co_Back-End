@@ -641,6 +641,98 @@ public class RentalServiceImpl implements RentalService {
         return rejectedCount;
     }
 
+    /**
+     * Method will update the rental return time upto 4pm. New rental cost and equipment costs will be calculated.
+     *
+     * @param theUpdateRentalDTO The rental to be updated
+     */
+    @Override
+    public void updateRentalReturnTime(RentalCreateDTO theUpdateRentalDTO) throws ResourceNotFoundException, ParseException, BadValuePassedException, ResourceNotUpdatedException {
+        Rental rentalToBeUpdatedFromDB = rentalRepository.findById(theUpdateRentalDTO.getRentalId()).orElseThrow(() -> new ResourceNotFoundException("The rental you are trying to update does not exist at Banger and Co."));
+
+        //before updating, check if initially set return time is after 4pm
+        //if so, cannot update.
+        if (LocalTime.parse(theUpdateRentalDTO.getReturnTime()).isAfter(LocalTime.of(16, 0))) {
+            //cannot update
+            throw new BadValuePassedException("This rental can only be extended upto 4pm");
+        }
+
+        //check if new return time < current return so, if so do not allow
+        if (rentalToBeUpdatedFromDB.getReturnTime().isAfter(LocalTime.parse(theUpdateRentalDTO.getReturnTime()))) {
+            //newly set return time is less than current return time
+            throw new BadValuePassedException("You can only extend your time duration. You are not allowed to decrease the time on rental");
+        }
+
+
+        VehicleRentalFilterDTO clientNewDate = new VehicleRentalFilterDTO();
+        clientNewDate.setPickupDate(new SimpleDateFormat("yyyy-MM-dd").parse(theUpdateRentalDTO.getPickupDate()));
+        clientNewDate.setReturnDate(new SimpleDateFormat("yyyy-MM-dd").parse(theUpdateRentalDTO.getReturnDate()));
+        clientNewDate.setPickupTime(LocalTime.parse(theUpdateRentalDTO.getPickupTime()));
+        clientNewDate.setReturnTime(LocalTime.parse(theUpdateRentalDTO.getReturnTime()));
+
+        LocalDateTime pickupDateTime = LocalDateTime.of(clientNewDate.getPickupDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), clientNewDate.getPickupTime());
+        LocalDateTime returnDateTime = LocalDateTime.of(clientNewDate.getReturnDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate(), clientNewDate.getReturnTime());
+
+        //check if duration is maximum of 2 weeks and start and end time is between 8 and 18:00
+        //if same day rental, check if minimum of 5 hours is present.
+        validateRentalFilters(clientNewDate);
+        //date and time is valid.
+
+        //check if vehicle is free on given duration.
+        //check if there are rentals from new return time to next day midnight
+        List<Rental> theRentalsFromReturnDate = rentalRepository.findRentalsFromToday(rentalToBeUpdatedFromDB.getReturnDate());
+
+        LocalDate dayAfter = rentalToBeUpdatedFromDB.getReturnDate().plus(1, ChronoUnit.DAYS);
+
+        for (Rental eachRental : theRentalsFromReturnDate) {
+            if (eachRental.getReturned() == null || !eachRental.getReturned()) {
+                //vehicle not yet returned
+                if (rentalToBeUpdatedFromDB.getVehicleOnRental().getVehicleId() == eachRental.getVehicleOnRental().getVehicleId()) {
+                    //when updating, do not check next day rentals for other vehicles. check only for the vehicle being updated.
+                    if (dayAfter.equals(eachRental.getPickupDate())) {
+                        //day after - 22nd
+                        //pickup - 22nd - 22nd = 22nd = day after rental
+
+                        //pickup is day after the return date
+                        throw new ResourceNotUpdatedException("This vehicle has a rental for tomorrow therefore your rental cannot be extended");
+                    } else if (eachRental.getPickupDate().equals(rentalToBeUpdatedFromDB.getReturnDate())) {
+                        //pickup date for db rental is same day as rental return date for update
+                        //check if it is the same rental as updating one
+                        if (eachRental.getRentalId() != rentalToBeUpdatedFromDB.getRentalId()) {
+                            //different rental, proceed
+                            //check if pickup time is after new time
+                            if (clientNewDate.getReturnTime().isAfter(eachRental.getPickupTime()) || clientNewDate.getReturnTime().equals(eachRental.getPickupTime())) {
+                                //check if new return time is greater than or equals to the pickup time in DB
+                                throw new ResourceNotUpdatedException("This vehicle has a rental on the new return time you specified");
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        //re-calculate cost
+        Vehicle theVehicle = rentalToBeUpdatedFromDB.getVehicleOnRental();
+        long rentalPeriodInHours = pickupDateTime.until(returnDateTime, ChronoUnit.HOURS);
+        double totalCostForVehicle = calculateCostForVehicle(rentalPeriodInHours, theVehicle);
+
+        double costOfEquipments = 0;
+        for (RentalCustomization eachCustomization : rentalToBeUpdatedFromDB.getRentalCustomizationList()) {
+            double pricePerDay = eachCustomization.getEquipmentAddedToRental().getPricePerDay();
+            double costOfEachEquipment;
+            costOfEachEquipment = ((pricePerDay / PRICE_PER_DAY_DIVISOR) * rentalPeriodInHours) * eachCustomization.getQuantityAddedForEquipmentInRental();
+            costOfEquipments = costOfEquipments + costOfEachEquipment;
+            eachCustomization.setTotalPriceForEquipment(costOfEachEquipment);
+        }
+
+        rentalToBeUpdatedFromDB.setReturnTime(LocalTime.parse(theUpdateRentalDTO.getReturnTime()));
+        rentalToBeUpdatedFromDB.setTotalCost(totalCostForVehicle + costOfEquipments);
+        rentalToBeUpdatedFromDB.setReturnTime(LocalTime.parse(theUpdateRentalDTO.getReturnTime()));
+
+
+        rentalRepository.save(rentalToBeUpdatedFromDB);
+    }
+
     private List<ChartReturn> fillEmptyMonths(List<ChartReturn> formattedDBData, Calendar dateTime12MonthsAgo) {
         List<String> monthList = new ArrayList<>();
         DateFormatSymbols monthProvider = new DateFormatSymbols(); //used to provide month names
@@ -1363,6 +1455,7 @@ public class RentalServiceImpl implements RentalService {
             } else {
                 AdditionalEquipment item = additionalEquipmentService._getAdditionalEquipmentById(eachEquipment.getEquipmentId());
                 //calculate total price for rental and reduce equipment quantity as rental is made.
+
                 item.setEquipmentQuantity(item.getEquipmentQuantity() - eachEquipment.getQuantitySelectedForRental());
 
                 RentalCustomization eachCustomization = new RentalCustomization();

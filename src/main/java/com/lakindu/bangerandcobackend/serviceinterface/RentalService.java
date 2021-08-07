@@ -275,4 +275,10 @@ public interface RentalService {
 
     HashMap<String, Integer> countCustomerRejectedRentals(String username) throws DataFormatException, IOException, ResourceNotFoundException;
 
+    /**
+     * Method will update the rental return time upto 4pm. New rental cost and equipment costs will be calculated.
+     *
+     * @param theUpdateRental The rental to be updated
+     */
+    void updateRentalReturnTime(RentalCreateDTO theUpdateRental) throws ResourceNotFoundException, ParseException, BadValuePassedException, ResourceNotCreatedException, ResourceNotUpdatedException;
 }
