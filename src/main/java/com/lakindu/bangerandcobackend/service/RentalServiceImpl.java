@@ -394,7 +394,9 @@ public class RentalServiceImpl implements RentalService {
             RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
 
             VehicleShowDTO vehicleShowDTO = rentalShowDTO.getVehicleToBeRented();
-            vehicleShowDTO.setVehicleImage(null);
+            if (vehicleShowDTO != null) {
+                vehicleShowDTO.setVehicleImage(null);
+            }
 
             UserDTO customerUsername = rentalShowDTO.getCustomerUsername();
             customerUsername.setProfilePicture(null);
@@ -420,7 +422,9 @@ public class RentalServiceImpl implements RentalService {
             RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
 
             VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
-            theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+            if (theVehicleToBeShown != null) {
+                theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+            }
 
             UserDTO theCustomer = rentalShowDTO.getCustomerUsername();
             theCustomer.setLicensePic(null);
@@ -447,7 +451,9 @@ public class RentalServiceImpl implements RentalService {
             RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
 
             VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
-            theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+            if (theVehicleToBeShown != null) {
+                theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+            }
 
             UserDTO theCustomer = rentalShowDTO.getCustomerUsername();
             theCustomer.setLicensePic(null);
@@ -589,7 +595,9 @@ public class RentalServiceImpl implements RentalService {
             RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
 
             VehicleShowDTO vehicleToBeRented = rentalShowDTO.getVehicleToBeRented();
-            vehicleToBeRented.setVehicleImage(null); //remove vehicle image
+            if (vehicleToBeRented != null) {
+                vehicleToBeRented.setVehicleImage(null); //remove vehicle image
+            }
 
             rentalShowDTO.setVehicleToBeRented(vehicleToBeRented); //assign vehicle with no image
             rentalShowDTO.setCustomerUsername(null); //remove customer information.
@@ -667,7 +675,9 @@ public class RentalServiceImpl implements RentalService {
             RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
 
             VehicleShowDTO vehicleToBeRented = rentalShowDTO.getVehicleToBeRented();
-            vehicleToBeRented.setVehicleImage(null); //remove vehicle image
+            if (vehicleToBeRented != null) {
+                vehicleToBeRented.setVehicleImage(null); //remove vehicle image
+            }
 
             UserDTO customerRenting = rentalShowDTO.getCustomerUsername();
             customerRenting.setLicensePic(null);
@@ -736,7 +746,9 @@ public class RentalServiceImpl implements RentalService {
             RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
 
             VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
-            theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+            if (theVehicleToBeShown != null) {
+                theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+            }
 
             UserDTO theCustomer = rentalShowDTO.getCustomerUsername();
             theCustomer.setLicensePic(null);
@@ -768,7 +780,9 @@ public class RentalServiceImpl implements RentalService {
         theDTO.setApproved(eachRental.getApproved());
         theDTO.setCollected(eachRental.getCollected());
         theDTO.setLateReturnRequested(eachRental.getLateReturnRequested());
-        theDTO.setVehicleToBeRented(vehicleService.getVehicleById(eachRental.getVehicleOnRental().getVehicleId()));
+        if (eachRental.getVehicleOnRental() != null) {
+            theDTO.setVehicleToBeRented(vehicleService.getVehicleById(eachRental.getVehicleOnRental().getVehicleId()));
+        }
         theDTO.setEquipmentsAddedToRental(additionalEquipmentService.getEquipmentForRental(eachRental.getRentalCustomizationList()));
         theDTO.setCustomerUsername(userService.getUserInformation(eachRental.getTheCustomerRenting().getUsername()));
 
@@ -930,7 +944,9 @@ public class RentalServiceImpl implements RentalService {
             RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
 
             VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
-            theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+            if (theVehicleToBeShown != null) {
+                theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+            }
             rentalShowDTO.setCustomerUsername(null); //no need customer information as the customer renting the vehicle is requesting data.
 
             rentalShowDTO.setVehicleToBeRented(theVehicleToBeShown);
@@ -969,7 +985,9 @@ public class RentalServiceImpl implements RentalService {
             RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
 
             VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
-            theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+            if (theVehicleToBeShown != null) {
+                theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+            }
             rentalShowDTO.setCustomerUsername(null); //no need customer information as the customer renting the vehicle is requesting data.
 
             rentalShowDTO.setVehicleToBeRented(theVehicleToBeShown);
@@ -1006,7 +1024,9 @@ public class RentalServiceImpl implements RentalService {
             RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
 
             VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
-            theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+            if (theVehicleToBeShown != null) {
+                theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+            }
             rentalShowDTO.setCustomerUsername(null); //no need customer information as the customer renting the vehicle is requesting data.
 
             rentalShowDTO.setVehicleToBeRented(theVehicleToBeShown);
@@ -1045,7 +1065,9 @@ public class RentalServiceImpl implements RentalService {
             RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
 
             VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
-            theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+            if (theVehicleToBeShown != null) {
+                theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+            }
             rentalShowDTO.setCustomerUsername(null); //no need customer information as the customer renting the vehicle is requesting data.
 
             rentalShowDTO.setVehicleToBeRented(theVehicleToBeShown);
@@ -1083,7 +1105,9 @@ public class RentalServiceImpl implements RentalService {
             RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
 
             VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
-            theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+            if (theVehicleToBeShown != null) {
+                theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+            }
             rentalShowDTO.setCustomerUsername(null); //no need customer information as the customer renting the vehicle is requesting data.
 
             rentalShowDTO.setVehicleToBeRented(theVehicleToBeShown);
@@ -1114,7 +1138,9 @@ public class RentalServiceImpl implements RentalService {
             RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
 
             VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
-            theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+            if (theVehicleToBeShown != null) {
+                theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+            }
 
             UserDTO theCustomer = rentalShowDTO.getCustomerUsername();
             theCustomer.setLicensePic(null);
@@ -1153,7 +1179,9 @@ public class RentalServiceImpl implements RentalService {
             RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
 
             VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
-            theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+            if (theVehicleToBeShown != null) {
+                theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+            }
 
             UserDTO theCustomer = rentalShowDTO.getCustomerUsername();
             theCustomer.setLicensePic(null);
@@ -1191,7 +1219,9 @@ public class RentalServiceImpl implements RentalService {
             RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
 
             VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
-            theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+            if (theVehicleToBeShown != null) {
+                theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+            }
 
             UserDTO theCustomer = rentalShowDTO.getCustomerUsername();
             theCustomer.setLicensePic(null);
@@ -1228,7 +1258,9 @@ public class RentalServiceImpl implements RentalService {
             RentalShowDTO rentalShowDTO = convertToDTO(eachRental);
 
             VehicleShowDTO theVehicleToBeShown = rentalShowDTO.getVehicleToBeRented();
-            theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+            if (theVehicleToBeShown != null) {
+                theVehicleToBeShown.setVehicleImage(null); //initially dont add vehicle image to return.
+            }
 
             UserDTO theCustomer = rentalShowDTO.getCustomerUsername();
             theCustomer.setLicensePic(null);
