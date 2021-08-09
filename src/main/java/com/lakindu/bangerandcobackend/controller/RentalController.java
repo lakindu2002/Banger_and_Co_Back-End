@@ -1,6 +1,7 @@
 package com.lakindu.bangerandcobackend.controller;
 
 import com.lakindu.bangerandcobackend.dto.ChartReturn;
+import com.lakindu.bangerandcobackend.dto.RentalAdditionalEquipmentUpdateDTO;
 import com.lakindu.bangerandcobackend.dto.RentalCreateDTO;
 import com.lakindu.bangerandcobackend.dto.RentalShowDTO;
 import com.lakindu.bangerandcobackend.serviceinterface.RentalService;
@@ -401,6 +402,7 @@ public class RentalController {
     @PutMapping(path = "/updateReturnTime")
     @PreAuthorize("hasAuthority('CUSTOMER')")
     public ResponseEntity<BangerAndCoResponse> updateRentalReturnTime(@Valid @RequestBody RentalCreateDTO theUpdateRental) throws BadValuePassedException, ResourceNotCreatedException, ParseException, ResourceNotFoundException, ResourceNotUpdatedException {
+        //allows rental return date to be extended up to 4pm if there is no rental for the next day.
         if (theUpdateRental.getRentalId() == null) {
             throw new BadValuePassedException("Please provide a rental to update");
         }
@@ -410,5 +412,17 @@ public class RentalController {
         return new ResponseEntity<>(new BangerAndCoResponse(
                 "The rental return time has been updated successfully", HttpStatus.OK.value()
         ), HttpStatus.OK);
+    }
+
+    @PutMapping(path = "/customize_add_on")
+    @PreAuthorize("hasAuthority('CUSTOMER')")
+    public ResponseEntity<BangerAndCoResponse> customizeRentalAdditionalEquipment(@Valid @RequestBody RentalAdditionalEquipmentUpdateDTO theAddOnDTO) throws ResourceNotUpdatedException, ResourceNotCreatedException, ResourceNotFoundException {
+        //allows a rental to be customized with additional equipment until it has been picked up
+        rentalService.updateRentalAddOns(theAddOnDTO);
+
+        return new ResponseEntity<>(
+                new BangerAndCoResponse("The rental customizations have been updated successfully", HttpStatus.OK.value()),
+                HttpStatus.OK
+        );
     }
 }

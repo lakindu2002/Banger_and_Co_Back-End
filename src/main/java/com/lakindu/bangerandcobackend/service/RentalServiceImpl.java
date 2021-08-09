@@ -3,10 +3,7 @@ package com.lakindu.bangerandcobackend.service;
 import com.lakindu.bangerandcobackend.dto.*;
 import com.lakindu.bangerandcobackend.entity.*;
 import com.lakindu.bangerandcobackend.repository.RentalRepository;
-import com.lakindu.bangerandcobackend.serviceinterface.AdditionalEquipmentService;
-import com.lakindu.bangerandcobackend.serviceinterface.RentalService;
-import com.lakindu.bangerandcobackend.serviceinterface.UserService;
-import com.lakindu.bangerandcobackend.serviceinterface.VehicleService;
+import com.lakindu.bangerandcobackend.serviceinterface.*;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotCreatedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
@@ -42,6 +39,7 @@ public class RentalServiceImpl implements RentalService {
     private final UserService userService;
     private final AdditionalEquipmentService additionalEquipmentService;
     private final MailSender mailSender;
+    private final RentalCustomizationService rentalCustomizationService;
 
     private final int PRICE_PER_DAY_DIVISOR = 24; //price_per_day/24 = price per hour
     private final int ITEMS_PER_PAGE = 10;
@@ -53,13 +51,14 @@ public class RentalServiceImpl implements RentalService {
             @Qualifier("vehicleServiceImpl") VehicleService vehicleService,
             @Qualifier("userServiceImpl") UserService userService,
             @Qualifier("additionalEquipmentServiceImpl") AdditionalEquipmentService additionalEquipmentService,
-            @Qualifier("mailSender") MailSender mailSender
-    ) {
+            @Qualifier("mailSender") MailSender mailSender,
+            @Qualifier("rentalCustomizationServiceImpl") RentalCustomizationService rentalCustomizationService) {
         this.rentalRepository = rentalRepository;
         this.vehicleService = vehicleService;
         this.userService = userService;
         this.additionalEquipmentService = additionalEquipmentService;
         this.mailSender = mailSender;
+        this.rentalCustomizationService = rentalCustomizationService;
     }
 
     static class RentalEquipmentCalculatorSupporter {
@@ -731,6 +730,44 @@ public class RentalServiceImpl implements RentalService {
 
 
         rentalRepository.save(rentalToBeUpdatedFromDB);
+    }
+
+    /**
+     * Method will allow updating rental addons till the rental has been collected.
+     *
+     * @param theAddOnDTO The new equipment set
+     */
+    @Override
+    @Transactional
+    public void updateRentalAddOns(RentalAdditionalEquipmentUpdateDTO theAddOnDTO) throws ResourceNotFoundException, ResourceNotUpdatedException, ResourceNotCreatedException {
+        Rental rentalToBeCustomized = rentalRepository.findById(theAddOnDTO.getRental()).orElseThrow(() -> new ResourceNotFoundException("The rental that you wish to customize does not exist at Banger and Co."));
+        LocalDateTime pickupDateTime = LocalDateTime.of(rentalToBeCustomized.getPickupDate(), rentalToBeCustomized.getPickupTime());
+        LocalDateTime returnDateTime = LocalDateTime.of(rentalToBeCustomized.getReturnDate(), rentalToBeCustomized.getReturnTime());
+
+        //if rental has been collected, do not allow
+        if (rentalToBeCustomized.getCollected() != null && rentalToBeCustomized.getCollected()) {
+            throw new ResourceNotUpdatedException("This rental has already been collected. Therefore, you cannot customize this rental");
+        }
+        //initially start by adding the current quantity back to the stock and starting new if equipments are present
+        if (rentalToBeCustomized.getRentalCustomizationList() != null) {
+            for (RentalCustomization eachCustomization : rentalToBeCustomized.getRentalCustomizationList()) {
+                additionalEquipmentService.addQuantityBackToItem(eachCustomization);
+            }
+            //delete existing rental customizations from the database and start new.
+            rentalCustomizationService.deleteByRental(rentalToBeCustomized);
+        }
+
+        //re-calculate totals and get new equipment list while updating quantity back into addons.
+        long rentalPeriodInHours = pickupDateTime.until(returnDateTime, ChronoUnit.HOURS);
+
+        double vehicleCost = calculateCostForVehicle(rentalPeriodInHours, rentalToBeCustomized.getVehicleOnRental());
+        RentalEquipmentCalculatorSupporter equipmentsAndTotalPriceForEquipments = getEquipmentsAndTotalPriceForEquipments(
+                theAddOnDTO.getUpdateEquipments(), rentalPeriodInHours, rentalToBeCustomized
+        );
+        rentalToBeCustomized.setTotalCost(vehicleCost + equipmentsAndTotalPriceForEquipments.getTotalCostForAdditionalEquipment());
+        rentalToBeCustomized.setRentalCustomizationList(equipmentsAndTotalPriceForEquipments.getRentalCustomizationList());
+
+        rentalRepository.save(rentalToBeCustomized);
     }
 
     private List<ChartReturn> fillEmptyMonths(List<ChartReturn> formattedDBData, Calendar dateTime12MonthsAgo) {
@@ -1474,6 +1511,7 @@ public class RentalServiceImpl implements RentalService {
                 addedCustomization.add(eachCustomization); //add it to the equipments array added to the rental.
 
                 totalPriceForEquipments += costForEachEquipment; //get the total sum
+
             }
         }
         supporter.setRentalCustomizationList(addedCustomization);

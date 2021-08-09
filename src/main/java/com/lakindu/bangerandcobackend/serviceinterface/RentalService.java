@@ -1,9 +1,6 @@
 package com.lakindu.bangerandcobackend.serviceinterface;
 
-import com.lakindu.bangerandcobackend.dto.ChartReturn;
-import com.lakindu.bangerandcobackend.dto.RentalCreateDTO;
-import com.lakindu.bangerandcobackend.dto.RentalShowDTO;
-import com.lakindu.bangerandcobackend.dto.VehicleRentalFilterDTO;
+import com.lakindu.bangerandcobackend.dto.*;
 import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotCreatedException;
@@ -281,4 +278,11 @@ public interface RentalService {
      * @param theUpdateRental The rental to be updated
      */
     void updateRentalReturnTime(RentalCreateDTO theUpdateRental) throws ResourceNotFoundException, ParseException, BadValuePassedException, ResourceNotCreatedException, ResourceNotUpdatedException;
+
+    /**
+     * Method will allow updating rental addons till the rental has been collected.
+     *
+     * @param theAddOnDTO The new equipment set
+     */
+    void updateRentalAddOns(RentalAdditionalEquipmentUpdateDTO theAddOnDTO) throws ResourceNotFoundException, ResourceNotUpdatedException, ResourceNotCreatedException;
 }
