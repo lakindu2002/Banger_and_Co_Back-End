@@ -4,15 +4,31 @@ import java.util.List;
 
 public class ScrapeDTO {
     private String vehicleType;
-    private List<PriceList> thePriceList;
+    private List<VehicleInformation> theVehicleInformation;
 
-    public static class PriceList {
+    public String getVehicleType() {
+        return vehicleType;
+    }
+
+    public void setVehicleType(String vehicleType) {
+        this.vehicleType = vehicleType;
+    }
+
+    public List<VehicleInformation> getTheVehicleInformation() {
+        return theVehicleInformation;
+    }
+
+    public void setTheVehicleInformation(List<VehicleInformation> theVehicleInformation) {
+        this.theVehicleInformation = theVehicleInformation;
+    }
+
+    public static class VehicleInformation {
         private String vehicleName;
         private double pricePerMonth;
         private double pricePerWeek;
         private double pricePerDay;
 
-        public PriceList() {
+        public VehicleInformation() {
         }
 
         public String getVehicleName() {

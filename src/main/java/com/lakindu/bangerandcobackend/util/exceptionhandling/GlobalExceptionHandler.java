@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import javax.annotation.PostConstruct;
+import java.net.SocketTimeoutException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
@@ -173,6 +174,17 @@ public class GlobalExceptionHandler {
                 "Access Denied",
                 "You are not allowed to view this resource.",
                 HttpStatus.FORBIDDEN.value(),
+                new ArrayList<>());
+
+        return new ResponseEntity<>(exceptionHandler, HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(SocketTimeoutException.class)
+    public ResponseEntity<BangerAndCoExceptionHandler> handleSocketTimeOutException(SocketTimeoutException ex) {
+        BangerAndCoExceptionHandler exceptionHandler = new BangerAndCoExceptionHandler(
+                "Socket Timed Out",
+                "The request timed out.",
+                HttpStatus.REQUEST_TIMEOUT.value(),
                 new ArrayList<>());
 
         return new ResponseEntity<>(exceptionHandler, HttpStatus.FORBIDDEN);
