@@ -126,6 +126,8 @@ public class WebScraperImpl implements WebScraper {
             }
         }
 
+        //calculate average price per day
+        scrapedPrices.forEach(ScrapeDTO::calculateAveragePricePerDay);
         return scrapedPrices;
     }
 

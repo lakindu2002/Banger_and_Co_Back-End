@@ -5,9 +5,18 @@ import java.util.List;
 public class ScrapeDTO {
     private String vehicleType;
     private List<VehicleInformation> theVehicleInformation;
+    private double averagePricePerDay;
 
     public String getVehicleType() {
         return vehicleType;
+    }
+
+    public double getAveragePricePerDay() {
+        return averagePricePerDay;
+    }
+
+    public void setAveragePricePerDay(double averagePricePerDay) {
+        this.averagePricePerDay = averagePricePerDay;
     }
 
     public void setVehicleType(String vehicleType) {
@@ -20,6 +29,16 @@ public class ScrapeDTO {
 
     public void setTheVehicleInformation(List<VehicleInformation> theVehicleInformation) {
         this.theVehicleInformation = theVehicleInformation;
+    }
+
+    public void calculateAveragePricePerDay() {
+        double totalCostPerDayPerType = 0;
+        //calculate average price per day
+        for (VehicleInformation eachVehicle : this.theVehicleInformation) {
+            totalCostPerDayPerType = totalCostPerDayPerType + eachVehicle.getPricePerDay();
+        }
+        //average
+        this.averagePricePerDay = totalCostPerDayPerType / theVehicleInformation.size(); //total/size = average
     }
 
     public static class VehicleInformation {
