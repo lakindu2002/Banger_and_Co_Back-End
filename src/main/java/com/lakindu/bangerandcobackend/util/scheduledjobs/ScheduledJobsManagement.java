@@ -34,17 +34,16 @@ public class ScheduledJobsManagement {
     @Value("${custom.dmv.filename}")
     private String saveFileName;
 
-    private String basicAuthHeader;
     private HttpHeaders httpHeaders;
-    private Logger LOGGER = Logger.getLogger(ScheduledJobsManagement.class.getName());
-    private String folderForCsv = System.getProperty("user.dir") + "/csv";
+    private final Logger LOGGER = Logger.getLogger(ScheduledJobsManagement.class.getName());
+    private final String folderForCsv = System.getProperty("user.dir") + "/csv";
 
     @PostConstruct
     public void constructAuthHeader() {
         //in basic auth: Basic Base64(username:password)
         String credentialsToBeEncoded = String.format("%s:%s", dmvUsername, dmvPassword);
         //create a request header to attach the basic auth token for authentication from dmv server.
-        basicAuthHeader = Base64.getEncoder().encodeToString(credentialsToBeEncoded.getBytes(StandardCharsets.UTF_8));
+        String basicAuthHeader = Base64.getEncoder().encodeToString(credentialsToBeEncoded.getBytes(StandardCharsets.UTF_8));
         httpHeaders = new HttpHeaders();
         httpHeaders.add("Authorization", String.format("Basic %s", basicAuthHeader));
 
