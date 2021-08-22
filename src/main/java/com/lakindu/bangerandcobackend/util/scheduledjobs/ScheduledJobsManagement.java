@@ -2,20 +2,15 @@ package com.lakindu.bangerandcobackend.util.scheduledjobs;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
-import org.springframework.http.client.ClientHttpRequest;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.scheduling.support.CronExpression;
 import org.springframework.stereotype.Component;
-import org.springframework.util.MultiValueMap;
-import org.springframework.util.StreamUtils;
 import org.springframework.web.client.RestTemplate;
 
 import javax.annotation.PostConstruct;
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Date;
 import java.util.logging.Logger;
