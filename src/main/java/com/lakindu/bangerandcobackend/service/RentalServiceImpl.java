@@ -216,16 +216,16 @@ public class RentalServiceImpl implements RentalService {
             theRentalToBeMade.setVehicleOnRental(theVehicle);
             theRentalToBeMade.setTheCustomerRenting(theCustomer);
 
-//            Rental madeRental = rentalRepository.save(theRentalToBeMade); //create the rental.
-//            //email the client indicating rental was made.
-//            //email the admins indicating a rental was made
-//            try {
-//                mailSender.sendRentalMail(new MailSenderHelper(theCustomer, "Rental Made Successfully", MailTemplateType.RENTAL_MADE), madeRental);
-//                mailSender.notifyAllAdminsAboutNewRental(userService._getAllAdminEmails(), "A New Rental Was Made", madeRental, MailTemplateType.ADMIN_BULK_RENTAL_MADE);
-//            } catch (Exception ex) {
-//                ex.printStackTrace();
-//                LOGGER.warning("EMAIL NOT SENT DURING RENTAL: " + ex.getMessage());
-//            }
+            Rental madeRental = rentalRepository.save(theRentalToBeMade); //create the rental.
+            //email the client indicating rental was made.
+            //email the admins indicating a rental was made
+            try {
+                mailSender.sendRentalMail(new MailSenderHelper(theCustomer, "Rental Made Successfully", MailTemplateType.RENTAL_MADE), madeRental);
+                mailSender.notifyAllAdminsAboutNewRental(userService._getAllAdminEmails(), "A New Rental Was Made", madeRental, MailTemplateType.ADMIN_BULK_RENTAL_MADE);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                LOGGER.warning("EMAIL NOT SENT DURING RENTAL: " + ex.getMessage());
+            }
 
         } else {
             throw new ResourceNotCreatedException("The rental could not be created because the vehicle was not available for the specified pickup and return duration");
