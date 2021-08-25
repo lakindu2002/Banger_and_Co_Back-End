@@ -86,6 +86,7 @@ public class DmvValidatorServiceImpl implements DmvValidatorService {
 
         //use buffered reader to read line by line from the csv file
         //the file contains two columns
+        //csv is saved in utf-8 so read in utf-8 as well.
         BufferedReader theReader = new BufferedReader(new InputStreamReader(new FileInputStream(theCsvFile), StandardCharsets.UTF_8));
 
         String readLine; //expected line read : LICENSE,STATUS
