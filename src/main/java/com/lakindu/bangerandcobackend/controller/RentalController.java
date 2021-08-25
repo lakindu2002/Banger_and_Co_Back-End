@@ -39,7 +39,7 @@ public class RentalController {
 
     @PostMapping(path = "/makeRental")
     @PreAuthorize("hasAuthority('CUSTOMER')")
-    public ResponseEntity<BangerAndCoResponse> makeRental(@Valid @RequestBody RentalCreateDTO theRental) throws ParseException, BadValuePassedException, ResourceNotFoundException, ResourceNotCreatedException {
+    public ResponseEntity<BangerAndCoResponse> makeRental(@Valid @RequestBody RentalCreateDTO theRental) throws ParseException, BadValuePassedException, ResourceNotFoundException, ResourceNotCreatedException, IOException {
         rentalService.makeRental(theRental);
 
         return new ResponseEntity<>(

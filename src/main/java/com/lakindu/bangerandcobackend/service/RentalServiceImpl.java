@@ -40,6 +40,7 @@ public class RentalServiceImpl implements RentalService {
     private final AdditionalEquipmentService additionalEquipmentService;
     private final MailSender mailSender;
     private final RentalCustomizationService rentalCustomizationService;
+    private final DmvValidatorService dmvValidatorService;
 
     private final int PRICE_PER_DAY_DIVISOR = 24; //price_per_day/24 = price per hour
     private final int ITEMS_PER_PAGE = 10;
@@ -52,13 +53,16 @@ public class RentalServiceImpl implements RentalService {
             @Qualifier("userServiceImpl") UserService userService,
             @Qualifier("additionalEquipmentServiceImpl") AdditionalEquipmentService additionalEquipmentService,
             @Qualifier("mailSender") MailSender mailSender,
-            @Qualifier("rentalCustomizationServiceImpl") RentalCustomizationService rentalCustomizationService) {
+            @Qualifier("rentalCustomizationServiceImpl") RentalCustomizationService rentalCustomizationService,
+            @Qualifier("dmvValidatorServiceImpl") DmvValidatorService dmvValidatorService
+    ) {
         this.rentalRepository = rentalRepository;
         this.vehicleService = vehicleService;
         this.userService = userService;
         this.additionalEquipmentService = additionalEquipmentService;
         this.mailSender = mailSender;
         this.rentalCustomizationService = rentalCustomizationService;
+        this.dmvValidatorService = dmvValidatorService;
     }
 
     static class RentalEquipmentCalculatorSupporter {
@@ -141,7 +145,7 @@ public class RentalServiceImpl implements RentalService {
     }
 
     @Override
-    public void makeRental(RentalCreateDTO theRental) throws ParseException, BadValuePassedException, ResourceNotFoundException, ResourceNotCreatedException {
+    public void makeRental(RentalCreateDTO theRental) throws ParseException, BadValuePassedException, ResourceNotFoundException, ResourceNotCreatedException, IOException {
         Rental theRentalToBeMade = new Rental();
 
         VehicleRentalFilterDTO theDateTime = new VehicleRentalFilterDTO();
@@ -163,6 +167,24 @@ public class RentalServiceImpl implements RentalService {
         long rentalPeriodInHours = pickupDateTime.until(returnDateTime, ChronoUnit.HOURS);
 
         User theCustomer = userService._getUserWithoutDecompression(theRental.getCustomerUsername());
+
+        //validate the customer driving license to ensure the license is not lost, stolen, suspended.
+        HashMap<String, String> validationDetails = dmvValidatorService.isLicenseSuspendedLostStolen(theCustomer);
+        String statusOfLicense = validationDetails.get(DmvValidatorServiceImpl.DMVType.STATUS_TYPE.value);
+
+        //validation for license
+        //if license is suspended, lost, stolen do not go let rental to be created.
+        if (statusOfLicense.equalsIgnoreCase(DmvValidatorServiceImpl.DMVType.SUSPENDED.value)) {
+            LOGGER.warning("RENTAL NOT MADE: LICENSE SUSPENDED");
+            throw new ResourceNotCreatedException("Your rental creation request was rejected because your driving license has been suspended by the DMV");
+        } else if (statusOfLicense.equalsIgnoreCase(DmvValidatorServiceImpl.DMVType.LOST.value)) {
+            LOGGER.warning("RENTAL NOT MADE: LICENSE REPORTED LOST");
+            throw new ResourceNotCreatedException("Your rental creation request was rejected because your driving license has been reported lost by the DMV");
+        } else if (statusOfLicense.equalsIgnoreCase(DmvValidatorServiceImpl.DMVType.STOLEN.value)) {
+            LOGGER.warning("RENTAL NOT MADE: LICENSE REPORTED STOLEN");
+            throw new ResourceNotCreatedException("Your rental creation request was rejected because your driving license has been reported as stolen by the DMV");
+        }
+
 
         if (theCustomer.isBlackListed()) {
             //customer cannot rent since they are blacklisted
@@ -194,16 +216,16 @@ public class RentalServiceImpl implements RentalService {
             theRentalToBeMade.setVehicleOnRental(theVehicle);
             theRentalToBeMade.setTheCustomerRenting(theCustomer);
 
-            Rental madeRental = rentalRepository.save(theRentalToBeMade); //create the rental.
-            //email the client indicating rental was made.
-            //email the admins indicating a rental was made
-            try {
-                mailSender.sendRentalMail(new MailSenderHelper(theCustomer, "Rental Made Successfully", MailTemplateType.RENTAL_MADE), madeRental);
-                mailSender.notifyAllAdminsAboutNewRental(userService._getAllAdminEmails(), "A New Rental Was Made", madeRental, MailTemplateType.ADMIN_BULK_RENTAL_MADE);
-            } catch (Exception ex) {
-                ex.printStackTrace();
-                LOGGER.warning("EMAIL NOT SENT DURING RENTAL: " + ex.getMessage());
-            }
+//            Rental madeRental = rentalRepository.save(theRentalToBeMade); //create the rental.
+//            //email the client indicating rental was made.
+//            //email the admins indicating a rental was made
+//            try {
+//                mailSender.sendRentalMail(new MailSenderHelper(theCustomer, "Rental Made Successfully", MailTemplateType.RENTAL_MADE), madeRental);
+//                mailSender.notifyAllAdminsAboutNewRental(userService._getAllAdminEmails(), "A New Rental Was Made", madeRental, MailTemplateType.ADMIN_BULK_RENTAL_MADE);
+//            } catch (Exception ex) {
+//                ex.printStackTrace();
+//                LOGGER.warning("EMAIL NOT SENT DURING RENTAL: " + ex.getMessage());
+//            }
 
         } else {
             throw new ResourceNotCreatedException("The rental could not be created because the vehicle was not available for the specified pickup and return duration");

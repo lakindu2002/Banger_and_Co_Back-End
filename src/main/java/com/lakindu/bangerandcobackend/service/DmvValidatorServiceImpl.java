@@ -13,6 +13,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 @Service
 public class DmvValidatorServiceImpl implements DmvValidatorService {
@@ -20,6 +21,7 @@ public class DmvValidatorServiceImpl implements DmvValidatorService {
     @Value("${custom.dmv.filename}")
     private String fileName;
     private File theCsvFile;
+    private final Logger LOGGER = Logger.getLogger(DmvValidatorServiceImpl.class.getName());
 
     @PostConstruct
     public void init() {
@@ -36,6 +38,7 @@ public class DmvValidatorServiceImpl implements DmvValidatorService {
      */
     @Override
     public HashMap<String, String> isLicenseSuspendedLostStolen(User theCustomer) throws IOException, ResourceNotFoundException {
+        boolean isFound = false;
         if (theCustomer == null) {
             throw new ResourceNotFoundException("The customer was not included for checking against DMV");
         }
@@ -44,25 +47,32 @@ public class DmvValidatorServiceImpl implements DmvValidatorService {
 
         if (theCsvFile.exists()) {
             //csv exists
+            String customerLicenseNumber = theCustomer.getDrivingLicenseNumber();
             HashMap<String, String> csvOutput = loadCsvData(); //read the csv.
             for (Map.Entry<String, String> entrySet : csvOutput.entrySet()) {
                 //iterate over the hashmap by using the Entry Set, and check if the customer license number is present in the list.
                 String eachLicenseNumber = entrySet.getKey();
                 String status = entrySet.getValue();
 
-                if (theCustomer.getDrivingLicenseNumber().trim().equalsIgnoreCase(eachLicenseNumber)) {
+                LOGGER.warning("CHECKING LICENSE: " + eachLicenseNumber + " AGAINST CUSTOMER: " + customerLicenseNumber + " COMPARISON: " + eachLicenseNumber.equals(customerLicenseNumber));
+
+                if (customerLicenseNumber.equalsIgnoreCase(eachLicenseNumber)) {
                     //if license number on iteration matches the license number of the customer
                     //the license is stored in the dmv, therefore, cannot make rental.
-                    theStatusHolder.put(DMVType.STATUS_TYPE.value, status); //insert the type of offense on the license.
+                    theStatusHolder.put(DMVType.STATUS_TYPE.value, status); //insert the type of state on the license.
+                    isFound = true; //license was found in the DMV
                     break;
                 }
             }
-            //if did not find, return the empty hashmap.
-            return theStatusHolder;
+            if (!isFound) {
+                //license not in DMV list, valid license
+                theStatusHolder.put(DMVType.STATUS_TYPE.value, DMVType.VALID.value);
+            }
         } else {
-            //csv does not exist.
-            throw new IOException("The File Provided By The Department of Motor Vehicles Could Not Be Located");
+            //no csv, return a valid license.
+            theStatusHolder.put(DMVType.STATUS_TYPE.value, DMVType.VALID.value);
         }
+        return theStatusHolder;
     }
 
     /**
@@ -120,7 +130,8 @@ public class DmvValidatorServiceImpl implements DmvValidatorService {
         STATUS_TYPE("STATUS"),
         SUSPENDED("suspended"),
         STOLEN("stolen"),
-        LOST("lost");
+        LOST("lost"),
+        VALID("valid");
 
         String value;
 
