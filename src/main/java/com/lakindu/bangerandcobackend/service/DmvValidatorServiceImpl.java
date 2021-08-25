@@ -7,10 +7,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -54,8 +52,6 @@ public class DmvValidatorServiceImpl implements DmvValidatorService {
                 String eachLicenseNumber = entrySet.getKey();
                 String status = entrySet.getValue();
 
-                LOGGER.warning("CHECKING LICENSE: " + eachLicenseNumber + " AGAINST CUSTOMER: " + customerLicenseNumber + " COMPARISON: " + eachLicenseNumber.equals(customerLicenseNumber));
-
                 if (customerLicenseNumber.equalsIgnoreCase(eachLicenseNumber)) {
                     //if license number on iteration matches the license number of the customer
                     //the license is stored in the dmv, therefore, cannot make rental.
@@ -82,7 +78,7 @@ public class DmvValidatorServiceImpl implements DmvValidatorService {
      * <br>
      *
      * @return Key - <b>License Number</b> and Value - <b>Status (Lost, Reported, Stolen)</b>
-     * @throws IOException
+     * @throws IOException Throws during the file input
      */
     private HashMap<String, String> loadCsvData() throws IOException {
         //read the content of the csv file and load the data onto a hashmap
@@ -90,7 +86,7 @@ public class DmvValidatorServiceImpl implements DmvValidatorService {
 
         //use buffered reader to read line by line from the csv file
         //the file contains two columns
-        BufferedReader theReader = new BufferedReader(new FileReader(theCsvFile));
+        BufferedReader theReader = new BufferedReader(new InputStreamReader(new FileInputStream(theCsvFile), StandardCharsets.UTF_8));
 
         String readLine; //expected line read : LICENSE,STATUS
         while ((readLine = theReader.readLine()) != null) {
