@@ -55,6 +55,7 @@ public class DmvValidatorServiceImpl implements DmvValidatorService {
                 if (customerLicenseNumber.equalsIgnoreCase(eachLicenseNumber)) {
                     //if license number on iteration matches the license number of the customer
                     //the license is stored in the dmv, therefore, cannot make rental.
+                    LOGGER.info("CUSTOMER LICENSE STATUS: " + status.toUpperCase());
                     theStatusHolder.put(DMVType.STATUS_TYPE.value, status); //insert the type of state on the license.
                     isFound = true; //license was found in the DMV
                     break;

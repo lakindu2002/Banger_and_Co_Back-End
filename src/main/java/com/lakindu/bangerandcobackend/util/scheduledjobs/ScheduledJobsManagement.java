@@ -80,10 +80,11 @@ public class ScheduledJobsManagement {
                         theCsv.createNewFile(); //create new file
                     }
 
-                    if (getCsvResponse.getBody() != null) {
+                    byte[] csvFileFromBody = getCsvResponse.getBody();
+                    if (csvFileFromBody != null) {
                         //if the csv file is present, flush the binary data to the licenseList.csv located in CSV directory
                         FileOutputStream theOutputStream = new FileOutputStream(theCsv);
-                        theOutputStream.write(getCsvResponse.getBody()); //write the response body, which is the csv returned from server
+                        theOutputStream.write(new String(csvFileFromBody).getBytes(StandardCharsets.UTF_8)); //write the response body, which is the csv returned from server
                         theOutputStream.flush(); //flush contents of stream to the file
                         theOutputStream.close(); //close the stream
                         LOGGER.info("Scheduled Job Successfully Saved CSV at: " + new Date().toString());
@@ -101,5 +102,10 @@ public class ScheduledJobsManagement {
         } catch (Exception ex) {
             LOGGER.warning("We ran into an error while fetching the CSV: " + ex.getMessage());
         }
+    }
+
+    @Scheduled(cron = "00 00 23 * * *")
+    public void blackListScheduledJob() {
+        //create a scheduled job to blacklist customers everyday at 11:00pm
     }
 }
