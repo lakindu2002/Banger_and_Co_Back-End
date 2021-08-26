@@ -122,4 +122,11 @@ public interface UserService extends UserDetailsService {
     void blackListCustomer(String usernameOfCustomer, Rental theRentalNotCollected);
 
     List<String> _getAllAdminEmails() throws ResourceNotFoundException;
+
+    /**
+     * Blacklists the customer when the DMV return shows their license is either lost, stolen or suspended
+     *
+     * @param theCustomer The customer to blacklist
+     */
+    void _blackListCustomer(User theCustomer);
 }

@@ -168,6 +168,12 @@ public class RentalServiceImpl implements RentalService {
 
         User theCustomer = userService._getUserWithoutDecompression(theRental.getCustomerUsername());
 
+        if (theCustomer.isBlackListed()) {
+            //customer cannot rent since they are blacklisted
+            throw new ResourceNotCreatedException("Your account is blacklisted. Therefore, until the administrator whitelists you, you cannot make any rentals at Banger and Co.");
+        }
+
+
         //validate the customer driving license to ensure the license is not lost, stolen, suspended.
         HashMap<String, String> validationDetails = dmvValidatorService.isLicenseSuspendedLostStolen(theCustomer);
         String statusOfLicense = validationDetails.get(DmvValidatorServiceImpl.DMVType.STATUS_TYPE.value);
@@ -178,23 +184,23 @@ public class RentalServiceImpl implements RentalService {
             LOGGER.warning("RENTAL NOT MADE: LICENSE SUSPENDED");
             //send email to DMV regarding the license status.
             mailSender.sendDmvEmail(theCustomer, statusOfLicense, dateOfOffense);
-            throw new ResourceNotCreatedException("Your rental creation request was rejected because your driving license has been suspended by the DMV");
+            //blacklist customer to prevent them from making any more rentals
+            userService._blackListCustomer(theCustomer);
+            throw new ResourceNotCreatedException("Your rental creation request was rejected because your driving license has been suspended by the DMV. Your account is now blacklisted");
         } else if (statusOfLicense.equalsIgnoreCase(DmvValidatorServiceImpl.DMVType.LOST.value)) {
             LOGGER.warning("RENTAL NOT MADE: LICENSE REPORTED LOST");
             //send email to DMV regarding the license status.
             mailSender.sendDmvEmail(theCustomer, statusOfLicense, dateOfOffense);
-            throw new ResourceNotCreatedException("Your rental creation request was rejected because your driving license has been reported lost by the DMV");
+            //blacklist customer to prevent them from making any more rentals
+            userService._blackListCustomer(theCustomer);
+            throw new ResourceNotCreatedException("Your rental creation request was rejected because your driving license has been reported lost by the DMV. Your account is now blacklisted");
         } else if (statusOfLicense.equalsIgnoreCase(DmvValidatorServiceImpl.DMVType.STOLEN.value)) {
             LOGGER.warning("RENTAL NOT MADE: LICENSE REPORTED STOLEN");
             //send email to DMV regarding the license status.
             mailSender.sendDmvEmail(theCustomer, statusOfLicense, dateOfOffense);
-            throw new ResourceNotCreatedException("Your rental creation request was rejected because your driving license has been reported as stolen by the DMV");
-        }
-
-
-        if (theCustomer.isBlackListed()) {
-            //customer cannot rent since they are blacklisted
-            throw new ResourceNotCreatedException("Your account has been blacklisted as you have a rental that you have not picked up. Therefore, until the administrator whitelists you, you cannot make any rentals at Banger and Co.");
+            //blacklist customer to prevent them from making any more rentals
+            userService._blackListCustomer(theCustomer);
+            throw new ResourceNotCreatedException("Your rental creation request was rejected because your driving license has been reported as stolen by the DMV. Your account is now blacklisted");
         }
 
         boolean isVehicleAvailable = vehicleService.isVehicleAvailableOnGivenDates(theVehicle, pickupDateTime, returnDateTime);
