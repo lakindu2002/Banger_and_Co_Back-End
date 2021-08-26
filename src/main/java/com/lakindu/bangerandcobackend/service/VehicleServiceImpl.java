@@ -225,8 +225,8 @@ public class VehicleServiceImpl implements VehicleService {
                     } else if (eachRental.getReturned() != null && eachRental.getReturned()) {
                         //vehicle has been returned, can be rented again
                         canBeAdded = true;
-                    } else if (eachRental.getApproved() == null) {
-                        //vehicle is pending, cannot be rented
+                    } else {
+                        //vehicle is pending, or on-going or can be collected.
                         return false;
                     }
                 } else {
@@ -239,11 +239,11 @@ public class VehicleServiceImpl implements VehicleService {
                         if (eachRental.getApproved() != null && !eachRental.getApproved()) {
                             //rental has been rejected, therefore, can be rented again
                             canBeAdded = true;
-                        } else if (eachRental.getApproved() != null && (eachRental.getReturned() != null && eachRental.getReturned())) {
+                        } else if (eachRental.getReturned() != null && eachRental.getReturned()) {
                             //vehicle has been returned, can be rented again
                             canBeAdded = true;
-                        } else if (eachRental.getApproved() == null) {
-                            //vehicle is pending, cannot be rented
+                        } else {
+                            //vehicle is pending, or on-going or can be collected.
                             return false;
                         }
                     } else {
