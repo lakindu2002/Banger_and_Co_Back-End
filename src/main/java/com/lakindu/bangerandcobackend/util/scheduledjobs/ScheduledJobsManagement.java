@@ -27,6 +27,9 @@ public class ScheduledJobsManagement {
     @Value("${custom.dmv.password}")
     private String dmvPassword;
 
+    @Value("${custom.dmv.registration}")
+    private String dmvRegistrationNumber; //GOES IN THE `Registration` REQUEST HEADER FOR COMPANY VERIFICATION
+
     @Value("${custom.dmv.endpoint}")
     private String apiEndPoint;
 
@@ -52,6 +55,7 @@ public class ScheduledJobsManagement {
         String basicAuthHeader = Base64.getEncoder().encodeToString(credentialsToBeEncoded.getBytes(StandardCharsets.UTF_8));
         httpHeaders = new HttpHeaders();
         httpHeaders.add("Authorization", String.format("Basic %s", basicAuthHeader));
+        httpHeaders.add("Registration", dmvRegistrationNumber); //Registration number must be in request header for authentication.
 
         File theFolder = new File(folderForCsv);
         if (!theFolder.exists()) {

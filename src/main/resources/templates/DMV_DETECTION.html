@@ -1,0 +1,91 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    <title>
+    </title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        .main-table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .paragraphs {
+            font-family: sans-serif;
+            font-size: 18px;
+            line-height: 25px;
+        }
+
+        .logo {
+            width: 180px;
+        }
+
+        hr {
+            width: 99.3%;
+            text-align: left;
+            margin-left: 0;
+            background-color: #469bc2;
+            padding: 3px;
+        }
+
+        .custom-padding {
+            padding-right: 20px;
+            padding-top: 20px;
+            padding-left: 20px;
+        }
+    </style>
+</head>
+
+<body style="background-color:#ebe8e8;">
+<div>
+    <table class="main-table" border="0">
+        <tr>
+            <td align="center" class="custom-padding">
+                <img class="logo"
+                     src="https://firebasestorage.googleapis.com/v0/b/bangerandco-964de.appspot.com/o/app_logo.png?alt=media&token=143828e3-5294-4caf-a190-3e6f596842bd">
+            </td>
+        </tr>
+
+        <tr>
+            <td align="center" class="custom-padding">
+                <hr>
+            </td>
+        </tr>
+
+        <tr>
+            <td style="padding-left: 20px; padding-right: 20px">
+                <p class="paragraphs">
+                    To the Department of Motor Vehicles,
+                </p>
+
+                <p class="paragraphs">
+                    Registration Number of Banger With DMV: {{registrationNumber}}
+                    <br>
+                    Date & Time Of Offense: {{dateTimeOffence}}
+                    <br>
+                    Customer Username & Full Name: {{username}} & {{fullName}}
+                </p>
+
+                <p class="paragraphs">
+                    Banger and Co has identified that a rental was tried to be made using the license number:
+                    <b>{{licenseNumber}}</b> and has been refused because this license number is: <b>{{status}}</b>
+                </p>
+
+                <hr>
+
+                <p class="paragraphs" style="text-align: center">
+                    <b>Customer Picture</b>
+                    <br>
+                    <img src="{{image}}"
+                         width="150px" height="150px"/>
+                </p>
+            </td>
+        </tr>
+    </table>
+</div>
+</body>
+
+</html>
