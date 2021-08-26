@@ -1,14 +1,13 @@
 package com.lakindu.bangerandcobackend.service;
 
+import com.lakindu.bangerandcobackend.auth.AuthReturnBuilder;
 import com.lakindu.bangerandcobackend.auth.CustomUserPrincipal;
 import com.lakindu.bangerandcobackend.auth.JWTConstants;
 import com.lakindu.bangerandcobackend.auth.JWTHandler;
 import com.lakindu.bangerandcobackend.dto.AuthRequest;
-import com.lakindu.bangerandcobackend.auth.AuthReturnBuilder;
 import com.lakindu.bangerandcobackend.dto.AuthReturnDTO;
 import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.serviceinterface.AuthService;
-import com.lakindu.bangerandcobackend.serviceinterface.RentalService;
 import com.lakindu.bangerandcobackend.serviceinterface.UserService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,21 +26,18 @@ public class AuthServiceImpl implements AuthService {
     private final UserService userService;
     private final JWTHandler theTokenIssuer;
     private final JWTConstants theConstants;
-    private final RentalService rentalService;
 
     @Autowired
     public AuthServiceImpl(
             AuthenticationManager authenticationManager,
             @Qualifier("userServiceImpl") UserService userService,
             @Qualifier("JWTHandler") JWTHandler theTokenIssuer,
-            @Qualifier("JWTConstants") JWTConstants theConstants,
-            @Qualifier("rentalServiceImpl") RentalService rentalService
+            @Qualifier("JWTConstants") JWTConstants theConstants
     ) {
         this.authenticationManager = authenticationManager;
         this.userService = userService;
         this.theTokenIssuer = theTokenIssuer;
         this.theConstants = theConstants;
-        this.rentalService = rentalService;
     }
 
     @Override
@@ -53,12 +49,6 @@ public class AuthServiceImpl implements AuthService {
                 ) //spring security will authenticate the user by calling the custom UserDetailsService implementation method
                 //located in the UserService
         );
-
-        if (userService._getUserRole(theAuthRequest.getUsername()).equalsIgnoreCase("administrator")) {
-            //retrieve the user name of the successfully authenticated user and check if they are an admin
-            //if so, call the blacklist method.
-            rentalService.blacklistCustomers();
-        }
 
         User theLoggedInUser = userService._getUserWithImageDecompression(theAuthRequest.getUsername());
         CustomUserPrincipal thePrincipal = new CustomUserPrincipal(theLoggedInUser);

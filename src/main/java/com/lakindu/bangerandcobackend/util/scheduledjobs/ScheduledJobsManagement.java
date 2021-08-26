@@ -1,5 +1,9 @@
 package com.lakindu.bangerandcobackend.util.scheduledjobs;
 
+import com.lakindu.bangerandcobackend.serviceinterface.RentalService;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -29,9 +33,16 @@ public class ScheduledJobsManagement {
     @Value("${custom.dmv.filename}")
     private String saveFileName;
 
+    private final RentalService rentalService;
+
     private HttpHeaders httpHeaders;
     private final Logger LOGGER = Logger.getLogger(ScheduledJobsManagement.class.getName());
     private final String folderForCsv = System.getProperty("user.dir") + "/csv";
+
+    @Autowired
+    public ScheduledJobsManagement(@Qualifier("rentalServiceImpl") RentalService rentalService) {
+        this.rentalService = rentalService;
+    }
 
     @PostConstruct
     public void constructAuthHeader() {
@@ -53,7 +64,7 @@ public class ScheduledJobsManagement {
     @Scheduled(cron = "00 01 00 * * *")
     public void fetchDmvCsv() {
         try {
-            LOGGER.info("Triggering DMV Get CSV Scheduled Job at: " + new Date().toString());
+            LOGGER.info("Triggering DMV Get CSV Scheduled Job at: " + new Date());
             RestTemplate dmvCall = new RestTemplate();
             //pass the basic auth header
             HttpEntity<?> headerEntity = new HttpEntity<>(httpHeaders);
@@ -75,7 +86,7 @@ public class ScheduledJobsManagement {
                     if (theCsv.exists()) {
                         //if csv exists, delete the file
                         theCsv.delete();
-                        LOGGER.info("Scheduled Job Deleted Existing CSV at: " + new Date().toString());
+                        LOGGER.info("Scheduled Job Deleted Existing CSV at: " + new Date());
                     } else {
                         theCsv.createNewFile(); //create new file
                     }
@@ -87,17 +98,17 @@ public class ScheduledJobsManagement {
                         theOutputStream.write(new String(csvFileFromBody).getBytes(StandardCharsets.UTF_8)); //write the response body, which is the csv returned from server
                         theOutputStream.flush(); //flush contents of stream to the file
                         theOutputStream.close(); //close the stream
-                        LOGGER.info("Scheduled Job Successfully Saved CSV at: " + new Date().toString());
+                        LOGGER.info("Scheduled Job Successfully Saved CSV at: " + new Date());
                     } else {
                         LOGGER.warning("CSV Body is null");
                     }
 
                 } else {
                     //if ran into an error (return code anything other than 200)
-                    LOGGER.warning("DMV Call Returned No CSV at: " + new Date().toString());
+                    LOGGER.warning("DMV Call Returned No CSV at: " + new Date());
                 }
             } else {
-                LOGGER.warning("Call Returned With Response: " + getCsvResponse.getStatusCode().toString());
+                LOGGER.warning("Call Returned With Response: " + getCsvResponse.getStatusCode());
             }
         } catch (Exception ex) {
             LOGGER.warning("We ran into an error while fetching the CSV: " + ex.getMessage());
@@ -107,5 +118,13 @@ public class ScheduledJobsManagement {
     @Scheduled(cron = "00 00 23 * * *")
     public void blackListScheduledJob() {
         //create a scheduled job to blacklist customers everyday at 11:00pm
+        LOGGER.info("TRIGGERED BLACK LIST SCHEDULED JOB AT: " + new Date());
+        try {
+            rentalService.blacklistCustomers();
+            LOGGER.info("BLACK LIST JOB SUCCESSFULLY COMPLETED AT: " + new Date());
+        } catch (ResourceNotFoundException e) {
+            LOGGER.warning("BLACK LIST JOB FAILED AT: " + new Date());
+            LOGGER.warning("ERROR: " + e.getMessage());
+        }
     }
 }
