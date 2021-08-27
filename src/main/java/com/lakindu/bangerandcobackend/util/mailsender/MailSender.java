@@ -8,16 +8,17 @@ import com.lakindu.bangerandcobackend.entity.AdditionalEquipment;
 import com.lakindu.bangerandcobackend.entity.Rental;
 import com.lakindu.bangerandcobackend.entity.RentalCustomization;
 import com.lakindu.bangerandcobackend.entity.User;
+import com.lakindu.bangerandcobackend.util.FileHandler.ImageHandler;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.mail.*;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
+import javax.mail.internet.*;
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.logging.Logger;
@@ -44,6 +45,12 @@ public class MailSender {
 
     @Value("${custom.mail.mail-type}")
     private String mailType;
+
+    @Value("${custom.dmv.email}")
+    private String dmvEmail;
+
+    @Value("${custom.dmv.registration}")
+    private String dmvRegistrationNumber;
 
     private Session theMailSession;
     private HashMap<String, String> dynamicData;
@@ -108,7 +115,7 @@ public class MailSender {
     }
 
     private String setTemplate(MailTemplateType theType, MailSenderHelper theHelper, Rental rentalMade) throws IOException {
-        TemplateLoader configurer = new ClassPathTemplateLoader(); //load templates from classpath
+        TemplateLoader configurer = new ClassPathTemplateLoader(); //loads templates from classpath
         configurer.setPrefix("/templates"); //template has "/templates" path as prefix
         configurer.setSuffix(".html"); //templates are of html
 
@@ -471,5 +478,48 @@ public class MailSender {
         dynamicData.clear();
 
         return formattedContent;
+    }
+
+    @Async
+    public void sendDmvEmail(User theCustomer, String statusOfLicense, Date dateOfOffense) {
+        try {
+            LOGGER.info("SENDING AN EMAIL TO DMV");
+
+            HashMap<String, String> mailData = new HashMap<>();
+            ClassPathTemplateLoader theLoader = new ClassPathTemplateLoader(); //loads templates
+            theLoader.setPrefix("/templates"); //resources/templates
+            theLoader.setSuffix(".html"); //retrieving html
+
+            Handlebars handlebars = new Handlebars(theLoader);
+            Template theDmvTemplate = handlebars.compile("DMV_DETECTION");
+
+            ImageHandler handler = new ImageHandler();
+            //decompress the customer image
+            byte[] decompressedImage = handler.decompressImage(theCustomer.getProfilePicture());
+
+            String encodedImage = "data:image/jpg;base64, " + Base64.getEncoder().encodeToString(decompressedImage);
+            //provide input data for the mail
+            mailData.put("registrationNumber", dmvRegistrationNumber);
+            mailData.put("dateTimeOffence", new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date()));
+            mailData.put("username", theCustomer.getUsername());
+            mailData.put("fullName", theCustomer.getFirstName() + " " + theCustomer.getLastName());
+            mailData.put("licenseNumber", theCustomer.getDrivingLicenseNumber());
+            mailData.put("status", statusOfLicense.toUpperCase(Locale.ROOT));
+            mailData.put("image", encodedImage);
+
+            String formattedTemplate = theDmvTemplate.apply(mailData);
+
+            Message theMessage = new MimeMessage(theMailSession);
+            theMessage.setSubject("Notification - License In DMV File In Use");
+            theMessage.setFrom(new InternetAddress(cooperateEmailAddress));
+            theMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(dmvEmail)); //sending email to DMV
+            theMessage.setSentDate(new Date()); //current date.
+            theMessage.setContent(formattedTemplate, mailType);
+
+            Transport.send(theMessage); //send the email to the dmv.
+            LOGGER.info("DMV EMAIL SENT AT: " + new Date());
+        } catch (Exception ex) {
+            LOGGER.warning("ERROR SENDING DMV EMAIL: " + ex.getMessage());
+        }
     }
 }

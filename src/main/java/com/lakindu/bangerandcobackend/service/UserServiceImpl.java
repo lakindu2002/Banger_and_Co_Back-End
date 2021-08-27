@@ -468,6 +468,17 @@ public class UserServiceImpl implements UserService {
         return emailList;
     }
 
+    /**
+     * Blacklists the customer when the DMV return shows their license is either lost, stolen or suspended
+     *
+     * @param theCustomer The customer to blacklist
+     */
+    @Override
+    public void _blackListCustomer(User theCustomer) {
+        theCustomer.setBlackListed(true);
+        theUserRepository.save(theCustomer); //blacklist the customer in the database.
+    }
+
     @Override
     public String encodePassword(String password) {
         //encode the password using the password encoder BCrypt.

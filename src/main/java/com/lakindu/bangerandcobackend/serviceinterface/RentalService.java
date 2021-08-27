@@ -37,7 +37,7 @@ public interface RentalService {
      * @throws ResourceNotFoundException   Thrown when the vehicle to be rented cannot be found
      * @throws ResourceNotCreatedException Thrown when the rental is not made due to an exception in the flow.
      */
-    void makeRental(RentalCreateDTO theRental) throws ParseException, BadValuePassedException, ResourceNotFoundException, ResourceNotCreatedException;
+    void makeRental(RentalCreateDTO theRental) throws ParseException, BadValuePassedException, ResourceNotFoundException, ResourceNotCreatedException, IOException;
 
     /**
      * Method will get a list of all pending rentals from the database.

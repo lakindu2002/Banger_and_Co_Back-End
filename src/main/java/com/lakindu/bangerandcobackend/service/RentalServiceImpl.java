@@ -40,6 +40,7 @@ public class RentalServiceImpl implements RentalService {
     private final AdditionalEquipmentService additionalEquipmentService;
     private final MailSender mailSender;
     private final RentalCustomizationService rentalCustomizationService;
+    private final DmvValidatorService dmvValidatorService;
 
     private final int PRICE_PER_DAY_DIVISOR = 24; //price_per_day/24 = price per hour
     private final int ITEMS_PER_PAGE = 10;
@@ -52,13 +53,16 @@ public class RentalServiceImpl implements RentalService {
             @Qualifier("userServiceImpl") UserService userService,
             @Qualifier("additionalEquipmentServiceImpl") AdditionalEquipmentService additionalEquipmentService,
             @Qualifier("mailSender") MailSender mailSender,
-            @Qualifier("rentalCustomizationServiceImpl") RentalCustomizationService rentalCustomizationService) {
+            @Qualifier("rentalCustomizationServiceImpl") RentalCustomizationService rentalCustomizationService,
+            @Qualifier("dmvValidatorServiceImpl") DmvValidatorService dmvValidatorService
+    ) {
         this.rentalRepository = rentalRepository;
         this.vehicleService = vehicleService;
         this.userService = userService;
         this.additionalEquipmentService = additionalEquipmentService;
         this.mailSender = mailSender;
         this.rentalCustomizationService = rentalCustomizationService;
+        this.dmvValidatorService = dmvValidatorService;
     }
 
     static class RentalEquipmentCalculatorSupporter {
@@ -141,7 +145,7 @@ public class RentalServiceImpl implements RentalService {
     }
 
     @Override
-    public void makeRental(RentalCreateDTO theRental) throws ParseException, BadValuePassedException, ResourceNotFoundException, ResourceNotCreatedException {
+    public void makeRental(RentalCreateDTO theRental) throws ParseException, BadValuePassedException, ResourceNotFoundException, ResourceNotCreatedException, IOException {
         Rental theRentalToBeMade = new Rental();
 
         VehicleRentalFilterDTO theDateTime = new VehicleRentalFilterDTO();
@@ -166,7 +170,37 @@ public class RentalServiceImpl implements RentalService {
 
         if (theCustomer.isBlackListed()) {
             //customer cannot rent since they are blacklisted
-            throw new ResourceNotCreatedException("Your account has been blacklisted as you have a rental that you have not picked up. Therefore, until the administrator whitelists you, you cannot make any rentals at Banger and Co.");
+            throw new ResourceNotCreatedException("Your account is blacklisted. Therefore, until the administrator whitelists you, you cannot make any rentals at Banger and Co.");
+        }
+
+
+        //validate the customer driving license to ensure the license is not lost, stolen, suspended.
+        HashMap<String, String> validationDetails = dmvValidatorService.isLicenseSuspendedLostStolen(theCustomer);
+        String statusOfLicense = validationDetails.get(DmvValidatorServiceImpl.DMVType.STATUS_TYPE.value);
+        Date dateOfOffense = new Date();
+        //validation for license
+        //if license is suspended, lost, stolen do not go let rental to be created.
+        if (statusOfLicense.equalsIgnoreCase(DmvValidatorServiceImpl.DMVType.SUSPENDED.value)) {
+            LOGGER.warning("RENTAL NOT MADE: LICENSE SUSPENDED");
+            //send email to DMV regarding the license status.
+            mailSender.sendDmvEmail(theCustomer, statusOfLicense, dateOfOffense);
+            //blacklist customer to prevent them from making any more rentals
+            userService._blackListCustomer(theCustomer);
+            throw new ResourceNotCreatedException("Your rental creation request was rejected because your driving license has been suspended by the DMV. Your account is now blacklisted");
+        } else if (statusOfLicense.equalsIgnoreCase(DmvValidatorServiceImpl.DMVType.LOST.value)) {
+            LOGGER.warning("RENTAL NOT MADE: LICENSE REPORTED LOST");
+            //send email to DMV regarding the license status.
+            mailSender.sendDmvEmail(theCustomer, statusOfLicense, dateOfOffense);
+            //blacklist customer to prevent them from making any more rentals
+            userService._blackListCustomer(theCustomer);
+            throw new ResourceNotCreatedException("Your rental creation request was rejected because your driving license has been reported lost by the DMV. Your account is now blacklisted");
+        } else if (statusOfLicense.equalsIgnoreCase(DmvValidatorServiceImpl.DMVType.STOLEN.value)) {
+            LOGGER.warning("RENTAL NOT MADE: LICENSE REPORTED STOLEN");
+            //send email to DMV regarding the license status.
+            mailSender.sendDmvEmail(theCustomer, statusOfLicense, dateOfOffense);
+            //blacklist customer to prevent them from making any more rentals
+            userService._blackListCustomer(theCustomer);
+            throw new ResourceNotCreatedException("Your rental creation request was rejected because your driving license has been reported as stolen by the DMV. Your account is now blacklisted");
         }
 
         boolean isVehicleAvailable = vehicleService.isVehicleAvailableOnGivenDates(theVehicle, pickupDateTime, returnDateTime);
@@ -684,8 +718,11 @@ public class RentalServiceImpl implements RentalService {
         LocalDate dayAfter = rentalToBeUpdatedFromDB.getReturnDate().plus(1, ChronoUnit.DAYS);
 
         for (Rental eachRental : theRentalsFromReturnDate) {
-            if (eachRental.getReturned() == null || !eachRental.getReturned()) {
-                //vehicle not yet returned
+            boolean isRejected = eachRental.getApproved() != null && !eachRental.getApproved();
+            boolean isReturned = eachRental.getReturned() != null && eachRental.getReturned();
+
+            if (!isReturned && !isRejected) {
+                //validate only for rentals that are not rejected and not returned: PENDING,APPROVED,ONGOING
                 if (rentalToBeUpdatedFromDB.getVehicleOnRental().getVehicleId() == eachRental.getVehicleOnRental().getVehicleId()) {
                     //when updating, do not check next day rentals for other vehicles. check only for the vehicle being updated.
                     if (dayAfter.equals(eachRental.getPickupDate())) {
@@ -699,7 +736,7 @@ public class RentalServiceImpl implements RentalService {
                         //check if it is the same rental as updating one
                         if (eachRental.getRentalId() != rentalToBeUpdatedFromDB.getRentalId()) {
                             //different rental, proceed
-                            //check if pickup time is after new time
+                            //check if pickup time is after or equal new time
                             if (clientNewDate.getReturnTime().isAfter(eachRental.getPickupTime()) || clientNewDate.getReturnTime().equals(eachRental.getPickupTime())) {
                                 //check if new return time is greater than or equals to the pickup time in DB
                                 throw new ResourceNotUpdatedException("This vehicle has a rental on the new return time you specified");

@@ -222,12 +222,12 @@ public class VehicleServiceImpl implements VehicleService {
                     if (eachRental.getApproved() != null && !eachRental.getApproved()) {
                         //rental has been rejected, therefore, can be rented again
                         canBeAdded = true;
-                    } else if (eachRental.getApproved() != null && (eachRental.getReturned() != null && eachRental.getReturned())) {
+                    } else if (eachRental.getReturned() != null && eachRental.getReturned()) {
                         //vehicle has been returned, can be rented again
                         canBeAdded = true;
-                    } else if (eachRental.getApproved() == null) {
-                        //vehicle is pending, cannot be rented
-                        canBeAdded = false;
+                    } else {
+                        //vehicle is pending, or on-going or can be collected.
+                        return false;
                     }
                 } else {
                     //The filtering Pickup DATE_TIME or Return DATE_TIME is not between a rental.
@@ -239,12 +239,12 @@ public class VehicleServiceImpl implements VehicleService {
                         if (eachRental.getApproved() != null && !eachRental.getApproved()) {
                             //rental has been rejected, therefore, can be rented again
                             canBeAdded = true;
-                        } else if (eachRental.getApproved() != null && (eachRental.getReturned() != null && eachRental.getReturned())) {
+                        } else if (eachRental.getReturned() != null && eachRental.getReturned()) {
                             //vehicle has been returned, can be rented again
                             canBeAdded = true;
-                        } else if (eachRental.getApproved() == null) {
-                            //vehicle is pending, cannot be rented
-                            canBeAdded = false;
+                        } else {
+                            //vehicle is pending, or on-going or can be collected.
+                            return false;
                         }
                     } else {
                         //the rental in database is not between passed Pickup-Date_Time and Return Date_Time
