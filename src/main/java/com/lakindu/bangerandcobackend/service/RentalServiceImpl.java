@@ -718,8 +718,11 @@ public class RentalServiceImpl implements RentalService {
         LocalDate dayAfter = rentalToBeUpdatedFromDB.getReturnDate().plus(1, ChronoUnit.DAYS);
 
         for (Rental eachRental : theRentalsFromReturnDate) {
-            if (eachRental.getReturned() == null || !eachRental.getReturned()) {
-                //vehicle not yet returned
+            boolean isRejected = eachRental.getApproved() != null && !eachRental.getApproved();
+            boolean isReturned = eachRental.getReturned() != null && eachRental.getReturned();
+
+            if (!isReturned && !isRejected) {
+                //validate only for rentals that are not rejected and not returned: PENDING,APPROVED,ONGOING
                 if (rentalToBeUpdatedFromDB.getVehicleOnRental().getVehicleId() == eachRental.getVehicleOnRental().getVehicleId()) {
                     //when updating, do not check next day rentals for other vehicles. check only for the vehicle being updated.
                     if (dayAfter.equals(eachRental.getPickupDate())) {
@@ -733,7 +736,7 @@ public class RentalServiceImpl implements RentalService {
                         //check if it is the same rental as updating one
                         if (eachRental.getRentalId() != rentalToBeUpdatedFromDB.getRentalId()) {
                             //different rental, proceed
-                            //check if pickup time is after new time
+                            //check if pickup time is after or equal new time
                             if (clientNewDate.getReturnTime().isAfter(eachRental.getPickupTime()) || clientNewDate.getReturnTime().equals(eachRental.getPickupTime())) {
                                 //check if new return time is greater than or equals to the pickup time in DB
                                 throw new ResourceNotUpdatedException("This vehicle has a rental on the new return time you specified");
