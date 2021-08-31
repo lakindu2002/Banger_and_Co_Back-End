@@ -13,9 +13,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
+import javax.activation.DataHandler;
+import javax.activation.MimeType;
 import javax.annotation.PostConstruct;
 import javax.mail.*;
 import javax.mail.internet.*;
+import javax.mail.util.ByteArrayDataSource;
+import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -497,7 +502,6 @@ public class MailSender {
             //decompress the customer image
             byte[] decompressedImage = handler.decompressImage(theCustomer.getProfilePicture());
 
-            String encodedImage = "data:image/jpg;base64, " + Base64.getEncoder().encodeToString(decompressedImage);
             //provide input data for the mail
             mailData.put("registrationNumber", dmvRegistrationNumber);
             mailData.put("dateTimeOffence", new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(new Date()));
@@ -505,7 +509,6 @@ public class MailSender {
             mailData.put("fullName", theCustomer.getFirstName() + " " + theCustomer.getLastName());
             mailData.put("licenseNumber", theCustomer.getDrivingLicenseNumber());
             mailData.put("status", statusOfLicense.toUpperCase(Locale.ROOT));
-            mailData.put("image", encodedImage);
 
             String formattedTemplate = theDmvTemplate.apply(mailData);
 
@@ -514,7 +517,36 @@ public class MailSender {
             theMessage.setFrom(new InternetAddress(cooperateEmailAddress));
             theMessage.setRecipient(Message.RecipientType.TO, new InternetAddress(dmvEmail)); //sending email to DMV
             theMessage.setSentDate(new Date()); //current date.
-            theMessage.setContent(formattedTemplate, mailType);
+
+            //one part of body to construct actual text data
+            MimeBodyPart htmlContent = new MimeBodyPart();
+            htmlContent.setContent(formattedTemplate, mailType); //attach the html body.
+
+
+            MimeBodyPart imageOfCustomer = new MimeBodyPart();
+            imageOfCustomer.setDataHandler(
+                    new DataHandler(new ByteArrayDataSource(decompressedImage, "image/jpeg"))
+            );
+            String attachmentFileName = theCustomer.getUsername() + "-" + theCustomer.getFirstName() + "-" + theCustomer.getLastName();
+            //set file name
+            imageOfCustomer.setFileName(attachmentFileName);
+
+            MimeBodyPart drivingLicensePicture = new MimeBodyPart();
+            drivingLicensePicture.setDataHandler(
+                    new DataHandler(
+                            new ByteArrayDataSource(handler.decompressImage(theCustomer.getDrivingLicense()), "image/jpeg")
+                    ));
+            //set file name
+            drivingLicensePicture.setFileName(attachmentFileName);
+
+
+            //construct the entire email template.
+            Multipart theCompleteBody = new MimeMultipart();
+            theCompleteBody.addBodyPart(imageOfCustomer);
+            theCompleteBody.addBodyPart(drivingLicensePicture);
+            theCompleteBody.addBodyPart(htmlContent);
+
+            theMessage.setContent(theCompleteBody); //attach the email body.
 
             Transport.send(theMessage); //send the email to the dmv.
             LOGGER.info("DMV EMAIL SENT AT: " + new Date());
