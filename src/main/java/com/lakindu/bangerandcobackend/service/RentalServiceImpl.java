@@ -1589,6 +1589,16 @@ public class RentalServiceImpl implements RentalService {
         return supporter;
     }
 
+    /**
+     * Method will trigger a call to a stored procedure name "IS_USER_FRADULENT".
+     * <br>
+     * This stored procedure will then communicate to the insurer database by using an SQL View to get the fraud data for the given license.
+     * <br>
+     * This client data is then returned back to the client via the automatic row mapping of BeanPropertyRowMapper.
+     *
+     * @param theCustomer The customer to check if they have fradulent claims
+     * @return The list of fradulent claims for the client.
+     */
     @SuppressWarnings("unchecked")
     @Override
     public List<FraudClient> communicateWithInsurersDatabase(User theCustomer) throws ResourceNotFoundException {
