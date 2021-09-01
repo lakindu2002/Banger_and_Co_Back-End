@@ -177,22 +177,5 @@ public interface RentalRepository extends JpaRepository<Rental, Integer> {
             "FROM Rental theRental WHERE theRental.pickupDate >=:updatingReturnDate"
     )
     List<Rental> findRentalsFromToday(LocalDate updatingReturnDate);
-
-    /**
-     * A stored procedure that, once called, will be used communicate with the Insurer Database to check if the passed license number has been associated with any fraudulent claims.
-     * <br>
-     * <br>
-     * The license number passed will be used to fetch data through an `SQL VIEW` and inside the stored procedure, the returned VIEW query will be counted.
-     * <br>
-     * <br>
-     * IF COUNT > 0: <b>FRAUD</b>, ELSE: <b>CLEAN</b>
-     * <br>
-     *
-     * @param licenseNumber The license number to check against the insurer database
-     * @return Status - Can only be <i>(case-sensitive)</i>: <b>FRAUD</b> or <b>CLEAN</b>
-     * @author Lakindu Hewawasam
-     */
-    @Query(nativeQuery = true, value = "CALL IS_USER_FRADULENT(:licenseNumber)")
-    List<HashMap<String, Object>> isCustomerLicenseFraudulent(String licenseNumber);
 }
 
