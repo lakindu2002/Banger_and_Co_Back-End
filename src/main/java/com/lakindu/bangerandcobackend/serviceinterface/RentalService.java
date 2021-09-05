@@ -1,6 +1,7 @@
 package com.lakindu.bangerandcobackend.serviceinterface;
 
 import com.lakindu.bangerandcobackend.dto.*;
+import com.lakindu.bangerandcobackend.entity.Rental;
 import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotCreatedException;
@@ -297,4 +298,13 @@ public interface RentalService {
      * @return The list of fradulent claims for the client.
      */
     List<FraudClient> communicateWithInsurersDatabase(User theCustomer) throws ResourceNotFoundException;
+
+    /**
+     * Method will reject rental once customer has fraudulent claims
+     *
+     * @param theRentalToBeStarted The rental to reject
+     * @param theCustomerRenting   The customer with fraudulent claims
+     * @param rejectReason         The reason for rejection.
+     */
+    void rejectRental(Rental theRentalToBeStarted, User theCustomerRenting, String rejectReason);
 }

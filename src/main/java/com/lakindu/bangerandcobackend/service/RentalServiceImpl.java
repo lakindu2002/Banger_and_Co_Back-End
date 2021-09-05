@@ -1480,15 +1480,17 @@ public class RentalServiceImpl implements RentalService {
     @Override
     public void startRental(Integer rentalId) throws Exception {
         Rental theRentalToBeStarted = rentalRepository.findById(rentalId).orElseThrow(() -> new ResourceNotFoundException("The rental that you are trying to start does not exist at Banger and Co."));
+        if (theRentalToBeStarted.getApproved() == null || !theRentalToBeStarted.getApproved()) {
+            throw new ResourceNotUpdatedException("This rental has been rejected therefore it cannot be started");
+        }
 
         User theCustomerRenting = theRentalToBeStarted.getTheCustomerRenting();
         //check if customer has fraudulent claims from the insurer db
-        List<FraudClient> fraudulentClaimsForCustomer = this.communicateWithInsurersDatabase(theCustomerRenting);
-        if (fraudulentClaimsForCustomer.size() > 0) {
-            //have fraudulent claims, reject the rental and send error
-            // TODO: 9/1/2021 Implement the reject rental logic where rental should be rejected and equipment must be added back
-            // TODO: 9/1/2021 Send proper message back to the admin.
-            throw new ResourceNotUpdatedException("This customer has potential fraudulent claims made as denoted by the Association of Sri Lankan Insurers, therefore, this rental cannot be started.");
+        if (this.checkForFraudulentClaims(theCustomerRenting)) {
+            //have fraudulent claims,reject and send error
+            String rejectReason = "This driving license number has potential fraudulent claims made as denoted by the Association of Sri Lankan Insurers, therefore, this rental cannot be started and is rejected";
+            this.rejectRental(theRentalToBeStarted, theCustomerRenting, rejectReason);
+            throw new ResourceNotUpdatedException(rejectReason);
         }
         //does customer have any other on-going rentals, if so, cannot start
         List<RentalShowDTO> customerOnGoingRentals = getCustomerOnGoingRentals(theCustomerRenting.getUsername());
@@ -1519,6 +1521,74 @@ public class RentalServiceImpl implements RentalService {
         } else {
             //the rental is either pending or has been collected.
             throw new BadValuePassedException("The rental you are trying to start is currently pending, or has been collected already");
+        }
+    }
+
+    private boolean checkForFraudulentClaims(User theCustomerRenting) throws ResourceNotFoundException, ResourceNotUpdatedException {
+        List<FraudClient> fraudulentClaimsForCustomer = this.communicateWithInsurersDatabase(theCustomerRenting);
+        //have fraudulent claims
+        return fraudulentClaimsForCustomer.size() > 0;
+    }
+
+
+    /**
+     * Method will trigger a call to a stored procedure name "IS_USER_FRADULENT".
+     * <br>
+     * This stored procedure will then communicate to the insurer database by using an SQL View to get the fraud data for the given license.
+     * <br>
+     * This client data is then returned back to the client via the automatic row mapping of BeanPropertyRowMapper.
+     *
+     * @param theCustomer The customer to check if they have fradulent claims
+     * @return The list of fradulent claims for the client.
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<FraudClient> communicateWithInsurersDatabase(User theCustomer) throws ResourceNotFoundException {
+        try {
+            String drivingLicenseNumber = theCustomer.getDrivingLicenseNumber();
+            //create the inputs required for the stored procedure.
+            SqlParameterSource theInputParameters = new MapSqlParameterSource()
+                    .addValue(INPUT_PARAM_STORED_PROCEDURE, drivingLicenseNumber);
+
+            Map<String, Object> theExecutedResult = isUserFraudulentProcedureCall.execute(theInputParameters);
+            //retrieve the data returned from stored procedure mapped via BeanPropertyRowMapper.
+            return (List<FraudClient>) theExecutedResult.get(JDBC_RESULT_CARRIER);
+        } catch (Exception ex) {
+            //exception occurred, stop app flow as this check is a must.
+            throw new ResourceNotFoundException("The Insurer Database Could Not Be Reached For Customer Fraud Validation");
+        }
+    }
+
+    /**
+     * Method will reject rental once customer has fraudulent claims
+     *
+     * @param theRentalToBeStarted The rental to reject
+     * @param theCustomerRenting   The customer with fraudulent claims
+     * @param rejectReason         The reason for rejection.
+     */
+    @Override
+    @Transactional(rollbackOn = Exception.class)
+    public void rejectRental(Rental theRentalToBeStarted, User theCustomerRenting, String rejectReason) {
+        List<RentalCustomization> rentalCustomizationList = theRentalToBeStarted.getRentalCustomizationList();
+        for (RentalCustomization eachCustomization : rentalCustomizationList) {
+            //add the items back for due to rejection
+            additionalEquipmentService.addQuantityBackToItem(eachCustomization);
+        }
+
+        //reject the rental
+        theRentalToBeStarted.setApproved(false);
+        theRentalToBeStarted.setCollected(null);
+        theRentalToBeStarted.setReturned(null);
+
+        Rental rejectedRental = rentalRepository.save(theRentalToBeStarted);
+
+        try {
+            mailSender.sendRentalMail(
+                    new MailSenderHelper(theCustomerRenting, "Rental Has Been Rejected", MailTemplateType.RENTAL_REJECTED, rejectReason),
+                    rejectedRental
+            );
+        } catch (Exception ex) {
+            LOGGER.warning("ERROR SENDING REJECT EMAIL");
         }
     }
 
@@ -1587,33 +1657,5 @@ public class RentalServiceImpl implements RentalService {
         supporter.setRentalCustomizationList(addedCustomization);
         supporter.setTotalCostForAdditionalEquipment(totalPriceForEquipments);
         return supporter;
-    }
-
-    /**
-     * Method will trigger a call to a stored procedure name "IS_USER_FRADULENT".
-     * <br>
-     * This stored procedure will then communicate to the insurer database by using an SQL View to get the fraud data for the given license.
-     * <br>
-     * This client data is then returned back to the client via the automatic row mapping of BeanPropertyRowMapper.
-     *
-     * @param theCustomer The customer to check if they have fradulent claims
-     * @return The list of fradulent claims for the client.
-     */
-    @SuppressWarnings("unchecked")
-    @Override
-    public List<FraudClient> communicateWithInsurersDatabase(User theCustomer) throws ResourceNotFoundException {
-        try {
-            String drivingLicenseNumber = theCustomer.getDrivingLicenseNumber();
-            //create the inputs required for the stored procedure.
-            SqlParameterSource theInputParameters = new MapSqlParameterSource()
-                    .addValue(INPUT_PARAM_STORED_PROCEDURE, drivingLicenseNumber);
-
-            Map<String, Object> theExecutedResult = isUserFraudulentProcedureCall.execute(theInputParameters);
-            //retrieve the data returned from stored procedure mapped via BeanPropertyRowMapper.
-            return (List<FraudClient>) theExecutedResult.get(JDBC_RESULT_CARRIER);
-        } catch (Exception ex) {
-            //exception occurred, stop app flow as this check is a must.
-            throw new ResourceNotFoundException("The Insurer Database Could Not Be Reached For Customer Fraud Validation");
-        }
     }
 }
