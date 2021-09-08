@@ -1,6 +1,7 @@
 package com.lakindu.bangerandcobackend.serviceinterface;
 
 import com.lakindu.bangerandcobackend.dto.*;
+import com.lakindu.bangerandcobackend.entity.Rental;
 import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotCreatedException;
@@ -285,4 +286,25 @@ public interface RentalService {
      * @param theAddOnDTO The new equipment set
      */
     void updateRentalAddOns(RentalAdditionalEquipmentUpdateDTO theAddOnDTO) throws ResourceNotFoundException, ResourceNotUpdatedException, ResourceNotCreatedException;
+
+    /**
+     * Method will trigger a call to a stored procedure name "IS_USER_FRADULENT".
+     * <br>
+     * This stored procedure will then communicate to the insurer database by using an SQL View to get the fraud data for the given license.
+     * <br>
+     * This client data is then returned back to the client via the automatic row mapping of BeanPropertyRowMapper.
+     *
+     * @param theCustomer The customer to check if they have fradulent claims
+     * @return The list of fradulent claims for the client.
+     */
+    List<FraudClient> communicateWithInsurersDatabase(User theCustomer) throws ResourceNotFoundException;
+
+    /**
+     * Method will reject rental once customer has fraudulent claims
+     *
+     * @param theRentalToBeStarted The rental to reject
+     * @param theCustomerRenting   The customer with fraudulent claims
+     * @param rejectReason         The reason for rejection.
+     */
+    void rejectRental(Rental theRentalToBeStarted, User theCustomerRenting, String rejectReason);
 }

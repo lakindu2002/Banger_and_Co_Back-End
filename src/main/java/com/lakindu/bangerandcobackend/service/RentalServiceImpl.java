@@ -12,12 +12,19 @@ import com.lakindu.bangerandcobackend.util.mailsender.MailSender;
 import com.lakindu.bangerandcobackend.util.mailsender.MailSenderHelper;
 import com.lakindu.bangerandcobackend.util.mailsender.MailTemplateType;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.jdbc.core.BeanPropertyRowMapper;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.SqlParameterSource;
+import org.springframework.jdbc.core.simple.SimpleJdbcCall;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.PostConstruct;
 import javax.mail.MessagingException;
 import javax.transaction.Transactional;
 import java.io.IOException;
@@ -42,6 +49,13 @@ public class RentalServiceImpl implements RentalService {
     private final RentalCustomizationService rentalCustomizationService;
     private final DmvValidatorService dmvValidatorService;
 
+    //utils required for using the stored procedure.
+    private final String INSURER_DB_CALL = "IS_USER_FRADULENT"; //stored procedure name
+    private final JdbcTemplate jdbcTemplate; //allows working with relational db while taking care of exceptions & connections.
+    private SimpleJdbcCall isUserFraudulentProcedureCall; //thread safe util used to communicate with a stored procedure.
+    private final String JDBC_RESULT_CARRIER = "client_list"; //data available here after executing stored procedure.
+    private final String INPUT_PARAM_STORED_PROCEDURE = "banger_customer_license_number";
+
     private final int PRICE_PER_DAY_DIVISOR = 24; //price_per_day/24 = price per hour
     private final int ITEMS_PER_PAGE = 10;
 
@@ -54,7 +68,8 @@ public class RentalServiceImpl implements RentalService {
             @Qualifier("additionalEquipmentServiceImpl") AdditionalEquipmentService additionalEquipmentService,
             @Qualifier("mailSender") MailSender mailSender,
             @Qualifier("rentalCustomizationServiceImpl") RentalCustomizationService rentalCustomizationService,
-            @Qualifier("dmvValidatorServiceImpl") DmvValidatorService dmvValidatorService
+            @Qualifier("dmvValidatorServiceImpl") DmvValidatorService dmvValidatorService,
+            @Qualifier("jdbcTemplate") JdbcTemplate jdbcTemplate
     ) {
         this.rentalRepository = rentalRepository;
         this.vehicleService = vehicleService;
@@ -63,7 +78,18 @@ public class RentalServiceImpl implements RentalService {
         this.mailSender = mailSender;
         this.rentalCustomizationService = rentalCustomizationService;
         this.dmvValidatorService = dmvValidatorService;
+        this.jdbcTemplate = jdbcTemplate;
     }
+
+    @PostConstruct
+    public void init() {
+        //create a stored procedure call using the procedure name given below.
+        //the stored procedure will map all results into a key named = "client_list" and will map each row as an instance of FraudClient
+        isUserFraudulentProcedureCall = new SimpleJdbcCall(jdbcTemplate)
+                .withProcedureName(INSURER_DB_CALL)
+                .returningResultSet(JDBC_RESULT_CARRIER, BeanPropertyRowMapper.newInstance(FraudClient.class));
+    }
+
 
     static class RentalEquipmentCalculatorSupporter {
         private List<RentalCustomization> rentalCustomizationList;
@@ -172,7 +198,6 @@ public class RentalServiceImpl implements RentalService {
             //customer cannot rent since they are blacklisted
             throw new ResourceNotCreatedException("Your account is blacklisted. Therefore, until the administrator whitelists you, you cannot make any rentals at Banger and Co.");
         }
-
 
         //validate the customer driving license to ensure the license is not lost, stolen, suspended.
         HashMap<String, String> validationDetails = dmvValidatorService.isLicenseSuspendedLostStolen(theCustomer);
@@ -1455,9 +1480,19 @@ public class RentalServiceImpl implements RentalService {
     @Override
     public void startRental(Integer rentalId) throws Exception {
         Rental theRentalToBeStarted = rentalRepository.findById(rentalId).orElseThrow(() -> new ResourceNotFoundException("The rental that you are trying to start does not exist at Banger and Co."));
+        if (theRentalToBeStarted.getApproved() == null || !theRentalToBeStarted.getApproved()) {
+            throw new ResourceNotUpdatedException("This rental has been rejected therefore it cannot be started");
+        }
 
-        //does customer have any other on-going rentals, if so, cannot start
         User theCustomerRenting = theRentalToBeStarted.getTheCustomerRenting();
+        //check if customer has fraudulent claims from the insurer db
+        if (this.checkForFraudulentClaims(theCustomerRenting)) {
+            //have fraudulent claims,reject and send error
+            String rejectReason = "This driving license number has potential fraudulent claims made as denoted by the Association of Sri Lankan Insurers, therefore, this rental cannot be started and is rejected";
+            this.rejectRental(theRentalToBeStarted, theCustomerRenting, rejectReason);
+            throw new ResourceNotUpdatedException(rejectReason);
+        }
+        //does customer have any other on-going rentals, if so, cannot start
         List<RentalShowDTO> customerOnGoingRentals = getCustomerOnGoingRentals(theCustomerRenting.getUsername());
 
         if (customerOnGoingRentals.size() > 0) {
@@ -1486,6 +1521,74 @@ public class RentalServiceImpl implements RentalService {
         } else {
             //the rental is either pending or has been collected.
             throw new BadValuePassedException("The rental you are trying to start is currently pending, or has been collected already");
+        }
+    }
+
+    private boolean checkForFraudulentClaims(User theCustomerRenting) throws ResourceNotFoundException, ResourceNotUpdatedException {
+        List<FraudClient> fraudulentClaimsForCustomer = this.communicateWithInsurersDatabase(theCustomerRenting);
+        //have fraudulent claims
+        return fraudulentClaimsForCustomer.size() > 0;
+    }
+
+
+    /**
+     * Method will trigger a call to a stored procedure name "IS_USER_FRADULENT".
+     * <br>
+     * This stored procedure will then communicate to the insurer database by using an SQL View to get the fraud data for the given license.
+     * <br>
+     * This client data is then returned back to the client via the automatic row mapping of BeanPropertyRowMapper.
+     *
+     * @param theCustomer The customer to check if they have fradulent claims
+     * @return The list of fradulent claims for the client.
+     */
+    @SuppressWarnings("unchecked")
+    @Override
+    public List<FraudClient> communicateWithInsurersDatabase(User theCustomer) throws ResourceNotFoundException {
+        try {
+            String drivingLicenseNumber = theCustomer.getDrivingLicenseNumber();
+            //create the inputs required for the stored procedure.
+            SqlParameterSource theInputParameters = new MapSqlParameterSource()
+                    .addValue(INPUT_PARAM_STORED_PROCEDURE, drivingLicenseNumber);
+
+            Map<String, Object> theExecutedResult = isUserFraudulentProcedureCall.execute(theInputParameters);
+            //retrieve the data returned from stored procedure mapped via BeanPropertyRowMapper.
+            return (List<FraudClient>) theExecutedResult.get(JDBC_RESULT_CARRIER);
+        } catch (Exception ex) {
+            //exception occurred, stop app flow as this check is a must.
+            throw new ResourceNotFoundException("The Insurer Database Could Not Be Reached For Customer Fraud Validation");
+        }
+    }
+
+    /**
+     * Method will reject rental once customer has fraudulent claims
+     *
+     * @param theRentalToBeStarted The rental to reject
+     * @param theCustomerRenting   The customer with fraudulent claims
+     * @param rejectReason         The reason for rejection.
+     */
+    @Override
+    @Transactional(rollbackOn = Exception.class)
+    public void rejectRental(Rental theRentalToBeStarted, User theCustomerRenting, String rejectReason) {
+        List<RentalCustomization> rentalCustomizationList = theRentalToBeStarted.getRentalCustomizationList();
+        for (RentalCustomization eachCustomization : rentalCustomizationList) {
+            //add the items back for due to rejection
+            additionalEquipmentService.addQuantityBackToItem(eachCustomization);
+        }
+
+        //reject the rental
+        theRentalToBeStarted.setApproved(false);
+        theRentalToBeStarted.setCollected(null);
+        theRentalToBeStarted.setReturned(null);
+
+        Rental rejectedRental = rentalRepository.save(theRentalToBeStarted);
+
+        try {
+            mailSender.sendRentalMail(
+                    new MailSenderHelper(theCustomerRenting, "Rental Has Been Rejected", MailTemplateType.RENTAL_REJECTED, rejectReason),
+                    rejectedRental
+            );
+        } catch (Exception ex) {
+            LOGGER.warning("ERROR SENDING REJECT EMAIL");
         }
     }
 
