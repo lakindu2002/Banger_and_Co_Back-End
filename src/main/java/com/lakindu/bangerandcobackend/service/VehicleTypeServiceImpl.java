@@ -121,6 +121,7 @@ public class VehicleTypeServiceImpl implements VehicleTypeService {
                 );
 
         //NO VALIDATIONS ARE REQUIRED AS ONCE A RENTAL HAS BEEN CREATED, THEY WILL BE CHARGED ON THEIR PREVIOUS RATE.
+        //BUT DURING UPDATE OF RENTAL, THEY WILL BE CHARGED ON NEW PRICE.
 
         //if exception has not been thrown, update the price.
         theTypeInDatabase.setPricePerDay(Double.parseDouble(theUpdateDTO.getPricePerDay()));

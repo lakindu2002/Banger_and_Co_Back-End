@@ -129,6 +129,12 @@ public class RentalServiceImpl implements RentalService {
         LocalTime bangerMinStartTime = LocalTime.of(8, 0); //construct a LocalTime for minimum time banger allows
         LocalTime bangerMaxEndTime = LocalTime.of(18, 0); //construct a LocalTime for maximum time banger allows.
 
+        LocalDateTime pickupDateTime = LocalDateTime.of(pickupDate, theFilterDTO.getPickupTime());
+        if (pickupDateTime.isBefore(LocalDateTime.now())) {
+            //user has selected a date before current date time, therefore cannot allow
+            throw new BadValuePassedException("The pickup time must not be a past time");
+        }
+
         if (theFilterDTO.getPickupTime().isBefore(bangerMinStartTime)) {
             //if pickup time is before 8
             throw new BadValuePassedException("The pickup time cannot be before 8:00 AM");
