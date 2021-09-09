@@ -10,7 +10,6 @@ jobs:
     runs-on: windows-latest
     timeout-minutes: 20 #after 20 minutes, timeout the CI process.
     steps:
-      - name: Obtaining copy of repository for building.
       - uses: actions/checkout@v2 #download copy of the repo on the branch to the runner.
       - name: Set up Java JDK 8
         uses: actions/setup-java@v2 #configure the java jdk 8timeout-minutes:
