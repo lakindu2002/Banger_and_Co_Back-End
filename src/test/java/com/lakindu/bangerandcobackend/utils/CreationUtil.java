@@ -122,7 +122,22 @@ public class CreationUtil {
         admin.setBlackListed(false);
         admin.setUserPassword(passwordEncoder.encode("test123"));
 
-        List<User> users = Arrays.asList(customer, admin);
+        User customer2 = new User();
+        customer2.setFirstName("Johnny");
+        customer2.setLastName("Doe");
+        customer2.setEmailAddress("john1@gmail.com");
+        customer2.setContactNumber("0777778542");
+        customer2.setUsername("johnydoe");
+        customer2.setUserRole(roleList.get(1));
+        customer2.setProfilePicture(handler.compressImage(new byte[]{}));
+        customer2.setDrivingLicense(handler.compressImage(new byte[]{}));
+        customer2.setOtherIdentity(handler.compressImage(new byte[]{}));
+        customer2.setDrivingLicenseNumber("C1231231");
+        customer2.setDateOfBirth(new Date(System.currentTimeMillis()));
+        customer2.setBlackListed(false);
+        customer2.setUserPassword(passwordEncoder.encode("test123"));
+
+        List<User> users = Arrays.asList(customer, admin, customer2);
         return userRepository.saveAll(users);
     }
 
