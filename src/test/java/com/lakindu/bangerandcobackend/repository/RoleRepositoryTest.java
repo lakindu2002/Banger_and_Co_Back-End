@@ -37,11 +37,19 @@ class RoleRepositoryTest {
     }
 
     @Test
-    void testShouldGetRoleByRoleName() {
+    void testShouldGetAdministratorRole() {
         String roleNameToGet = "administrator";
         Role roleByRoleName = roleRepository.findRoleByRoleName(roleNameToGet);
         assertThat(roleByRoleName.getRoleName()).isEqualToIgnoringCase(roleNameToGet);
-        LOGGER.info("testShouldGetRoleByRoleName: PASSED");
+        LOGGER.info("testShouldGetAdministratorRole: PASSED");
+    }
+
+    @Test
+    void testShouldNotGetRoleDueToCaseInSensitive() {
+        String roleNameToGet = "customeR";
+        Role roleByRoleName = roleRepository.findRoleByRoleName(roleNameToGet);
+        assertThat(roleByRoleName).isNull();
+        LOGGER.info("testShouldNotGetRoleDueToCaseInSensitive: PASSED");
     }
 
     @Test

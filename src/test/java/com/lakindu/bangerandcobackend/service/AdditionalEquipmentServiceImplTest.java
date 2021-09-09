@@ -108,6 +108,12 @@ class AdditionalEquipmentServiceImplTest {
     }
 
     @Test
+    void testShouldNotRemoveAnEquipmentWithInvalidId() {
+        assertThrows(ResourceNotFoundException.class, () -> additionalEquipmentService.removeEquipment(10000));
+        LOGGER.info("testShouldNotRemoveAnEquipmentWithInvalidId: PASSED");
+    }
+
+    @Test
     void testShouldGetEquipmentById() {
         int idToGet = equipmentToGet.getEquipmentId();
         try {
@@ -120,6 +126,12 @@ class AdditionalEquipmentServiceImplTest {
     }
 
     @Test
+    void testShouldNotGetEquipmentByIdWhenIdDoesNotExist() {
+        assertThrows(ResourceNotFoundException.class, () -> additionalEquipmentService.getEquipmentByID(10000));
+        LOGGER.info("testShouldNotGetEquipmentByIdWhenIdDoesNotExist: PASSED");
+    }
+
+    @Test
     void testShouldGetEquipmentByIdByCallingInternalMethod() {
         int idToGet = equipmentToGet.getEquipmentId();
         try {
@@ -129,6 +141,12 @@ class AdditionalEquipmentServiceImplTest {
         } catch (Exception e) {
             fail("testShouldGetEquipmentByIdByCallingInternalMethod: FAILED");
         }
+    }
+
+    @Test
+    void testShouldNotGetEquipmentByIdInInternalCallWhenIdDoesNotExist() {
+        assertThrows(ResourceNotFoundException.class, () -> additionalEquipmentService._getAdditionalEquipmentById(10000));
+        LOGGER.info("testShouldNotGetEquipmentByIdInInternalCallWhenIdDoesNotExist: PASSED");
     }
 
     @Test
