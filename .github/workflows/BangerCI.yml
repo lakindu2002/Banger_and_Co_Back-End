@@ -16,8 +16,6 @@ jobs:
         with:
           java-version: '8'
           distribution: 'adopt'
-      - name: Test Internet Connectivity
-        run: ping google.lk
       - name: Build/Test With Maven
         #verify - run tests
         #batch mode - run in a non-interactive mode
