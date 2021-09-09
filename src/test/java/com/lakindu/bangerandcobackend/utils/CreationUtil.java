@@ -1,6 +1,7 @@
 package com.lakindu.bangerandcobackend.utils;
 
 import com.lakindu.bangerandcobackend.entity.AdditionalEquipment;
+import com.lakindu.bangerandcobackend.entity.Role;
 import com.lakindu.bangerandcobackend.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -60,5 +61,22 @@ public class CreationUtil {
 
     public void removeAllAdditionalEquipments() {
         additionalEquipmentRepository.deleteAll();
+    }
+
+    public List<Role> createRoles() {
+        Role admin = new Role();
+        admin.setRoleName("administrator");
+        admin.setUsersInEachRole(new ArrayList<>());
+
+        Role customer = new Role();
+        customer.setRoleName("customer");
+        customer.setUsersInEachRole(new ArrayList<>());
+
+        List<Role> roles = Arrays.asList(admin, customer);
+        return roleRepository.saveAll(roles);
+    }
+
+    public void deleteRoles() {
+        roleRepository.deleteAll();
     }
 }
