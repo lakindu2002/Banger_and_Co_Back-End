@@ -31,12 +31,12 @@ class AuthControllerTest {
     @Autowired
     private CreationUtil creationUtil;
 
-    private TestRestTemplate testRestTemplate = new TestRestTemplate();
+    private final TestRestTemplate testRestTemplate = new TestRestTemplate();
 
-    private String ADMIN_USERNAME = "jadensmith";
-    private String ADMIN_PASSWORD = "test123";
-    private String CUSTOMER_USERNAME = "johndoe";
-    private String CUSTOMER_PASSWORD = "test123";
+    private final String ADMIN_USERNAME = "jadensmith";
+    private final String ADMIN_PASSWORD = "test123";
+    private final String CUSTOMER_USERNAME = "johndoe";
+    private final String CUSTOMER_PASSWORD = "test123";
 
     @BeforeEach
     void setUp() throws IOException {
