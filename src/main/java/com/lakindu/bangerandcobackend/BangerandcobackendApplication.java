@@ -19,7 +19,7 @@ public class BangerandcobackendApplication {
         SpringApplication.run(BangerandcobackendApplication.class, args);
     }
 
-    @Bean
+    @Bean(name = "taskExecutor")
     public Executor executor() {
         //configure a thread pool executor
         ThreadPoolTaskExecutor theExecutor = new ThreadPoolTaskExecutor();

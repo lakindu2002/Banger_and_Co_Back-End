@@ -87,6 +87,13 @@
             <version>1.13.1</version>
         </dependency>
 
+        <!--utilize h2 for only testing.-->
+        <dependency>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <scope>test</scope>
+        </dependency>
+
 
     </dependencies>
 
