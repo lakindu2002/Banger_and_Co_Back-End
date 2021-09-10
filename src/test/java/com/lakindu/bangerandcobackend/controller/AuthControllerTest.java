@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
+import java.util.logging.Logger;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
@@ -37,6 +38,8 @@ class AuthControllerTest {
     private final String ADMIN_PASSWORD = "test123";
     private final String CUSTOMER_USERNAME = "johndoe";
     private final String CUSTOMER_PASSWORD = "test123";
+
+    private final Logger LOGGER = Logger.getLogger(AuthControllerTest.class.getName());
 
     @BeforeEach
     void setUp() throws IOException {
@@ -61,6 +64,7 @@ class AuthControllerTest {
         );
 
         assertThat(authResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        LOGGER.info("testShouldLoginAsCustomerSuccessfully: PASSED");
     }
 
     @Test
@@ -76,6 +80,7 @@ class AuthControllerTest {
         );
 
         assertThat(authResponse.getStatusCode()).isEqualTo(HttpStatus.OK);
+        LOGGER.info("testShouldLoginAsAdministratorSuccessfully: PASSED");
     }
 
     @Test
@@ -91,6 +96,7 @@ class AuthControllerTest {
         );
 
         assertThat(authResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        LOGGER.info("testShouldNotLoginWhenUsernameIsLessThan6Characters: PASSED");
     }
 
     @Test
@@ -106,6 +112,7 @@ class AuthControllerTest {
         );
 
         assertThat(authResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        LOGGER.info("testShouldNotLoginWhenUsernameIsGreaterThan15Characters: PASSED");
     }
 
     @Test
@@ -121,6 +128,7 @@ class AuthControllerTest {
         );
 
         assertThat(authResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        LOGGER.info("testShouldNotLoginWhenPasswordIsLessThan6Characters: PASSED");
     }
 
     @Test
@@ -136,6 +144,7 @@ class AuthControllerTest {
         );
 
         assertThat(authResponse.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
+        LOGGER.info("testShouldNotLoginWhenPasswordIsGreaterThan15Characters: PASSED");
     }
 
     @Test
@@ -151,5 +160,6 @@ class AuthControllerTest {
         );
 
         assertThat(authResponse.getStatusCode()).isEqualTo(HttpStatus.INTERNAL_SERVER_ERROR);
+        LOGGER.info("testShouldNotLoginWhenUsernameOrPasswordIsInvalid: PASSED");
     }
 }
