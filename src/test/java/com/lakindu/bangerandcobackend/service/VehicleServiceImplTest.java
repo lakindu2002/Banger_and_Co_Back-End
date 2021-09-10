@@ -33,19 +33,18 @@ class VehicleServiceImplTest {
     private CreationUtil creationUtil;
     @Autowired
     private VehicleService vehicleService;
-    private List<Vehicle> createdVehicles;
     private List<VehicleType> vehicleTypes;
 
     private Vehicle vehicleToView;
     private Vehicle vehicleToDelete;
     private VehicleType createType;
 
-    private Logger LOGGER = Logger.getLogger(VehicleTypeServiceImplTest.class.getName());
+    private final Logger LOGGER = Logger.getLogger(VehicleTypeServiceImplTest.class.getName());
 
     @BeforeEach
     void setUp() throws IOException {
         vehicleTypes = creationUtil.createVehicleTypes();
-        createdVehicles = creationUtil.createVehicles(vehicleTypes);
+        List<Vehicle> createdVehicles = creationUtil.createVehicles(vehicleTypes);
         vehicleToView = createdVehicles.get(0);
         vehicleToDelete = createdVehicles.get(1);
         createType = vehicleTypes.get(0);
@@ -73,6 +72,7 @@ class VehicleServiceImplTest {
         MultipartFile theFile = new MockMultipartFile("Test", new byte[]{});
 
         assertDoesNotThrow(() -> vehicleService.createVehicle(theDTO, theFile));
+        LOGGER.info("testShouldCreateAVehicleSuccessfully: PASSED");
     }
 
     @Test
@@ -89,6 +89,7 @@ class VehicleServiceImplTest {
         MultipartFile theFile = new MockMultipartFile("Test", new byte[]{});
 
         assertThrows(ResourceAlreadyExistsException.class, () -> vehicleService.createVehicle(theDTO, theFile));
+        LOGGER.info("testShouldNotCreateVehicleWhenLicensePlateExists: PASSED");
     }
 
     @Test
@@ -104,6 +105,7 @@ class VehicleServiceImplTest {
         MultipartFile theFile = new MockMultipartFile("Test", new byte[]{});
 
         assertThrows(ResourceNotFoundException.class, () -> vehicleService.createVehicle(theDTO, theFile));
+        LOGGER.info("testShouldNotCreateAVehicleWhenVehicleTypeIsInvalid: PASSED");
     }
 
     @Test
@@ -112,6 +114,7 @@ class VehicleServiceImplTest {
             int id = vehicleToView.getVehicleId();
             Vehicle vehicle = vehicleService._getVehicleInformation(id);
             assertThat(vehicle.getVehicleId()).isEqualTo(id);
+            LOGGER.info("testShouldGetVehicleInformationOnInternalMethod: PASSED");
         } catch (Exception e) {
             fail("testShouldGetVehicleInformationOnInternalMethod: FAILED");
         }
@@ -121,17 +124,20 @@ class VehicleServiceImplTest {
     void testShouldNotGetVehicleWhenVehicleIdDoesNotExist() {
         int id = 1000;
         assertThrows(ResourceNotFoundException.class, () -> vehicleService._getVehicleInformation(id));
+        LOGGER.info("testShouldNotGetVehicleWhenVehicleIdDoesNotExist: PASSED");
     }
 
     @Test
     void testShouldNotRemoveAVehicleWhenIdIsInvalid() {
         int id = 1000;
         assertThrows(ResourceNotFoundException.class, () -> vehicleService.removeVehicleById(id));
+        LOGGER.info("testShouldNotRemoveAVehicleWhenIdIsInvalid: PASSED");
     }
 
     @Test
     void testWillCheckIsVehicleHasPendingOrOnGoingRentals() {
         assertDoesNotThrow(() -> vehicleService.checkIfVehicleHasPendingOrOnGoingRentals(vehicleToDelete));
+        LOGGER.info("testWillCheckIsVehicleHasPendingOrOnGoingRentals: PASSED");
     }
 
 
@@ -139,6 +145,7 @@ class VehicleServiceImplTest {
     void testShouldRemoveAVehicleSuccessfully() {
         int id = vehicleToDelete.getVehicleId();
         assertDoesNotThrow(() -> vehicleService.removeVehicleById(id));
+        LOGGER.info("testShouldRemoveAVehicleSuccessfully: PASSED");
     }
 
     @Test
@@ -147,6 +154,7 @@ class VehicleServiceImplTest {
         try {
             VehicleShowDTO vehicleById = vehicleService.getVehicleById(id);
             assertThat(vehicleById.getVehicleId()).isEqualTo(id);
+            LOGGER.info("testShouldGetAVehicleByIdSuccessfully: PASSED");
         } catch (Exception ex) {
             fail("testShouldGetAVehicleByIdSuccessfully: FAILED");
         }
@@ -156,5 +164,6 @@ class VehicleServiceImplTest {
     void testShouldNotGetVehicleByIdWhenIdIsInvalid() {
         int id = 1000;
         assertThrows(ResourceNotFoundException.class, () -> vehicleService.getVehicleById(id));
+        LOGGER.info("testShouldNotGetVehicleByIdWhenIdIsInvalid: PASSED");
     }
 }
