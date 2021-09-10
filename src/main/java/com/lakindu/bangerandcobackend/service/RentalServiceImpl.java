@@ -234,6 +234,13 @@ public class RentalServiceImpl implements RentalService {
             throw new ResourceNotCreatedException("Your rental creation request was rejected because your driving license has been reported as stolen by the DMV. Your account is now blacklisted");
         }
 
+        //check if customer has fraudulent claims from the insurer db
+        if (this.checkForFraudulentClaims(theCustomer)) {
+            //have fraudulent claims,reject and send error
+            String rejectReason = "This driving license number is associated to fraudulent claims as denoted by the Association of Sri Lankan Insurers, therefore, this rental cannot be created";
+            throw new ResourceNotCreatedException(rejectReason);
+        }
+
         boolean isVehicleAvailable = vehicleService.isVehicleAvailableOnGivenDates(theVehicle, pickupDateTime, returnDateTime);
         //exceptions will be thrown during validation for customer having pending,on-going,approved rentals
         isCustomerHavingPendingOnGoingApprovedRentalsForPeriod(theCustomer, pickupDateTime, returnDateTime);
@@ -1491,13 +1498,7 @@ public class RentalServiceImpl implements RentalService {
         }
 
         User theCustomerRenting = theRentalToBeStarted.getTheCustomerRenting();
-        //check if customer has fraudulent claims from the insurer db
-        if (this.checkForFraudulentClaims(theCustomerRenting)) {
-            //have fraudulent claims,reject and send error
-            String rejectReason = "This driving license number has potential fraudulent claims made as denoted by the Association of Sri Lankan Insurers, therefore, this rental cannot be started and is rejected";
-            this.rejectRental(theRentalToBeStarted, theCustomerRenting, rejectReason);
-            throw new ResourceNotUpdatedException(rejectReason);
-        }
+
         //does customer have any other on-going rentals, if so, cannot start
         List<RentalShowDTO> customerOnGoingRentals = getCustomerOnGoingRentals(theCustomerRenting.getUsername());
 
@@ -1530,7 +1531,7 @@ public class RentalServiceImpl implements RentalService {
         }
     }
 
-    private boolean checkForFraudulentClaims(User theCustomerRenting) throws ResourceNotFoundException, ResourceNotUpdatedException {
+    private boolean checkForFraudulentClaims(User theCustomerRenting) throws ResourceNotFoundException {
         List<FraudClient> fraudulentClaimsForCustomer = this.communicateWithInsurersDatabase(theCustomerRenting);
         //have fraudulent claims
         return fraudulentClaimsForCustomer.size() > 0;
