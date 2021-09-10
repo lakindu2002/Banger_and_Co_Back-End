@@ -209,4 +209,47 @@ public class CreationUtil {
         List<VehicleType> vehicleTypes = Arrays.asList(one, two, three);
         return vehicleTypeRepository.saveAll(vehicleTypes);
     }
+
+    public List<Vehicle> createVehicles(List<VehicleType> vehicleTypes) throws IOException {
+        ImageHandler handler = new ImageHandler();
+
+
+        Vehicle one = new Vehicle();
+        one.setVehicleImage(handler.compressImage(new byte[]{}));
+        one.setTheVehicleType(vehicleTypes.get(0));
+        one.setVehicleName("Mercedes Benz");
+        one.setRentalsForTheVehicle(new ArrayList<>());
+        one.setFuelType("Petrol");
+        one.setLicensePlate("KF-7895");
+        one.setSeatingCapacity(8);
+        one.setTransmission("Automatic");
+
+        Vehicle two = new Vehicle();
+        two.setVehicleImage(handler.compressImage(new byte[]{}));
+        two.setTheVehicleType(vehicleTypes.get(0));
+        two.setVehicleName("Mercedes Benz");
+        two.setRentalsForTheVehicle(new ArrayList<>());
+        two.setFuelType("Petrol");
+        two.setLicensePlate("CSA-9862");
+        two.setSeatingCapacity(8);
+        two.setTransmission("Automatic");
+
+        Vehicle three = new Vehicle();
+        three.setVehicleImage(handler.compressImage(new byte[]{}));
+        three.setTheVehicleType(vehicleTypes.get(0));
+        three.setVehicleName("Mercedes Benz");
+        three.setRentalsForTheVehicle(new ArrayList<>());
+        three.setFuelType("Petrol");
+        three.setLicensePlate("CSA-9352");
+        three.setSeatingCapacity(8);
+        three.setTransmission("Automatic");
+
+        List<Vehicle> vehicles = Arrays.asList(one, two, three);
+        return vehicleRepository.saveAll(vehicles);
+    }
+
+    public void deleteVehicles() {
+        vehicleRepository.deleteAll();
+        vehicleTypeRepository.deleteAll();
+    }
 }
