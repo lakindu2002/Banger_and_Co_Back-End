@@ -252,4 +252,8 @@ public class CreationUtil {
         vehicleRepository.deleteAll();
         vehicleTypeRepository.deleteAll();
     }
+
+    public String constructAPIUrl(int port, String endpoint) {
+        return String.format("http://localhost:%d/api/%s", port, endpoint);
+    }
 }
