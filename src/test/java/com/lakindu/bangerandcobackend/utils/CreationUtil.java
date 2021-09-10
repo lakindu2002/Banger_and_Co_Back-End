@@ -5,7 +5,6 @@ import com.lakindu.bangerandcobackend.repository.*;
 import com.lakindu.bangerandcobackend.util.FileHandler.ImageHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.security.core.parameters.P;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -96,7 +95,7 @@ public class CreationUtil {
         User customer = new User();
         customer.setFirstName("John");
         customer.setLastName("Doe");
-        customer.setEmailAddress("john@gmail.com");
+        customer.setEmailAddress("lakinduhewa@gmail.com");
         customer.setContactNumber("0777778542");
         customer.setUsername("johndoe");
         customer.setUserRole(roleList.get(1));
@@ -135,7 +134,23 @@ public class CreationUtil {
         customer2.setBlackListed(false);
         customer2.setUserPassword(passwordEncoder.encode("test123"));
 
-        List<User> users = Arrays.asList(customer, admin, customer2);
+        User customer3 = new User();
+        customer3.setFirstName("John");
+        customer3.setLastName("Doe");
+        customer3.setEmailAddress("cb007787@students.apiit.lk");
+        customer3.setContactNumber("0777778542");
+        customer3.setUsername("cb007787");
+        customer3.setUserRole(roleList.get(1));
+        customer3.setProfilePicture(handler.compressImage(new byte[]{}));
+        customer3.setDrivingLicense(handler.compressImage(new byte[]{}));
+        customer3.setOtherIdentity(handler.compressImage(new byte[]{}));
+        customer3.setDrivingLicenseNumber("X1311312");
+        customer3.setDateOfBirth(new Date(System.currentTimeMillis()));
+        customer3.setBlackListed(false);
+        customer3.setUserPassword(passwordEncoder.encode("test123"));
+
+
+        List<User> users = Arrays.asList(customer, admin, customer2, customer3);
         return userRepository.saveAll(users);
     }
 
