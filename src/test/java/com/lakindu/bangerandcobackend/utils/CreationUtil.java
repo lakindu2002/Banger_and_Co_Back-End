@@ -1,9 +1,6 @@
 package com.lakindu.bangerandcobackend.utils;
 
-import com.lakindu.bangerandcobackend.entity.AdditionalEquipment;
-import com.lakindu.bangerandcobackend.entity.Inquiry;
-import com.lakindu.bangerandcobackend.entity.Role;
-import com.lakindu.bangerandcobackend.entity.User;
+import com.lakindu.bangerandcobackend.entity.*;
 import com.lakindu.bangerandcobackend.repository.*;
 import com.lakindu.bangerandcobackend.util.FileHandler.ImageHandler;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -184,5 +181,32 @@ public class CreationUtil {
 
     public void deleteInquiries() {
         inquiryRepository.deleteAll();
+    }
+
+    public void removeVehicleTypes() {
+        vehicleTypeRepository.deleteAll();
+    }
+
+    public List<VehicleType> createVehicleTypes() {
+        VehicleType one = new VehicleType();
+        one.setTypeName("TOWN CARS");
+        one.setSize("SMALL");
+        one.setVehicleList(new ArrayList<>());
+        one.setPricePerDay(350);
+
+        VehicleType two = new VehicleType();
+        two.setTypeName("MINI VAN");
+        two.setSize("LARGE");
+        two.setVehicleList(new ArrayList<>());
+        two.setPricePerDay(350);
+
+        VehicleType three = new VehicleType();
+        three.setTypeName("TOWN CARS");
+        three.setSize("MEDIUM");
+        three.setVehicleList(new ArrayList<>());
+        three.setPricePerDay(350);
+
+        List<VehicleType> vehicleTypes = Arrays.asList(one, two, three);
+        return vehicleTypeRepository.saveAll(vehicleTypes);
     }
 }
