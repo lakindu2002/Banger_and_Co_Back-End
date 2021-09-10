@@ -1,6 +1,7 @@
 package com.lakindu.bangerandcobackend.utils;
 
 import com.lakindu.bangerandcobackend.entity.AdditionalEquipment;
+import com.lakindu.bangerandcobackend.entity.Inquiry;
 import com.lakindu.bangerandcobackend.entity.Role;
 import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.repository.*;
@@ -144,5 +145,44 @@ public class CreationUtil {
     public void deleteRolesAndUsers() {
         userRepository.deleteAll();
         roleRepository.deleteAll();
+    }
+
+    public List<Inquiry> createInquiries() {
+        Inquiry one = new Inquiry();
+        one.calculateLodgedTime();
+        one.setReplied(false);
+        one.setFirstName("Lakindu");
+        one.setLastName("Hewawasam");
+        one.setInquirySubject("Test Subject");
+        one.setMessage("Test Message");
+        one.setContactNumber("0777790875");
+        one.setEmailAddress("lakinduhewa@gmail.com");
+
+        Inquiry two = new Inquiry();
+        two.calculateLodgedTime();
+        two.setReplied(false);
+        two.setFirstName("Lakindu");
+        two.setLastName("Hewawasam");
+        two.setInquirySubject("Test Subject");
+        two.setMessage("Test Message");
+        two.setContactNumber("0777790875");
+        two.setEmailAddress("lakinduhewa@gmail.com");
+
+        Inquiry three = new Inquiry();
+        three.calculateLodgedTime();
+        three.setReplied(false);
+        three.setFirstName("Lakindu");
+        three.setLastName("Hewawasam");
+        three.setInquirySubject("Test Subject");
+        three.setMessage("Test Message");
+        three.setContactNumber("0777790875");
+        three.setEmailAddress("lakinduhewa@gmail.com");
+
+        List<Inquiry> inquiries = Arrays.asList(one, two, three);
+        return inquiryRepository.saveAll(inquiries);
+    }
+
+    public void deleteInquiries() {
+        inquiryRepository.deleteAll();
     }
 }
