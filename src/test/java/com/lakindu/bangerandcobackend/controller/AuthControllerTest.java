@@ -1,7 +1,6 @@
 package com.lakindu.bangerandcobackend.controller;
 
 import com.lakindu.bangerandcobackend.dto.AuthRequest;
-import com.lakindu.bangerandcobackend.entity.User;
 import com.lakindu.bangerandcobackend.utils.CreationUtil;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,11 +17,9 @@ import org.springframework.http.ResponseEntity;
 
 import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.logging.Logger;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class AuthControllerTest {

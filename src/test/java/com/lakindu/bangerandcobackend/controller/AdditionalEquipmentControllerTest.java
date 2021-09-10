@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -151,7 +150,7 @@ class AdditionalEquipmentControllerTest {
     }
 
     @Test
-    void getEquipmentById() {
+    void testShouldGetEquipmentById() {
         int id = equipmentToView.getEquipmentId();
 
         HttpHeaders headers = new HttpHeaders();
@@ -163,11 +162,11 @@ class AdditionalEquipmentControllerTest {
         );
 
         assertThat(exchange.getBody().getEquipmentId()).isEqualTo(id);
-        LOGGER.info("testShouldGetAllAdditionalEquipment: PASSED");
+        LOGGER.info("testShouldGetEquipmentById: PASSED");
     }
 
     @Test
-    void removeEquipmentById() {
+    void testShouldRemoveEquipmentById() {
         int id = equipmentToDelete.getEquipmentId();
 
         HttpHeaders headers = new HttpHeaders();
@@ -179,6 +178,7 @@ class AdditionalEquipmentControllerTest {
         );
 
         assertThat(call.getStatusCode()).isEqualTo(HttpStatus.OK);
+        LOGGER.info("testShouldRemoveEquipmentById: PASSED");
 
     }
 

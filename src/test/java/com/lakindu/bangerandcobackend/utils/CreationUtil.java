@@ -18,28 +18,16 @@ import java.util.List;
 public class CreationUtil {
     @Autowired
     private AdditionalEquipmentRepository additionalEquipmentRepository;
-
     @Autowired
     private InquiryRepository inquiryRepository;
-
-    @Autowired
-    private RentalCustomizationRepository rentalCustomizationRepository;
-
-    @Autowired
-    private RentalRepository rentalRepository;
-
     @Autowired
     private RoleRepository roleRepository;
-
     @Autowired
     private UserRepository userRepository;
-
     @Autowired
     private VehicleRepository vehicleRepository;
-
     @Autowired
     private VehicleTypeRepository vehicleTypeRepository;
-
     @Autowired
     @Qualifier("passwordEncoder")
     private PasswordEncoder passwordEncoder;

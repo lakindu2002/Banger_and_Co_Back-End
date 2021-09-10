@@ -10,10 +10,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.core.Authentication;
 
 import javax.transaction.Transactional;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.logging.Logger;
@@ -109,7 +107,7 @@ class UserServiceImplTest {
     void testShouldGetAllCustomers() {
         try {
             List<UserDTO> allCustomers = userService.getAllCustomers();
-            assertThat(allCustomers.size()).isEqualTo(2);
+            assertThat(allCustomers.size()).isEqualTo(3);
             LOGGER.info("testShouldGetAllCustomers: PASSED");
         } catch (Exception ex) {
             fail("testShouldGetAllCustomers: FAILED");

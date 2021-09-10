@@ -13,8 +13,6 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.in;
-import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 class InquiryRepositoryTest {

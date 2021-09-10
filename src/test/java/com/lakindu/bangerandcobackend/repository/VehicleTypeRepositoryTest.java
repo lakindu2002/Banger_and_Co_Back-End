@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.logging.Logger;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 class VehicleTypeRepositoryTest {
