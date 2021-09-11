@@ -4,8 +4,8 @@ import java.util.List;
 
 public class BangerAndCoExceptionHandler {
     //class implemented to handle exception responses to client
-    private final String message;
-    private final String exceptionMessage;
+    private final String message; //the high level "Resource Not found"
+    private final String exceptionMessage; //actual exception  "The vehicle you are searching does not exist."
     private final int errorCode;
     private final List<MultipleErrorSupporter> multipleErrors;
 
