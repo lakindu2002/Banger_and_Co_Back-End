@@ -1,15 +1,13 @@
 package com.lakindu.bangerandcobackend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.lakindu.bangerandcobackend.dto.AuthRequest;
 import com.lakindu.bangerandcobackend.auth.AuthReturnBuilder;
+import com.lakindu.bangerandcobackend.dto.AuthRequest;
 import com.lakindu.bangerandcobackend.dto.AuthReturnDTO;
 import com.lakindu.bangerandcobackend.dto.UserDTO;
 import com.lakindu.bangerandcobackend.serviceinterface.AuthService;
-import com.lakindu.bangerandcobackend.serviceinterface.RentalService;
 import com.lakindu.bangerandcobackend.serviceinterface.UserService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.BadValuePassedException;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.InputValidNotValidatedException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -22,7 +20,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
-import javax.validation.ValidationException;
 import javax.validation.Validator;
 import java.util.HashMap;
 
@@ -38,8 +35,7 @@ public class AuthController {
     public AuthController(
             @Qualifier("userServiceImpl") UserService userService,
             @Qualifier("authServiceImpl") AuthService authService,
-            @Qualifier("defaultValidator") Validator validator,
-            @Qualifier("rentalServiceImpl") RentalService rentalService) {
+            @Qualifier("defaultValidator") Validator validator) {
         this.userService = userService;
         this.authService = authService;
         this.validator = validator;

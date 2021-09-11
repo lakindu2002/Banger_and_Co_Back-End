@@ -4,7 +4,6 @@ import com.lakindu.bangerandcobackend.dto.InquiryDTO;
 import com.lakindu.bangerandcobackend.dto.InquiryReplyDTO;
 import com.lakindu.bangerandcobackend.entity.Inquiry;
 import com.lakindu.bangerandcobackend.serviceinterface.InquiryService;
-import com.lakindu.bangerandcobackend.serviceinterface.UserService;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,14 +22,11 @@ import java.util.List;
 @RequestMapping(path = "/api/inquiry")
 public class InquiryController {
     private final InquiryService inquiryService;
-    private final UserService userService;
 
     @Autowired
     public InquiryController(
-            @Qualifier("inquiryServiceImpl") InquiryService inquiryService,
-            @Qualifier("userServiceImpl") UserService userService) {
+            @Qualifier("inquiryServiceImpl") InquiryService inquiryService) {
         this.inquiryService = inquiryService;
-        this.userService = userService;
     }
 
     @PreAuthorize("permitAll()") //permit all requests to this endpoint
