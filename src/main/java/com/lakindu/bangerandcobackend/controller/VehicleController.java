@@ -1,6 +1,5 @@
 package com.lakindu.bangerandcobackend.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lakindu.bangerandcobackend.dto.VehicleCreateDTO;
 import com.lakindu.bangerandcobackend.dto.VehicleRentalFilterDTO;
@@ -9,7 +8,7 @@ import com.lakindu.bangerandcobackend.dto.VehicleUpdateDTO;
 import com.lakindu.bangerandcobackend.entity.Vehicle;
 import com.lakindu.bangerandcobackend.serviceinterface.RentalService;
 import com.lakindu.bangerandcobackend.serviceinterface.VehicleService;
-import com.lakindu.bangerandcobackend.util.exceptionhandling.*;
+import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoResponse;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.customexceptions.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;

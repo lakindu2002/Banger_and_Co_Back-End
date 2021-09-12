@@ -2,6 +2,7 @@ package com.lakindu.bangerandcobackend.auth;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.lakindu.bangerandcobackend.util.exceptionhandling.BangerAndCoExceptionHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -31,7 +32,12 @@ public class JWTAuthFilter extends OncePerRequestFilter {
     private final JWTConstants theConstants;
     private final UserDetailsService userDetailsService;
 
-    public JWTAuthFilter(JWTHandler theHandler, JWTConstants theConstants, @Qualifier("userServiceImpl") UserDetailsService userDetailsService) {
+    @Autowired
+    public JWTAuthFilter(
+            @Qualifier("JWTHandler") JWTHandler theHandler,
+            @Qualifier("JWTConstants") JWTConstants theConstants,
+            @Qualifier("userServiceImpl") UserDetailsService userDetailsService
+    ) {
         this.theHandler = theHandler;
         this.theConstants = theConstants;
         this.userDetailsService = userDetailsService;
