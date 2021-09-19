@@ -34,8 +34,8 @@ public class VehicleTypeServiceImpl implements VehicleTypeService {
     public void createVehicleType(VehicleTypeDTO theDTO) throws ResourceAlreadyExistsException {
         //construct a domain entity to persist
         VehicleType thePersistingObject = new VehicleType();
-        thePersistingObject.setTypeName(theDTO.getTypeName().toUpperCase());
-        thePersistingObject.setSize(theDTO.getSize().toUpperCase());
+        thePersistingObject.setTypeName(theDTO.getTypeName().toUpperCase().trim());
+        thePersistingObject.setSize(theDTO.getSize().toUpperCase().trim());
         thePersistingObject.setPricePerDay(Double.parseDouble(theDTO.getPricePerDay()));
 
         //check if the same type name exists along with same size, if so do not allow creation.
