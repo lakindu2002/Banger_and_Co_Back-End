@@ -133,14 +133,12 @@ public class AdditionalEquipmentServiceImpl implements AdditionalEquipmentServic
         AdditionalEquipment theEquipment = additionalEquipmentRepository.findById(equipmentId)
                 .orElseThrow(() -> new ResourceNotFoundException("The additional equipment that you are trying to delete is not present at Banger and Co"));
 
-        //2 validations must be done before it can be removed.
-        //check if there are pending rentals that have this equipment added to it
-        //check if there are on-going rentals that have this equipment added to it
+        //equipment can be deleted if there are no rentals associated to it
 
-        //if it can be deleted, first remove the additional equipment that is going to be removed from the rentals.
-        //this will be removed by hibernate automatically.
-
-        checkIfEquipmentHasPendingOrOngoingRentals(theEquipment); //two checks to be done.
+        if (theEquipment.getRentalsHavingThisCustomization().size() > 0) {
+            //have rentals, cannot be deleted
+            throw new ResourceCannotBeDeletedException("This equipment has rentals to it, therefore it cannot be deleted");
+        }
         //no exceptions thrown, proceed with deletion
         additionalEquipmentRepository.delete(theEquipment);
     }
