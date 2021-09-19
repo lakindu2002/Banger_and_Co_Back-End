@@ -273,12 +273,11 @@ public class VehicleServiceImpl implements VehicleService {
     public void removeVehicleById(int vehicleId) throws ResourceNotFoundException, ResourceCannotBeDeletedException {
         //first check if vehicle actually exists for the ID.
         Vehicle theVehicleToBeRemoved = vehicleRepository.findById(vehicleId).orElseThrow(() -> new ResourceNotFoundException("The vehicle that you are trying to remove does not exist at Banger and Co."));
-        //check if vehicle to be removed has any pending/on-going rentals
-        checkIfVehicleHasPendingOrOnGoingRentals(theVehicleToBeRemoved);
-        //if there are any rentals or vehicles pending, rental service will throw the relevant exceptions.
+        //check if vehicle to be removed has any rental associated to it
+        if (theVehicleToBeRemoved.getRentalsForTheVehicle().size() > 0) {
+            throw new ResourceCannotBeDeletedException("This vehicle has rentals associated to it, therefore, it cannot be removed");
+        }
 
-        //set the vehicle for null for each rental having this vehicle
-        theVehicleToBeRemoved.clearRentals();
         vehicleRepository.delete(theVehicleToBeRemoved); //remove the vehicle from the database,
     }
 
@@ -328,7 +327,7 @@ public class VehicleServiceImpl implements VehicleService {
         //check if vehicle has any pending or ongoing rentals
         checkIfVehicleHasPendingOrOnGoingRentals(theVehicle);
 
-        //can be removed.
+        //can be updated.
         theVehicle.setTheVehicleType(theType); //update the type
         theVehicle.setVehicleName(updateObject.getVehicleName()); //update the vehicle name
         if (updateObject.getNewPicture() != null) {

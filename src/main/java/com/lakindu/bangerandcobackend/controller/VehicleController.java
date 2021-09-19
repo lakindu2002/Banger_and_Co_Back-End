@@ -129,8 +129,7 @@ public class VehicleController {
     @PreAuthorize("hasAuthority('ADMINISTRATOR')")
     @DeleteMapping(path = "/remove/{id}")
     public ResponseEntity<BangerAndCoResponse> deleteVehicleById(@PathVariable(name = "id", required = true) int vehicleId) throws ResourceNotFoundException, ResourceCannotBeDeletedException {
-        //method executed by administrator to remove a vehicle only when there are no pending or on going rentals for it.
-        //on delete, past rental references will have vehicle ID as null.
+        //method executed by administrator to remove a vehicle only when there are no rentals associated for it.
         vehicleService.removeVehicleById(vehicleId);
 
         return new ResponseEntity<>(
