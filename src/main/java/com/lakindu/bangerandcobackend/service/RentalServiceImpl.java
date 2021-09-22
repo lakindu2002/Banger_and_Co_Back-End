@@ -1640,6 +1640,10 @@ public class RentalServiceImpl implements RentalService {
                 AdditionalEquipment item = additionalEquipmentService._getAdditionalEquipmentById(eachEquipment.getEquipmentId());
                 //calculate total price for rental and reduce equipment quantity as rental is made.
 
+                if (eachEquipment.getQuantitySelectedForRental() > item.getEquipmentQuantity()) {
+                    throw new ResourceNotCreatedException("The equipment: " + eachEquipment.getEquipmentName() + " has no " + eachEquipment.getQuantitySelectedForRental() + " in stock");
+                }
+
                 item.setEquipmentQuantity(item.getEquipmentQuantity() - eachEquipment.getQuantitySelectedForRental());
 
                 RentalCustomization eachCustomization = new RentalCustomization();
