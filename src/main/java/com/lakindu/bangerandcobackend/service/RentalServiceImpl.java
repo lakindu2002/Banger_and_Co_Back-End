@@ -1104,6 +1104,10 @@ public class RentalServiceImpl implements RentalService {
             throw new BadValuePassedException("The rental you are trying to approve has already been handled");
         } else {
             User theCustomerRenting = rental.getTheCustomerRenting();
+
+            if (theCustomerRenting.isBlackListed()) {
+                throw new BadValuePassedException("The rental cannot be approved because this customer is blacklisted");
+            }
             //approve the rental
             //when approving -> isApproved is TRUE and isCollected is FALSE to indicate the rental has been approved but not yet been collected.
             rental.setApproved(true);
