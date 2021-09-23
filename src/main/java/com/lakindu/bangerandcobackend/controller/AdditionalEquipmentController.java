@@ -29,7 +29,7 @@ public class AdditionalEquipmentController {
         this.additionalEquipmentService = additionalEquipmentService;
     }
 
-    @PreAuthorize("hasAuthority('ADMINISTRATOR')")
+    @PreAuthorize("hasAuthority('ADMINISTRATOR')") //can be executed only by the administrator.
     @PostMapping(path = "/create")
     public ResponseEntity<BangerAndCoResponse> createAdditionalEquipment(
             @Valid @RequestBody AdditionalEquipmentDTO theDTO

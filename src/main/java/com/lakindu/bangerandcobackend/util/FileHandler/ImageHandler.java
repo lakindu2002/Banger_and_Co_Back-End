@@ -19,15 +19,15 @@ public class ImageHandler {
         theDeflater.setInput(rawImage); //set the bytes to be compressed
         theDeflater.finish(); //compression should end with current contents of input buffer
 
-        byte[] compressedData = new byte[1024]; //compress data for 1024 Bytes
+        byte[] compressedData = new byte[1024]; //compress data in 1024 Bytes per fetch
 
         //create output stream with size of image bytes
         ByteArrayOutputStream theByteArrayOutputStream = new ByteArrayOutputStream(rawImage.length);
 
         while (!theDeflater.finished()) {
             //while the deflater compresses the data
-            int compressedBytes = theDeflater.deflate(compressedData); //compresses the image and inserts to compressed byte array
-            theByteArrayOutputStream.write(compressedData, 0, compressedBytes); //write the compressed data to the output buffer
+            int compressedBytes = theDeflater.deflate(compressedData); //compresses the image and inserts to compressed byte array as 1 byte
+            theByteArrayOutputStream.write(compressedData, 0, compressedBytes); //write the compressed data to the output buffer (1 byte per byte)
         }
 
         theDeflater.end();
