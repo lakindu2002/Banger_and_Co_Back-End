@@ -104,7 +104,7 @@ public class WebScraperImpl implements WebScraper {
                             eachVehicle.setPricePerMonth(0);
                         } else {
                             //append a $ to support parsing to double by the NumberFormatter.
-                            String retrievedRatePerMonth = String.format(Locale.ENGLISH, "$%s", ratePerMonthElement.text().trim());
+                            String retrievedRatePerMonth = String.format(Locale.ENGLISH, "$%s", ratePerMonthElement.text().substring(3).trim());
                             eachVehicle.setPricePerMonth(numberFormat.parse(retrievedRatePerMonth).doubleValue());
                         }
 
@@ -113,7 +113,7 @@ public class WebScraperImpl implements WebScraper {
                             eachVehicle.setPricePerWeek(0);
                         } else {
                             //append a $ to support parsing to double by the NumberFormatter.
-                            String retrievedRatePerWeek = String.format(Locale.ENGLISH, "$%s", ratePerWeekElement.text().trim());
+                            String retrievedRatePerWeek = String.format(Locale.ENGLISH, "$%s", ratePerWeekElement.text().substring(3).trim());
                             eachVehicle.setPricePerWeek(numberFormat.parse(retrievedRatePerWeek).doubleValue()); //auto trigger price per day calculation.
                         }
                     }
