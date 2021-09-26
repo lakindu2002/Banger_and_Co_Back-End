@@ -13,6 +13,8 @@ This project uses the following dependencies to interact with the Angular Front 
 - Java Mail
 - Bean Validation on DTOs to implement Server Side Validation
 - Pagination on the Server Side for Rental Viewing
+- CSV Validation with DMV Server using node.js
+- Database integration using Stored Procedure and SQL View
 
 ### Set up the Project
 
